@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 1.6.1 *(2016-07-28)*
+----------------------------
+
+* Fix: The `FlattenJson` annotation no longer causes the processor to fail when used on interfaces. (Issue [#47](../../issues/47))
+* Fix: Interfaces annotated with `@AutoGsonAdapter` now always correctly order their fields (Issue [#45](../../issues/47))
+     * When using Json Path notation, if fields with the same parent were not grouped together, the constructor was being called with arguments in the wrong order.
+
 Version 1.6.0 *(2016-07-28)*
 ----------------------------
 
