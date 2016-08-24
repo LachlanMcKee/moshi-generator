@@ -59,4 +59,12 @@ public class InterfaceTest extends BaseGeneratorTest {
                 .addRelativeGenerated("TestUsingInheritance_GsonPathModel.java")
                 .addRelativeGenerated("TestUsingInheritance_GsonTypeAdapter.java"));
     }
+
+    @Test
+    public void testFlattenJsonWithInterface() {
+        assertGeneratedContent(new BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/flatten_json")
+                .addRelativeSource("TestFlattenJsonWithInterface.java")
+                .addRelativeGenerated("TestFlattenJsonWithInterface_GsonPathModel.java")
+                .addRelativeGenerated("TestFlattenJsonWithInterface_GsonTypeAdapter.java"));
+    }
 }

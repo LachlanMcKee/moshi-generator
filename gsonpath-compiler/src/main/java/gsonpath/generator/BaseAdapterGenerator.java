@@ -143,10 +143,11 @@ public abstract class BaseAdapterGenerator extends Generator {
                 String variableName = fieldPathInfo.getVariableName();
                 String safeVariableName = variableName;
 
-                boolean defineVariableType = modelAlreadyCreated;
+                // A model isn't created if the constructor is called at the bottom of the type adapter.
+                boolean checkIfResultIsNull = modelAlreadyCreated;
                 if (fieldPathInfo.isRequired && !modelAlreadyCreated) {
                     safeVariableName += "_safe";
-                    defineVariableType = true;
+                    checkIfResultIsNull = true;
                 }
 
                 boolean callToString = false;
@@ -165,6 +166,13 @@ public abstract class BaseAdapterGenerator extends Generator {
                         FlattenJson annotation = fieldInfo.getAnnotation(FlattenJson.class);
                         if (annotation != null) {
                             handled = true;
+
+                            // FlattenJson is a special case. We always need to ensure that the JsonObject is not null.
+                            if (!checkIfResultIsNull) {
+                                safeVariableName += "_safe";
+                                checkIfResultIsNull = true;
+                            }
+                            
                             codeBlock.addStatement("$T $L = mGson.getAdapter($T.class).read(in)",
                                     CLASS_NAME_JSON_ELEMENT,
                                     safeVariableName,
@@ -179,7 +187,7 @@ public abstract class BaseAdapterGenerator extends Generator {
                                 safeVariableName,
                                 fieldClassName.simpleName());
 
-                        if (defineVariableType) {
+                        if (checkIfResultIsNull) {
                             codeBlock.addStatement("$L $L", fieldClassName.simpleName(), variableAssignment);
 
                         } else {
@@ -202,7 +210,7 @@ public abstract class BaseAdapterGenerator extends Generator {
                             safeVariableName,
                             adapterName);
 
-                    if (defineVariableType) {
+                    if (checkIfResultIsNull) {
                         codeBlock.addStatement("$L $L", fieldTypeName, variableAssignment);
 
                     } else {
@@ -210,7 +218,7 @@ public abstract class BaseAdapterGenerator extends Generator {
                     }
                 }
 
-                if (defineVariableType) {
+                if (checkIfResultIsNull) {
                     String fieldName = fieldInfo.getFieldName();
                     codeBlock.beginControlFlow("if ($L != null)", safeVariableName);
 
