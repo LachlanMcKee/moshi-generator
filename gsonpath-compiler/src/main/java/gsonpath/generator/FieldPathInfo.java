@@ -1,11 +1,13 @@
 package gsonpath.generator;
 
 public class FieldPathInfo {
+    public final int fieldIndex;
     public final FieldInfo fieldInfo;
     public final String jsonPath;
     public final boolean isRequired;
 
-    public FieldPathInfo(FieldInfo fieldInfo, String jsonPath, boolean isRequired) {
+    public FieldPathInfo(int fieldIndex, FieldInfo fieldInfo, String jsonPath, boolean isRequired) {
+        this.fieldIndex = fieldIndex;
         this.fieldInfo = fieldInfo;
         this.jsonPath = jsonPath;
         this.isRequired = isRequired;

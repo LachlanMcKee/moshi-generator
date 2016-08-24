@@ -26,6 +26,7 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
         }
         java.lang.Integer value_Json1_Nest1 = null;
         java.lang.Integer value_value2 = null;
+        java.lang.Integer value_Json1_Nest3 = null;
 
         int jsonFieldCounter0 = 0;
         in.beginObject();
@@ -48,7 +49,7 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
                     in.beginObject();
 
                     while (in.hasNext()) {
-                        if (jsonFieldCounter1 == 1) {
+                        if (jsonFieldCounter1 == 2) {
                             in.skipValue();
                             continue;
                         }
@@ -58,6 +59,12 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
                                 jsonFieldCounter1++;
 
                                 value_Json1_Nest1 = getIntegerSafely(in);
+                                break;
+
+                            case "Nest3":
+                                jsonFieldCounter1++;
+
+                                value_Json1_Nest3 = getIntegerSafely(in);
                                 break;
 
                             default:
@@ -85,7 +92,8 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
         in.endObject();
         return new TestValidInterface_GsonPathModel(
                 value_Json1_Nest1,
-                value_value2
+                value_value2,
+                value_Json1_Nest3
         );
     }
 

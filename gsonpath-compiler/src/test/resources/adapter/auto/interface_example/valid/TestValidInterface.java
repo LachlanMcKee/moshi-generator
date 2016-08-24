@@ -9,4 +9,7 @@ public interface TestValidInterface {
     Integer getValue1();
 
     Integer getValue2();
+
+    @SerializedName("Json1.Nest3")
+    Integer getValue3();
 }

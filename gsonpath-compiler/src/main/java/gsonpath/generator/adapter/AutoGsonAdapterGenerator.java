@@ -31,7 +31,7 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
 
     public HandleResult handle(TypeElement modelElement) throws ProcessingException {
         mSafeVariableCount = 0;
-        
+
         ClassName modelClassName = ClassName.get(modelElement);
         ClassName adapterClassName = ClassName.get(modelClassName.packageName(), generateClassName(modelClassName));
 
@@ -54,7 +54,7 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
         char flattenDelimiter = autoGsonAnnotation.flattenDelimiter().value();
         GsonFieldValidationType gsonFieldValidationType = autoGsonAnnotation.fieldValidationType();
         PathSubstitution[] pathSubstitutions = autoGsonAnnotation.substitutions();
-        
+
         // Validate the path substitutions. Duplicate keys are not allowed.
         Set<String> pathSubstitutionKeys = new HashSet<>(pathSubstitutions.length);
         for (PathSubstitution pathSubstitution : pathSubstitutions) {
@@ -307,7 +307,8 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
 
         String regexSafeDelimiter = Pattern.quote(String.valueOf(flattenDelimiter));
 
-        for (FieldInfo fieldInfo : fieldInfoList) {
+        for (int fieldInfoIndex = 0; fieldInfoIndex < fieldInfoList.size(); fieldInfoIndex++) {
+            FieldInfo fieldInfo = fieldInfoList.get(fieldInfoIndex);
             TypeName fieldTypeName = fieldInfo.getTypeName();
 
             if (fieldTypeName.equals(TypeName.OBJECT)) {
@@ -320,7 +321,7 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
 
             if (serializedNameAnnotation != null && serializedNameAnnotation.value().length() > 0) {
                 jsonFieldPath = serializedNameAnnotation.value();
-                
+
                 // Check if the serialized name needs any values to be substituted
                 for (PathSubstitution substitution : pathSubstitutions) {
                     jsonFieldPath = jsonFieldPath.replaceAll("\\{" + substitution.original() + "\\}", substitution.replacement());
@@ -422,7 +423,7 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
                     } else {
                         // We have reached the end of this branch, add the field at the end.
                         if (!currentFieldTree.containsKey(currentKey)) {
-                            currentFieldTree.addField(currentKey, new FieldPathInfo(fieldInfo, jsonFieldPath, isRequired));
+                            currentFieldTree.addField(currentKey, new FieldPathInfo(fieldInfoIndex, fieldInfo, jsonFieldPath, isRequired));
 
                         } else {
                             throwDuplicateFieldException(fieldInfo.getElement(), currentKey);
@@ -432,7 +433,7 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
 
             } else {
                 if (!gsonPathFieldTree.containsKey(jsonFieldPath)) {
-                    gsonPathFieldTree.addField(jsonFieldPath, new FieldPathInfo(fieldInfo, jsonFieldPath, isRequired));
+                    gsonPathFieldTree.addField(jsonFieldPath, new FieldPathInfo(fieldInfoIndex, fieldInfo, jsonFieldPath, isRequired));
 
                 } else {
                     throwDuplicateFieldException(fieldInfo.getElement(), jsonFieldPath);
@@ -494,9 +495,15 @@ public class AutoGsonAdapterGenerator extends BaseAdapterGenerator {
                                         final Map<String, MandatoryFieldInfo> mandatoryInfoMap,
                                         final GsonFieldTree rootElements) throws ProcessingException {
 
-        // Create a flat list of the variables
+        // Create a flat list of the variables and ensure they are ordered by their original field index within the POJO
         final List<FieldPathInfo> flattenedFields = new ArrayList<>();
         getFlattenedFields(rootElements, flattenedFields);
+        Collections.sort(flattenedFields, new Comparator<FieldPathInfo>() {
+            @Override
+            public int compare(FieldPathInfo o1, FieldPathInfo o2) {
+                return Integer.compare(o1.fieldIndex, o2.fieldIndex);
+            }
+        });
 
         MethodSpec.Builder readMethod = MethodSpec.methodBuilder("read")
                 .addAnnotation(Override.class)
