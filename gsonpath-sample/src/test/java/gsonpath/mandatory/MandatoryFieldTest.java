@@ -2,7 +2,7 @@ package gsonpath.mandatory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 import gsonpath.GsonPath;
 import gsonpath.JsonFieldMissingException;
 import org.junit.Assert;
@@ -25,9 +25,9 @@ public class MandatoryFieldTest {
         try {
             gson.fromJson(new InputStreamReader(resourceAsStream), MandatorySampleModel.class);
 
-        } catch (JsonSyntaxException e) {
+        } catch (JsonParseException e) {
             // Since the mandatory value is not found, we are expecting an exception.
-            Assert.assertEquals(e.getCause().getClass(), JsonFieldMissingException.class);
+            Assert.assertEquals(e.getClass(), JsonFieldMissingException.class);
             return;
         }
 
