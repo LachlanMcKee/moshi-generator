@@ -1,4 +1,4 @@
-package gsonpath.generator;
+package gsonpath.model;
 
 import com.squareup.javapoet.TypeName;
 

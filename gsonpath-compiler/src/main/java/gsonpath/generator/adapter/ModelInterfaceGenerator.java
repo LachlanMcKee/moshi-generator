@@ -2,7 +2,10 @@ package gsonpath.generator.adapter;
 
 import com.squareup.javapoet.*;
 import gsonpath.ProcessingException;
-import gsonpath.generator.BaseAdapterGenerator;
+import gsonpath.generator.AdapterGeneratorDelegate;
+import gsonpath.generator.Generator;
+import gsonpath.model.InterfaceFieldInfo;
+import gsonpath.model.InterfaceInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -14,21 +17,19 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 
-class ModelInterfaceGenerator extends BaseAdapterGenerator {
+class ModelInterfaceGenerator extends Generator {
 
     ModelInterfaceGenerator(ProcessingEnvironment processingEnv) {
         super(processingEnv);
     }
 
-    @Override
-    protected String getClassNameSuffix() {
-        return "GsonPathModel";
-    }
-
     InterfaceInfo handle(TypeElement element) throws ProcessingException {
         ClassName modelClassName = ClassName.get(element);
 
-        ClassName outputClassName = ClassName.get(modelClassName.packageName(), generateClassName(modelClassName));
+        AdapterGeneratorDelegate adapterGeneratorDelegate = new AdapterGeneratorDelegate();
+        ClassName outputClassName = ClassName.get(modelClassName.packageName(),
+                adapterGeneratorDelegate.generateClassName(modelClassName, "GsonPathModel"));
+
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(outputClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(modelClassName);
@@ -80,7 +81,7 @@ class ModelInterfaceGenerator extends BaseAdapterGenerator {
             if (methodType.getParameterTypes().size() > 0) {
                 throw new ProcessingException("Gson Path interface methods must not have parameters", enclosedElement);
             }
-            
+
             String methodName = enclosedElement.getSimpleName().toString();
 
             // Transform the method name into the field name by removing the first camel-cased portion.
@@ -204,32 +205,11 @@ class ModelInterfaceGenerator extends BaseAdapterGenerator {
                 if (TypeName.get(memberElement.getEnclosingElement().asType()).equals(TypeName.OBJECT)) {
                     continue;
                 }
-                
+
                 methodElements.add(memberElement);
             }
         }
         return methodElements;
     }
 
-    static class InterfaceInfo {
-        ClassName parentClassName;
-        InterfaceFieldInfo[] fieldInfo;
-
-        InterfaceInfo(ClassName parentClassName, InterfaceFieldInfo[] fieldInfo) {
-            this.parentClassName = parentClassName;
-            this.fieldInfo = fieldInfo;
-        }
-    }
-
-    static class InterfaceFieldInfo {
-        Element methodElement;
-        TypeName typeName;
-        String fieldName;
-
-        InterfaceFieldInfo(Element methodElement, TypeName typeName, String fieldName) {
-            this.methodElement = methodElement;
-            this.typeName = typeName;
-            this.fieldName = fieldName;
-        }
-    }
 }

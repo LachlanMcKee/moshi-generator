@@ -5,9 +5,11 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import com.squareup.javapoet.*;
 import gsonpath.*;
-import gsonpath.generator.BaseAdapterGenerator;
-import gsonpath.generator.GsonFieldTree;
+import gsonpath.generator.AdapterGeneratorDelegate;
+import gsonpath.generator.Generator;
+import gsonpath.model.GsonTree;
 import gsonpath.generator.HandleResult;
+import gsonpath.model.GsonTreeFactory;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
@@ -16,16 +18,19 @@ import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.util.List;
 
-public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
+public class GsonArrayStreamerGenerator extends Generator {
+    private final AdapterGeneratorDelegate adapterGeneratorDelegate;
 
     public GsonArrayStreamerGenerator(ProcessingEnvironment processingEnv) {
         super(processingEnv);
+        adapterGeneratorDelegate = new AdapterGeneratorDelegate();
     }
 
     public HandleResult handle(TypeElement streamerElement) throws ProcessingException {
         // The class must implement the GsonArrayStreamer interface!
         ClassName streamerClassName = ClassName.get(streamerElement);
-        ClassName outputClassName = ClassName.get(streamerClassName.packageName(), generateClassName(streamerClassName));
+        ClassName outputClassName = ClassName.get(streamerClassName.packageName(),
+                adapterGeneratorDelegate.generateClassName(streamerClassName, "GsonArrayStreamer"));
 
         TypeMirror gsonArrayStreamerElement = null;
         for (TypeMirror typeMirror : streamerElement.getInterfaces()) {
@@ -60,9 +65,9 @@ public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
         // This flag is only valid if the rootField value is populated, since it only affects the behaviour of rootField.
         final boolean consumeReaderFully = autoGsonArrayAnnotation.consumeReaderFully() && isRootFieldSpecified;
 
-        GsonFieldTree rootElements = new GsonFieldTree();
+        GsonTree rootElements = new GsonTree();
         if (isRootFieldSpecified) {
-            createGsonTreeFromRootField(rootElements, rootField, flattenDelimiter);
+            new GsonTreeFactory().createGsonTreeFromRootField(rootElements, rootField, flattenDelimiter);
         }
 
         // getArray
@@ -78,7 +83,7 @@ public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
 
         if (rootElements.size() > 0) {
             // The code must navigate to the correct root field.
-            addToSimpleCodeBlock(getArrayBlock, rootElements, new ObjectParserCallback() {
+            addToSimpleCodeBlock(getArrayBlock, rootElements, new AdapterGeneratorDelegate.ObjectParserCallback() {
                 @Override
                 public void onInitialObjectNull() {
                     getArrayBlock.addStatement("return null");
@@ -140,7 +145,7 @@ public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
 
         if (rootElements.size() > 0) {
             // The code must navigate to the correct root field.
-            addToSimpleCodeBlock(getListBlock, rootElements, new ObjectParserCallback() {
+            addToSimpleCodeBlock(getListBlock, rootElements, new AdapterGeneratorDelegate.ObjectParserCallback() {
                 @Override
                 public void onInitialObjectNull() {
                     getListBlock.addStatement("return null");
@@ -202,7 +207,7 @@ public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
 
         if (rootElements.size() > 0) {
             // The code must navigate to the correct root field.
-            addToSimpleCodeBlock(streamCodeBlock, rootElements, new ObjectParserCallback() {
+            addToSimpleCodeBlock(streamCodeBlock, rootElements, new AdapterGeneratorDelegate.ObjectParserCallback() {
                 @Override
                 public void onInitialObjectNull() {
                     streamCodeBlock.addStatement("return");
@@ -282,12 +287,10 @@ public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
         builder.addStatement("in.endArray()");
     }
 
-    private void addToSimpleCodeBlock(CodeBlock.Builder builder, GsonFieldTree rootElements, ObjectParserCallback callback) throws ProcessingException {
+    private void addToSimpleCodeBlock(CodeBlock.Builder builder, GsonTree rootElements, AdapterGeneratorDelegate.ObjectParserCallback callback) throws ProcessingException {
         builder.beginControlFlow("try");
         if (rootElements.size() > 0) {
-            mCounterVariableCount = 0;
-
-            createObjectParser(true, 0, builder, rootElements, callback);
+            adapterGeneratorDelegate.addGsonAdapterReadCode(builder, rootElements, true, null, callback);
         }
         builder.nextControlFlow("catch ($T e)", ClassName.get(IOException.class));
         builder.addStatement("throw new $T(e)", ClassName.get(JsonSyntaxException.class));
@@ -319,10 +322,4 @@ public class GsonArrayStreamerGenerator extends BaseAdapterGenerator {
     public void onJavaFileBuilt(JavaFile.Builder builder) {
         builder.addStaticImport(GsonUtil.class, "*");
     }
-
-    @Override
-    protected String getClassNameSuffix() {
-        return "GsonArrayStreamer";
-    }
-
 }
