@@ -38,7 +38,7 @@ public class GsonField {
 
     @Override
     public String toString() {
-        return "GsonField{" +
+        return "GsonField: {" +
                 "fieldIndex=" + fieldIndex +
                 ", fieldInfo=" + fieldInfo +
                 ", jsonPath='" + jsonPath + '\'' +

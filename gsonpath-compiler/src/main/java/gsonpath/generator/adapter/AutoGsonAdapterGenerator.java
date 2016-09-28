@@ -69,12 +69,12 @@ public class AutoGsonAdapterGenerator extends Generator {
             fieldInfoList = fieldInfoFactory.getModelFieldsFromInterface(interfaceInfo);
         }
 
-        GsonTree fieldTree = new GsonTreeFactory().createGsonTree(fieldInfoList, properties.rootField,
+        GsonObject rootGsonObject = new GsonObjectTreeFactory().createGsonObject(fieldInfoList, properties.rootField,
                 properties.flattenDelimiter, properties.gsonFieldNamingPolicy, properties.gsonFieldValidationType,
                 properties.pathSubstitutions);
 
         // Adds the mandatory field index constants and also populates the mandatoryInfoMap values.
-        Map<String, MandatoryFieldInfo> mandatoryInfoMap = new MandatoryFieldInfoFactory().createMandatoryFieldsFromGsonTree(fieldTree);
+        Map<String, MandatoryFieldInfo> mandatoryInfoMap = new MandatoryFieldInfoFactory().createMandatoryFieldsFromGsonObject(rootGsonObject);
 
         int mandatoryFieldSize = mandatoryInfoMap.size();
         if (mandatoryFieldSize > 0) {
@@ -93,10 +93,10 @@ public class AutoGsonAdapterGenerator extends Generator {
                     .build());
         }
 
-        adapterTypeBuilder.addMethod(createReadMethod(modelClassName, concreteClassName, mandatoryInfoMap, fieldTree));
+        adapterTypeBuilder.addMethod(createReadMethod(modelClassName, concreteClassName, mandatoryInfoMap, rootGsonObject));
 
         if (!isModelInterface) {
-            adapterTypeBuilder.addMethod(createWriteMethod(modelClassName, fieldTree, properties.serializeNulls));
+            adapterTypeBuilder.addMethod(createWriteMethod(modelClassName, rootGsonObject, properties.serializeNulls));
 
         } else {
             // Create an empty method for the write, since we do not support writing for interfaces.
@@ -123,10 +123,10 @@ public class AutoGsonAdapterGenerator extends Generator {
     private MethodSpec createReadMethod(ClassName baseElement,
                                         ClassName concreteElement,
                                         Map<String, MandatoryFieldInfo> mandatoryInfoMap,
-                                        GsonTree rootElements) throws ProcessingException {
+                                        GsonObject rootElements) throws ProcessingException {
 
         // Create a flat list of the variables and ensure they are ordered by their original field index within the POJO
-        List<GsonField> flattenedFields = new GsonTreeFactory().getFlattenedFieldsFromTree(rootElements);
+        List<GsonField> flattenedFields = new GsonObjectTreeFactory().getFlattenedFieldsFromGsonObject(rootElements);
 
         MethodSpec.Builder readMethod = MethodSpec.methodBuilder("read")
                 .addAnnotation(Override.class)
@@ -207,7 +207,7 @@ public class AutoGsonAdapterGenerator extends Generator {
      * public void write(JsonWriter out, ImageSizes value) throws IOException {
      */
     private MethodSpec createWriteMethod(ClassName elementClassName,
-                                         GsonTree rootElements,
+                                         GsonObject rootElements,
                                          boolean serializeNulls) throws ProcessingException {
 
         MethodSpec.Builder writeMethod = MethodSpec.methodBuilder("write")
@@ -237,7 +237,7 @@ public class AutoGsonAdapterGenerator extends Generator {
 
     private void writeObject(int fieldDepth,
                              CodeBlock.Builder codeBlock,
-                             GsonTree jsonMapping,
+                             GsonObject jsonMapping,
                              String currentPath,
                              boolean serializeNulls) throws ProcessingException {
 
@@ -302,7 +302,7 @@ public class AutoGsonAdapterGenerator extends Generator {
                 codeBlock.add("\n");
 
             } else {
-                GsonTree nextLevelMap = (GsonTree) value;
+                GsonObject nextLevelMap = (GsonObject) value;
                 if (nextLevelMap.size() > 0) {
                     String newPath;
                     if (currentPath.length() > 0) {
