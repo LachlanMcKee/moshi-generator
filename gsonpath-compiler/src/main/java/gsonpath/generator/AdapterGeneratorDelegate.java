@@ -9,7 +9,7 @@ import gsonpath.FlattenJson;
 import gsonpath.ProcessingException;
 import gsonpath.model.FieldInfo;
 import gsonpath.model.GsonField;
-import gsonpath.model.GsonTree;
+import gsonpath.model.GsonObject;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,7 +38,7 @@ public class AdapterGeneratorDelegate {
     private int mCounterVariableCount;
 
     public void addGsonAdapterReadCode(CodeBlock.Builder codeBlock,
-                                       GsonTree jsonMapping,
+                                       GsonObject jsonMapping,
                                        boolean createModelAtBeginning,
                                        FieldAnnotationValidator fieldAnnotationValidator,
                                        ObjectParserCallback callback) throws ProcessingException {
@@ -48,7 +48,7 @@ public class AdapterGeneratorDelegate {
     }
 
     private void addGsonAdapterReadCodeInternal(CodeBlock.Builder codeBlock,
-                                                GsonTree jsonMapping,
+                                                GsonObject jsonMapping,
                                                 boolean createModelAtBeginning,
                                                 int fieldDepth,
                                                 FieldAnnotationValidator fieldAnnotationValidator,
@@ -115,7 +115,7 @@ public class AdapterGeneratorDelegate {
                 handleGsonField((GsonField) value, codeBlock, createModelAtBeginning, fieldAnnotationValidator, callback);
 
             } else {
-                GsonTree nextLevelMap = (GsonTree) value;
+                GsonObject nextLevelMap = (GsonObject) value;
                 if (nextLevelMap.size() == 0) {
                     callback.onNodeEmpty();
                     addBreak = false;

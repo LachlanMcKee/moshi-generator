@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class MandatoryFieldInfoFactory {
 
-    public Map<String, MandatoryFieldInfo> createMandatoryFieldsFromGsonTree(GsonTree gsonTree) {
+    public Map<String, MandatoryFieldInfo> createMandatoryFieldsFromGsonObject(GsonObject gsonObject) {
         Map<String, MandatoryFieldInfo> mandatoryInfoMap = new LinkedHashMap<>();
-        createMandatoryFieldsFromGsonTree(gsonTree, mandatoryInfoMap);
+        createMandatoryFieldsFromGsonObject(gsonObject, mandatoryInfoMap);
         return mandatoryInfoMap;
     }
 
@@ -15,17 +15,17 @@ public class MandatoryFieldInfoFactory {
      * Add any mandatory field indexes as constants. This is done for code readability.
      * We will obtain the values using a depth-first recursion.
      */
-    private void createMandatoryFieldsFromGsonTree(GsonTree gsonTree, Map<String, MandatoryFieldInfo> mandatoryInfoMap) {
+    private void createMandatoryFieldsFromGsonObject(GsonObject gsonObject, Map<String, MandatoryFieldInfo> mandatoryInfoMap) {
 
-        for (String branchKey : gsonTree.keySet()) {
-            Object treeObject = gsonTree.get(branchKey);
+        for (String branchKey : gsonObject.keySet()) {
+            Object gsonType = gsonObject.get(branchKey);
 
-            if (treeObject instanceof GsonField) {
-                createConstantForField((GsonField) treeObject, mandatoryInfoMap);
+            if (gsonType instanceof GsonField) {
+                createConstantForField((GsonField) gsonType, mandatoryInfoMap);
 
             } else {
                 // Recursive call, navigating further down the tree.
-                createMandatoryFieldsFromGsonTree((GsonTree) treeObject, mandatoryInfoMap);
+                createMandatoryFieldsFromGsonObject((GsonObject) gsonType, mandatoryInfoMap);
             }
         }
     }

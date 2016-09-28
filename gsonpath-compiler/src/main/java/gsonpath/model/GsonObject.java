@@ -4,22 +4,24 @@ import com.google.common.base.Objects;
 
 import java.util.LinkedHashMap;
 
-public class GsonTree {
+public class GsonObject {
     private final LinkedHashMap<String, Object> fieldMap;
 
-    public GsonTree() {
+    public GsonObject() {
         fieldMap = new LinkedHashMap<>();
     }
 
-    public void addTreeBranch(String branchName, GsonTree gsonTree) {
-        fieldMap.put(branchName, gsonTree);
+    public GsonObject addObject(String branchName, GsonObject gsonObject) {
+        fieldMap.put(branchName, gsonObject);
+        return gsonObject;
     }
 
-    public void addField(String branchName, GsonField field) throws IllegalArgumentException {
+    public GsonField addField(String branchName, GsonField field) throws IllegalArgumentException {
         if (containsKey(branchName)) {
             throw new IllegalArgumentException("Value already exists");
         }
         fieldMap.put(branchName, field);
+        return field;
     }
 
     public int size() {
@@ -43,8 +45,8 @@ public class GsonTree {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        GsonTree gsonTree = (GsonTree) o;
-        return Objects.equal(fieldMap, gsonTree.fieldMap);
+        GsonObject gsonObject = (GsonObject) o;
+        return Objects.equal(fieldMap, gsonObject.fieldMap);
     }
 
     @Override
@@ -54,8 +56,6 @@ public class GsonTree {
 
     @Override
     public String toString() {
-        return "GsonTree{" +
-                "fieldMap=" + fieldMap +
-                '}';
+        return "GsonObject: " + fieldMap;
     }
 }
