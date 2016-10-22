@@ -3,6 +3,7 @@ package adapter.auto.interface_example.inheritance;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.String;
 
 public final class TestUsingInheritance_GsonPathModel implements TestUsingInheritance {
     private final Integer value3;
@@ -50,5 +51,14 @@ public final class TestUsingInheritance_GsonPathModel implements TestUsingInheri
         result = 31 * result + (value1 != null ? value1.hashCode() : 0);
         result = 31 * result + (value2 != null ? value2.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TestUsingInheritance{" +
+                "value3=" + value3 +
+                ", value1=" + value1 +
+                ", value2=" + value2 +
+                '}';
     }
 }

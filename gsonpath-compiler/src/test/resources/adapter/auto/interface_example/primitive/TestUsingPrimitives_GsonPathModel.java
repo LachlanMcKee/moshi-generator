@@ -3,6 +3,7 @@ package adapter.auto.interface_example.primitive;
 import java.lang.Double;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.String;
 
 public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimitives {
     private final int intExample;
@@ -98,5 +99,19 @@ public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimiti
         result = 31 * result + (java.util.Arrays.hashCode(doubleArrayExample));
         result = 31 * result + (java.util.Arrays.hashCode(booleanArrayExample));
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TestUsingPrimitives{" +
+                "intExample=" + intExample +
+                ", longExample=" + longExample +
+                ", doubleExample=" + doubleExample +
+                ", booleanExample=" + booleanExample +
+                ", intArrayExample=" + java.util.Arrays.toString(intArrayExample) +
+                ", longArrayExample=" + java.util.Arrays.toString(longArrayExample) +
+                ", doubleArrayExample=" + java.util.Arrays.toString(doubleArrayExample) +
+                ", booleanArrayExample=" + java.util.Arrays.toString(booleanArrayExample) +
+                '}';
     }
 }
