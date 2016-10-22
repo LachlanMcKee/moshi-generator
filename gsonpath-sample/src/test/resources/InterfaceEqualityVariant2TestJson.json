@@ -1,0 +1,25 @@
+{
+    "intExample": -1,
+    "longExample": -1000,
+    "doubleExample": -2.5,
+    "booleanExample": false,
+    "intArrayExample": [
+        -1,
+        -2,
+        -3
+    ],
+    "longArrayExample": [
+        -1000,
+        -2000,
+        -3000
+    ],
+    "doubleArrayExample": [
+        -2.5,
+        -3.5,
+        -4.5
+    ],
+    "booleanArrayExample": [
+        false,
+        true
+    ]
+}

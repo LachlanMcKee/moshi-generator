@@ -117,10 +117,10 @@ class ModelInterfaceGenerator extends Generator {
                 toStringCodeBlock.addStatement("if ($L != that.$L) return false", fieldName, fieldName);
             } else {
                 if (typeName instanceof ArrayTypeName) {
-                    toStringCodeBlock.addStatement("if (java.util.Arrays.equals($L, that.$L))", fieldName, fieldName);
+                    toStringCodeBlock.addStatement("if (!java.util.Arrays.equals($L, that.$L)) return false", fieldName, fieldName);
 
                 } else {
-                    toStringCodeBlock.addStatement("if (($L == null || !$L.equals(that.$L))) return false", fieldName, fieldName, fieldName);
+                    toStringCodeBlock.addStatement("if ($L != null ? !$L.equals(that.$L) : that.$L != null) return false", fieldName, fieldName, fieldName, fieldName);
                 }
             }
 
