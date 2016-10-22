@@ -33,4 +33,11 @@ public final class TestFlattenJsonWithInterface_GsonPathModel implements TestFla
         int result = flattenExample != null ? flattenExample.hashCode() : 0;
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "TestFlattenJsonWithInterface{" +
+                "flattenExample=" + flattenExample +
+                '}';
+    }
 }

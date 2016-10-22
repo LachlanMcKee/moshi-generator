@@ -40,15 +40,19 @@ class ModelInterfaceGenerator extends Generator {
         List<Element> methodElements = getMethodElements(element);
 
         // Equals method
-        CodeBlock.Builder toStringCodeBlock = CodeBlock.builder();
-        toStringCodeBlock.addStatement("if (this == o) return true");
-        toStringCodeBlock.addStatement("if (o == null || getClass() != o.getClass()) return false");
-        toStringCodeBlock.add("\n");
-        toStringCodeBlock.addStatement("$T that = ($T) o", outputClassName, outputClassName);
-        toStringCodeBlock.add("\n");
+        CodeBlock.Builder equalsCodeBlock = CodeBlock.builder();
+        equalsCodeBlock.addStatement("if (this == o) return true");
+        equalsCodeBlock.addStatement("if (o == null || getClass() != o.getClass()) return false");
+        equalsCodeBlock.add("\n");
+        equalsCodeBlock.addStatement("$T that = ($T) o", outputClassName, outputClassName);
+        equalsCodeBlock.add("\n");
 
         // Hash code method
         CodeBlock.Builder hasCodeCodeBlock = CodeBlock.builder();
+
+        // ToString method
+        CodeBlock.Builder toStringCodeBlock = CodeBlock.builder();
+        toStringCodeBlock.add("return \"$L{\" +\n", modelClassName.simpleName());
 
         // An optimisation for hash codes which prevents us creating too many temp long variables.
         boolean hasDoubleField = false;
@@ -114,13 +118,13 @@ class ModelInterfaceGenerator extends Generator {
 
             // Add to the equals method
             if (typeName.isPrimitive()) {
-                toStringCodeBlock.addStatement("if ($L != that.$L) return false", fieldName, fieldName);
+                equalsCodeBlock.addStatement("if ($L != that.$L) return false", fieldName, fieldName);
             } else {
                 if (typeName instanceof ArrayTypeName) {
-                    toStringCodeBlock.addStatement("if (!java.util.Arrays.equals($L, that.$L)) return false", fieldName, fieldName);
+                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals($L, that.$L)) return false", fieldName, fieldName);
 
                 } else {
-                    toStringCodeBlock.addStatement("if ($L != null ? !$L.equals(that.$L) : that.$L != null) return false", fieldName, fieldName, fieldName, fieldName);
+                    equalsCodeBlock.addStatement("if ($L != null ? !$L.equals(that.$L) : that.$L != null) return false", fieldName, fieldName, fieldName, fieldName);
                 }
             }
 
@@ -157,21 +161,34 @@ class ModelInterfaceGenerator extends Generator {
             } else {
                 hasCodeCodeBlock.addStatement("result = 31 * result + ($L)", hashCodeLine);
             }
+
+            // Add to the toString method.
+            toStringCodeBlock.add("\t\t\"");
+            if (elementIndex > 0) {
+                toStringCodeBlock.add(", ");
+            }
+            if (typeName instanceof ArrayTypeName) {
+                toStringCodeBlock.add("$L=\" + java.util.Arrays.toString($L) +", fieldName, fieldName);
+
+            } else {
+                toStringCodeBlock.add("$L=\" + $L +", fieldName, fieldName);
+            }
+            toStringCodeBlock.add("\n", fieldName, fieldName);
         }
 
         typeBuilder.addMethod(constructorBuilder.build());
 
         // Add the equals method
-        MethodSpec.Builder toStringBuilder = MethodSpec.methodBuilder("equals")
+        MethodSpec.Builder equalsBuilder = MethodSpec.methodBuilder("equals")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.BOOLEAN)
                 .addParameter(TypeName.OBJECT, "o");
 
-        toStringCodeBlock.add("\n");
-        toStringCodeBlock.addStatement("return true");
-        toStringBuilder.addCode(toStringCodeBlock.build());
-        typeBuilder.addMethod(toStringBuilder.build());
+        equalsCodeBlock.add("\n");
+        equalsCodeBlock.addStatement("return true");
+        equalsBuilder.addCode(equalsCodeBlock.build());
+        typeBuilder.addMethod(equalsBuilder.build());
 
         // Add the hashCode method
         MethodSpec.Builder hashCodeBuilder = MethodSpec.methodBuilder("hashCode")
@@ -188,6 +205,17 @@ class ModelInterfaceGenerator extends Generator {
 
         hashCodeBuilder.addCode(hasCodeCodeBlock.build());
         typeBuilder.addMethod(hashCodeBuilder.build());
+
+        // Add the hashCode method
+        MethodSpec.Builder toStringBuilder = MethodSpec.methodBuilder("toString")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.get(String.class));
+
+        toStringCodeBlock.add("\t\t'}';\n", modelClassName.simpleName());
+
+        toStringBuilder.addCode(toStringCodeBlock.build());
+        typeBuilder.addMethod(toStringBuilder.build());
 
         if (!writeFile(outputClassName.packageName(), typeBuilder)) {
             throw new ProcessingException("Failed to write generated file: " + outputClassName.simpleName());
