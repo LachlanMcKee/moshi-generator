@@ -37,9 +37,9 @@ public final class TestValidInterface_GsonPathModel implements TestValidInterfac
 
         TestValidInterface_GsonPathModel that = (TestValidInterface_GsonPathModel) o;
 
-        if ((value1 == null || !value1.equals(that.value1))) return false;
-        if ((value2 == null || !value2.equals(that.value2))) return false;
-        if ((value3 == null || !value3.equals(that.value3))) return false;
+        if (value1 != null ? !value1.equals(that.value1) : that.value1 != null) return false;
+        if (value2 != null ? !value2.equals(that.value2) : that.value2 != null) return false;
+        if (value3 != null ? !value3.equals(that.value3) : that.value3 != null) return false;
 
         return true;
     }

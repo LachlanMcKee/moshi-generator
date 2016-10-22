@@ -23,7 +23,7 @@ public final class TestFlattenJsonWithInterface_GsonPathModel implements TestFla
 
         TestFlattenJsonWithInterface_GsonPathModel that = (TestFlattenJsonWithInterface_GsonPathModel) o;
 
-        if ((flattenExample == null || !flattenExample.equals(that.flattenExample))) return false;
+        if (flattenExample != null ? !flattenExample.equals(that.flattenExample) : that.flattenExample != null) return false;
 
         return true;
     }

@@ -77,10 +77,10 @@ public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimiti
         if (longExample != that.longExample) return false;
         if (doubleExample != that.doubleExample) return false;
         if (booleanExample != that.booleanExample) return false;
-        if (java.util.Arrays.equals(intArrayExample, that.intArrayExample));
-        if (java.util.Arrays.equals(longArrayExample, that.longArrayExample));
-        if (java.util.Arrays.equals(doubleArrayExample, that.doubleArrayExample));
-        if (java.util.Arrays.equals(booleanArrayExample, that.booleanArrayExample));
+        if (!java.util.Arrays.equals(intArrayExample, that.intArrayExample)) return false;
+        if (!java.util.Arrays.equals(longArrayExample, that.longArrayExample)) return false;
+        if (!java.util.Arrays.equals(doubleArrayExample, that.doubleArrayExample)) return false;
+        if (!java.util.Arrays.equals(booleanArrayExample, that.booleanArrayExample)) return false;
 
         return true;
     }
