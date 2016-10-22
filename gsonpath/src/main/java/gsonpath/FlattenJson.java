@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * Specifies that the JSON object found for this field should be
  * flattened into a String.
- * <p/>
+ * <p>
  * For example, given the following JSON:
  * <pre>
  * {
@@ -14,7 +14,7 @@ import java.lang.annotation.*;
  * }
  * </pre>
  * The following String is returned through the JsonParser:
- * <p/>
+ * <p>
  * "{'value1': 1, 'value2': 2}"
  */
 @Retention(RetentionPolicy.SOURCE)

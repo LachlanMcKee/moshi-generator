@@ -2,7 +2,7 @@ package gsonpath;
 
 /**
  * Specifies what type of validation should be done during Gson parsing.
- * <p/>
+ * <p>
  * If some form of validation is used, and a field does not pass the validation, an exception
  * will be thrown and the parser will not return a result.
  */
@@ -23,7 +23,7 @@ public enum GsonFieldValidationType {
     /**
      * All fields marked with non-null will be validated during parsing
      * if the field is not found, an exception will be thrown.
-     * <p/>
+     * <p>
      * Primitive fields will also be treated as non-null. If you want to
      * ensure that a primitive can be optional, make it boxed.
      */

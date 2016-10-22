@@ -5,11 +5,11 @@ import gsonpath.GsonArrayStreamer;
 /**
  * A factory which exposes auto generated {@link gsonpath.GsonArrayStreamer} classes which
  * are created using the {@link gsonpath.AutoGsonArrayStreamer} annotation.
- * <p/>
+ * <p>
  * The creation of the {@link gsonpath.GsonArrayStreamer} classes is delegated to
  * another generated class (of type {@link GsonArrayStreamerLoader}) which can create the correct
  * {@link GsonArrayStreamer} classes without using any reflection.
- * <p/>
+ * <p>
  * The factory only uses reflection once, when it needs to obtain this delegated {@link GsonArrayStreamerLoader}
  * class.
  */

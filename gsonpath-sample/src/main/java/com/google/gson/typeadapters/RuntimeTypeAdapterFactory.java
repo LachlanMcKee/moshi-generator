@@ -92,7 +92,7 @@ import com.google.gson.stream.JsonWriter;
  *   }}</pre>
  * Both the type field name ({@code "type"}) and the type labels ({@code
  * "Rectangle"}) are configurable.
- * <p/>
+ * <p>
  * <h3>Registering Types</h3>
  * Create a {@code RuntimeTypeAdapterFactory} by passing the base type and type field
  * name to the {@link #of} factory method. If you don't supply an explicit type

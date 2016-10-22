@@ -8,16 +8,16 @@ import java.lang.annotation.Target;
 /**
  * A class annotated with this annotation will automatically generate a Gson
  * {@link com.google.gson.TypeAdapter} at compile time.
- * <p/>
+ * <p>
  * The benefit of this annotation is that it removes the majority of reflection used by
  * Gson, and also avoids problems caused by obfuscators such as proguard since the field names
  * are not obtained at runtime, instead they are statically referenced ahead of time.
- * <p/>
+ * <p>
  * Another benefit of this generated {@link com.google.gson.TypeAdapter} class is that the
  * <i>com.google.gson.annotations.SerializedName</i> gson annotation is able to use very basic
  * JsonPath style notation. It can specify a tree branch notation which allows the POJO to
  * be much flatter than standard implementations
- * <p/>
+ * <p>
  * For example, for a given JSON file:
  * <pre>
  * {
@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  * </pre>
  * The generated {@link com.google.gson.TypeAdapter} will map this nested JSON into a single POJO without any boilerplate code
  * being written.
- * <p/>
+ * <p>
  * Note: As a consequence of generating code at compile time, some flexibility is lost surrounding
  * {@link com.google.gson.Gson} configurations. Therefore any Gson specific configurations
  * (such as {@link GsonPathFieldNamingPolicy}) must be specified within the annotation itself.
@@ -53,28 +53,32 @@ public @interface AutoGsonAdapter {
     /**
      * Specifies a set of defaults which can be used to set a different set of defaults as opposed
      * to the ones provided out of the box.
-     * <p/>
+     * <p>
      * For further information about how to use this, see {@link GsonPathDefaultConfiguration}
+     *
+     * @return the configuration class
      */
     Class<?> defaultConfiguration() default void.class;
 
     /**
      * Determines whether fields that do not use the 'SerializedName' gson annotation are added to the Type Adapter
      * or not. By default all fields are added.
-     * <p/>
+     * <p>
      * To exclude fields on a case-by-case basis, see {@link gsonpath.ExcludeField}
+     *
+     * @return whether non-annotated fields are ignored, or if it should inherit from the default configuration.
      */
     InheritableBoolean ignoreNonAnnotatedFields() default InheritableBoolean.FALSE_OR_INHERIT_DEFAULT_IF_AVAILABLE;
 
     /**
      * Specifies the root field where the generated {@link com.google.gson.TypeAdapter} will begin
      * to access the declared fields.
-     * <p/>
+     * <p>
      * If left blank, nothing will change, and the fields will be read immediately from the reader.
-     * <p/>
+     * <p>
      * However, if the root field is specified, then the reader will drill down into a specific
      * tree branch of the JSON and then commence reading the exposed fields.
-     * <p/>
+     * <p>
      * E.g. For a given JSON file:
      * <pre>
      * {
@@ -100,48 +104,58 @@ public @interface AutoGsonAdapter {
      * </pre>
      * Then the reader will read into the 'left' and 'path' section of the JSON and
      * then read the 'value1' property as usual.
+     *
+     * @return the root json field to use.
      */
     String rootField() default "";
 
     /**
      * The delimiter used to flatten Json nested structures into a single POJO.
-     * <p/>
+     * <p>
      * By default this is set to using the '.' character. If required you can override
      * this to using a different character, and all the fields within this class will
      * use this delimiter instead.
-     * <p/>
+     * <p>
      * Value will inherit from a 'defaults' class which uses the {@link GsonPathDefaultConfiguration}
      * annotation. If you don't wish to inherit, specify an explicit delimiter.
+     *
+     * @return the flatten delimiter to use.
      */
     FlattenDelimiter flattenDelimiter() default @FlattenDelimiter(value = '.', inheritDefaultIfAvailable = true);
 
     /**
      * Exposes the Gson field naming policy at compile time rather than runtime.
-     * <p/>
+     * <p>
      * Note: This will affect every version of this class regardless of how the
      * gson object is constructed.
-     * <p/>
+     * <p>
      * Value will inherit from a 'defaults' class which uses the {@link GsonPathDefaultConfiguration}
      * annotation. If you don't wish to inherit, specify an explicit fieldNamingPolicy.
+     *
+     * @return the field naming policy
      */
     GsonPathFieldNamingPolicy fieldNamingPolicy() default GsonPathFieldNamingPolicy.IDENTITY_OR_INHERIT_DEFAULT_IF_AVAILABLE;
 
     /**
      * Determines whether the Type Adapter will allow null values into the JSON when writing.
-     * <p/>
+     * <p>
      * Refer to the Gson documentation for further details.
+     *
+     * @return whether nulls are serialized, or if it should inherit from the default configuration.
      */
     InheritableBoolean serializeNulls() default InheritableBoolean.FALSE_OR_INHERIT_DEFAULT_IF_AVAILABLE;
 
     /**
      * Defines validation rule which can be used to ensure that the parsed JSON conforms to a particular format.
-     * <p/>
+     * <p>
      * If the validation is enabled and a JSON document does not conform, an exception will be thrown, and the
      * parser will stop immediately.
-     * <p/>
+     * <p>
      * The validation is relies on the 'NonNull' (also 'Nonnull', 'NotNull' and 'Notnull') and 'Nullable' annotations.
-     * <p/>
+     * <p>
      * The feature allows you to create a contract where you can be sure that the POJO has all the data that you expect.
+     *
+     * @return the field validation type.
      */
     GsonFieldValidationType fieldValidationType() default GsonFieldValidationType.NO_VALIDATION_OR_INHERIT_DEFAULT_IF_AVAILABLE;
 
@@ -152,6 +166,8 @@ public @interface AutoGsonAdapter {
      * json with different names, but a similar structure.
      * <p>
      * See the {@link PathSubstitution} Javadoc for more details.
+     *
+     * @return the array of path substitutions.
      */
     PathSubstitution[] substitutions() default {};
 }

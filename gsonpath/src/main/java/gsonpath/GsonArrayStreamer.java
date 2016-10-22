@@ -56,7 +56,7 @@ public interface GsonArrayStreamer<T> {
     /**
      * Streams a list of objects from a Json array which exists within the reader. Each object is returned
      * one at a time using the callback.
-     * <p/>
+     * <p>
      * The streaming can be cancelled at anytime using the {@link StreamCallback.StreamHandler} object
      * within the callback.
      *
@@ -73,7 +73,7 @@ public interface GsonArrayStreamer<T> {
     /**
      * Streams a list of objects from a Json array which exists within the reader. Each object is returned
      * one at a time using the callback.
-     * <p/>
+     * <p>
      * The streaming can be cancelled at anytime using the {@link StreamCallback.StreamHandler} object
      * within the callback.
      *
@@ -89,15 +89,16 @@ public interface GsonArrayStreamer<T> {
     /**
      * Streams a list of objects from a Json array which exists within the reader. An array of objects, of size
      * 'segmentSize' is returned each time the array has been filled.
-     * <p/>
+     * <p>
      * The streaming can be cancelled at anytime using the {@link StreamCallback.StreamHandler} object
      * within the callback.
      *
-     * @param gson     standard Gson main class. Must have all the required type adapters defined.
-     * @param in       the reader used to create the {@link JsonReader} which will read the Json array.
-     * @param callback a callback which returns each individual object within the Json array.
-     *                 The callback exposes a mechanism to stop streaming the Json array using the
-     *                 {@link StreamCallback.StreamHandler} class.
+     * @param gson        standard Gson main class. Must have all the required type adapters defined.
+     * @param in          the reader used to create the {@link JsonReader} which will read the Json array.
+     * @param segmentSize the size of the array which is returned in each callback.
+     * @param callback    a callback which returns each individual object within the Json array.
+     *                    The callback exposes a mechanism to stop streaming the Json array using the
+     *                    {@link StreamCallback.StreamHandler} class.
      * @throws JsonSyntaxException thrown by Gson. Ensure you close your input stream as this method will not close it.
      */
     void streamArraySegmented(Gson gson, Reader in, int segmentSize, StreamCallback<T[]> callback) throws JsonSyntaxException;
@@ -105,22 +106,23 @@ public interface GsonArrayStreamer<T> {
     /**
      * Streams a list of objects from a Json array which exists within the reader. An array of objects, of size
      * 'segmentSize' is returned each time the array has been filled.
-     * <p/>
+     * <p>
      * The streaming can be cancelled at anytime using the {@link StreamCallback.StreamHandler} object
      * within the callback.
      *
-     * @param gson     standard Gson main class. Must have all the required type adapters defined.
-     * @param in       the reader which will read the json array
-     * @param callback a callback which returns each individual object within the Json array.
-     *                 The callback exposes a mechanism to stop streaming the Json array using the
-     *                 {@link StreamCallback.StreamHandler} class.
+     * @param gson        standard Gson main class. Must have all the required type adapters defined.
+     * @param in          the reader which will read the json array
+     * @param segmentSize the size of the array which is returned in each callback.
+     * @param callback    a callback which returns each individual object within the Json array.
+     *                    The callback exposes a mechanism to stop streaming the Json array using the
+     *                    {@link StreamCallback.StreamHandler} class.
      * @throws JsonSyntaxException thrown by Gson. Ensure you close your input stream as this method will not close it.
      */
     void streamArraySegmented(Gson gson, JsonReader in, int segmentSize, StreamCallback<T[]> callback) throws JsonSyntaxException;
 
     /**
      * A callback used when streaming json array content as opposed to reading the entire array into memory.
-     * <p/>
+     * <p>
      * Using the {@link StreamHandler} it is possible to cancel reading the stream midway.
      */
     public interface StreamCallback<T> {
@@ -134,6 +136,8 @@ public interface GsonArrayStreamer<T> {
 
             /**
              * Determines whether the stream should be stopped.
+             *
+             * @return whether the stream has stopped.
              */
             public boolean isStreamStopped() {
                 return streamStopped;

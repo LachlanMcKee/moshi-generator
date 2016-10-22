@@ -17,11 +17,15 @@ public @interface PathSubstitution {
      * <p>
      * The text replacement looks for the text with surrounding curly braces.
      * e.g. for a original term of 'ORIGINAL', the string replacement actually looks for '{ORIGINAL}'
+     *
+     * @return the original text
      */
     String original();
 
     /**
      * The text used to override the original text.
+     *
+     * @return the replacement text
      */
     String replacement();
 }

@@ -5,7 +5,7 @@ import org.junit.Test;
 
 /**
  * These tests are used whenever the input class file generates a blank type adapter.
- * <p/>
+ * <p>
  * This can be due to the class being empty, or the content within the class isn't
  * applicable for a type adapter.
  */

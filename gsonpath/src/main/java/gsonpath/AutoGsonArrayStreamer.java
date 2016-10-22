@@ -8,18 +8,18 @@ import java.lang.annotation.Target;
 /**
  * A class annotated with this annotation will automatically generate a
  * Gson {@link gsonpath.GsonArrayStreamer} at compile time.
- * <p/>
+ * <p>
  * The generated class is useful when wanting to read a JSON array directly
  * from an input stream without creating a wrapper class which exists only
  * to allow a Gson {@link com.google.gson.TypeAdapter} to read it properly.
- * <p/>
+ * <p>
  * It also has more advanced features such as allowing streaming the array elements
  * one-by-one, or in a segmented fashion.
- * <p/>
+ * <p>
  * To use this annotation correctly without issues, the annotated class must be an interface
  * which extends the {@link gsonpath.GsonArrayStreamer} interface. If these preconditions
  * are not met, a compiler error will be thrown.
- * <p/>
+ * <p>
  * For more information, see the {@link GsonArrayStreamer} documentation.
  */
 @Retention(RetentionPolicy.SOURCE)
@@ -28,32 +28,38 @@ public @interface AutoGsonArrayStreamer {
     /**
      * By leaving value blank, it is implied that the root of the json is an array
      * instead of an object.
-     * <p/>
+     * <p>
      * For more information as to how this property works, see the {@link gsonpath.AutoGsonAdapter}
      * documentation.
+     *
+     * @return the root json field to use.
      */
     String rootField() default "";
 
     /**
      * The delimiter used to flatten Json nested structures into a single POJO.
-     * <p/>
+     * <p>
      * By default this is set to using the '.' character. If required you can override
      * this to using a different character, and all the fields within this class will
      * use this delimiter instead.
+     *
+     * @return the flatten delimiter to use.
      */
     char flattenDelimiter() default '.';
 
     /**
      * Typically Gson validates whether a stream has been read in its entirety, and throws
      * an exception if it has not.
-     * <p/>
+     * <p>
      * When using the 'rootField' property, we can yield a performance gain by ignoring the rest
      * of the stream as soon as the specified Json Array has been read.
-     * <p/>
+     * <p>
      * The downsides to this is that the stream is now in an invalid state. By default we want
      * to ensure that the stream is read correctly to maintain good compatibility with Gson.
      * However if you use the streamer directly on the input stream, you can deliberately disable
      * this functionality and reap some level of performance gains.
+     *
+     * @return whether to completely consume the reader
      */
     boolean consumeReaderFully() default true;
 }

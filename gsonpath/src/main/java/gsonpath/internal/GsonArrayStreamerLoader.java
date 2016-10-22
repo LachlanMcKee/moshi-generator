@@ -12,7 +12,7 @@ public interface GsonArrayStreamerLoader {
     /**
      * Obtains a concrete implementation of a given class which implements the {@link GsonArrayStreamer}
      * interface.
-     * <p/>
+     * <p>
      * The concrete implementation is generated at compile time when the {@link gsonpath.AutoGsonArrayStreamer}
      * annotation is used correctly. For correct usage, check the documentation of the annotation.
      *

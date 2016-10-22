@@ -5,7 +5,7 @@ import java.lang.annotation.Target;
 
 /**
  * Defines a delimiter character used by the Gson Path library when dealing with nested fields.
- * <p/>
+ * <p>
  * This exists as another annotation as opposed to using a char directly since it provides an easy mechanism
  * to determine whether the Type Adapter should use the default delimiter if supplied, or override it.
  */
@@ -13,13 +13,17 @@ import java.lang.annotation.Target;
 public @interface FlattenDelimiter {
     /**
      * The delimiter value
+     *
+     * @return a delimiter character.
      */
     char value();
 
     /**
      * Whether this delimiter should be overridden by the default value.
-     * <p/>
+     * <p>
      * Typically you should leave this as false.
+     *
+     * @return if the default should be used.
      */
     boolean inheritDefaultIfAvailable() default false;
 }
