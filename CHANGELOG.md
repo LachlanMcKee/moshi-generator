@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.6.2 *(2016-10-22)*
+----------------------------
+
+* Fix: The `equals` method generated for interfaces annotated with `@AutoGsonAdapter` now tests for equality correctly.
+* New: Added `toString` method genration for interfaces annotated with `@AutoGsonAdapter`.
+
 Version 1.6.1 *(2016-07-28)*
 ----------------------------
 
