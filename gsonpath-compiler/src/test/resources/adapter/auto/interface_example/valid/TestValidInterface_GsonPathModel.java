@@ -3,6 +3,7 @@ package adapter.auto.interface_example.valid;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.String;
 
 public final class TestValidInterface_GsonPathModel implements TestValidInterface {
     private final Integer value1;
@@ -50,5 +51,14 @@ public final class TestValidInterface_GsonPathModel implements TestValidInterfac
         result = 31 * result + (value2 != null ? value2.hashCode() : 0);
         result = 31 * result + (value3 != null ? value3.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TestValidInterface{" +
+                "value1=" + value1 +
+                ", value2=" + value2 +
+                ", value3=" + value3 +
+                '}';
     }
 }
