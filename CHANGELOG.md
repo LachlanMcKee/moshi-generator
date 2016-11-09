@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 1.6.3 *(2016-11-09)*
+----------------------------
+
+* Fix: Added Java 7 target and source compatibility for all libraries.
+
 Version 1.6.2 *(2016-10-22)*
 ----------------------------
 
