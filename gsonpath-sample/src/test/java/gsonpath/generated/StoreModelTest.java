@@ -1,8 +1,8 @@
-package gsonpath;
+package gsonpath.generated;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import gsonpath.generated.StoreModel;
+import gsonpath.GsonPath;
 import org.junit.Assert;
 import org.junit.Test;
 

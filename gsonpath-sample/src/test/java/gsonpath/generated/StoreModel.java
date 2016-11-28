@@ -6,18 +6,18 @@ import gsonpath.AutoGsonAdapter;
 import java.util.List;
 
 @AutoGsonAdapter(rootField = "store")
-public class StoreModel {
+class StoreModel {
     @SerializedName("book")
-    public List<BookModel> bookList;
+    List<BookModel> bookList;
 
     @SerializedName("bicycle.color")
-    public String bikeColour;
+    String bikeColour;
 
     @SerializedName("bicycle.price")
-    public double bikePrice;
+    double bikePrice;
 
     @AutoGsonAdapter
-    public static class BookModel {
+    static class BookModel {
         public String category;
         public String author;
         public String title;

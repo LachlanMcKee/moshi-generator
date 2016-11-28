@@ -3,7 +3,7 @@ package gsonpath.interface_test;
 import gsonpath.AutoGsonAdapter;
 
 @AutoGsonAdapter
-public interface InterfaceExample {
+interface InterfaceExample {
     Integer getIntExample();
 
     Long getLongExample();
