@@ -8,10 +8,7 @@ import gsonpath.model.InterfaceFieldInfo;
 import gsonpath.model.InterfaceInfo;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -107,6 +104,12 @@ class ModelInterfaceGenerator extends Generator {
                     .returns(typeName);
 
             accessorMethod.addCode("return $L;\n", fieldName);
+
+            // Copy all annotations from the interface accessor method to the implementing classes accessor.
+            List<? extends AnnotationMirror> annotationMirrors = enclosedElement.getAnnotationMirrors();
+            for (AnnotationMirror annotationMirror : annotationMirrors) {
+                accessorMethod.addAnnotation(AnnotationSpec.get(annotationMirror));
+            }
 
             typeBuilder.addMethod(accessorMethod.build());
 
