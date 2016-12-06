@@ -1,5 +1,7 @@
 package adapter.auto.interface_example.flatten_json;
 
+import gsonpath.FlattenJson;
+
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -12,6 +14,7 @@ public final class TestFlattenJsonWithInterface_GsonPathModel implements TestFla
     }
 
     @Override
+    @FlattenJson
     public String getFlattenExample() {
         return flattenExample;
     }

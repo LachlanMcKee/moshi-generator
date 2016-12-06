@@ -1,5 +1,7 @@
 package adapter.auto.interface_example.valid;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
@@ -17,6 +19,7 @@ public final class TestValidInterface_GsonPathModel implements TestValidInterfac
     }
 
     @Override
+    @SerializedName("Json1.Nest1")
     public Integer getValue1() {
         return value1;
     }
@@ -27,6 +30,7 @@ public final class TestValidInterface_GsonPathModel implements TestValidInterfac
     }
 
     @Override
+    @SerializedName("Json1.Nest3")
     public Integer getValue3() {
         return value3;
     }

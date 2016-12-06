@@ -1,5 +1,7 @@
 package adapter.auto.interface_example.inheritance;
 
+import com.google.gson.annotations.SerializedName;
+import gsonpath.NonNull;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
@@ -22,11 +24,13 @@ public final class TestUsingInheritance_GsonPathModel implements TestUsingInheri
     }
 
     @Override
+    @NonNull
     public Integer getValue1() {
         return value1;
     }
 
     @Override
+    @SerializedName("Json1.Nest2")
     public Integer getValue2() {
         return value2;
     }
