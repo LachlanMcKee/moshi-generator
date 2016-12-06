@@ -7,8 +7,13 @@ public class TypeAdapterLoaderGeneratorTest extends BaseGeneratorTest {
     @Test
     public void testGeneratedLoader() {
         assertGeneratedContent(new BaseGeneratorTest.TestCriteria("adapter/loader")
-                .addRelativeSource("TestLoaderSource1.java")
-                .addRelativeSource("TestLoaderSource2.java")
-                .addRelativeGenerated("GeneratedTypeAdapterLoader.java"));
+                .addRelativeSource("TestLoaderSource.java")
+                .addRelativeSource("source2/TestLoaderSource.java")
+                .addRelativeSource("source2/TestLoaderSource2.java")
+                .addRelativeSource("source3/TestLoaderSource.java")
+                .addRelativeGenerated("GeneratedTypeAdapterLoader.java")
+                .addRelativeGenerated("PackagePrivateTypeAdapterLoader.java")
+                .addRelativeGenerated("source2/PackagePrivateTypeAdapterLoader.java")
+                .addRelativeGenerated("source3/PackagePrivateTypeAdapterLoader.java"));
     }
 }

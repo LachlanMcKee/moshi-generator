@@ -4,6 +4,6 @@ import gsonpath.AutoGsonAdapter;
 import gsonpath.GsonFieldValidationType;
 
 @AutoGsonAdapter(fieldValidationType = GsonFieldValidationType.VALIDATE_ALL_EXCEPT_NULLABLE)
-public class MandatorySampleModel {
+class MandatorySampleModel {
     int test;
 }

@@ -3,5 +3,5 @@ package adapter.loader;
 import gsonpath.AutoGsonAdapter;
 
 @AutoGsonAdapter
-public class TestLoaderSource1 {
+class TestLoaderSource {
 }
