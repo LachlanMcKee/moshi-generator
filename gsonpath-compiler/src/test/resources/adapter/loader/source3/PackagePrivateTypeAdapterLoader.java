@@ -12,6 +12,9 @@ public final class PackagePrivateTypeAdapterLoader implements TypeAdapterLoader 
         Class rawType = type.getRawType();
         if (rawType.equals(TestLoaderSource.class)) {
             return new TestLoaderSource_GsonTypeAdapter(gson);
+
+        } else if (rawType.equals(TestLoaderSource.Inner.class)) {
+            return new TestLoaderSource_Inner_GsonTypeAdapter(gson);
         }
 
         return null;

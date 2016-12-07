@@ -57,7 +57,7 @@ public class TypeAdapterLoaderGenerator extends Generator {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(TypeAdapterLoader.class);
 
-        typeBuilder.addField(FieldSpec.builder(ParameterizedTypeName.get(HashMap.class, String.class, TypeAdapterLoader.class), "mPackagePrivateLoaders")
+        typeBuilder.addField(FieldSpec.builder(ArrayTypeName.of(TypeAdapterLoader.class), "mPackagePrivateLoaders")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build());
 
@@ -65,18 +65,12 @@ public class TypeAdapterLoaderGenerator extends Generator {
                 .addModifiers(Modifier.PUBLIC);
 
         CodeBlock.Builder constructorCodeBlock = CodeBlock.builder();
-        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new HashMap<>()");
-        constructorCodeBlock.add("\n");
+        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new $T[$L]", TypeAdapterLoader.class, packageLocalHandleResults.size());
 
         // Add the package local type adapter loaders to the hash map.
+        int index = 0;
         for (String packageName : packageLocalHandleResults.keySet()) {
-            String loaderName = packageName.replace(".", "_") + "_Loader";
-            constructorCodeBlock.addStatement("$T $L = new $L.$L()", TypeAdapterLoader.class, loaderName, packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME);
-
-            for (HandleResult handleResult : packageLocalHandleResults.get(packageName)) {
-                constructorCodeBlock.addStatement("mPackagePrivateLoaders.put(\"$L\", $L)", handleResult.originalClassName.toString(), loaderName);
-            }
-            constructorCodeBlock.add("\n");
+            constructorCodeBlock.addStatement("mPackagePrivateLoaders[$L] = new $L.$L()", index++, packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME);
         }
 
         constructorBuilder.addCode(constructorCodeBlock.build());
@@ -93,15 +87,15 @@ public class TypeAdapterLoaderGenerator extends Generator {
                 .addParameter(TypeToken.class, "type");
 
         CodeBlock.Builder codeBlock = CodeBlock.builder();
-        codeBlock.addStatement("Class rawType = type.getRawType()");
+        codeBlock.beginControlFlow("for (int i = 0; i < mPackagePrivateLoaders.length; i++)");
+        codeBlock.addStatement("TypeAdapter typeAdapter = mPackagePrivateLoaders[i].create(gson, type)");
         codeBlock.add("\n");
 
-        codeBlock.addStatement("TypeAdapterLoader typeAdapterLoader = mPackagePrivateLoaders.get(rawType.getName())");
-        codeBlock.beginControlFlow("if (typeAdapterLoader != null)");
-        codeBlock.addStatement("return typeAdapterLoader.create(gson, type)");
+        codeBlock.beginControlFlow("if (typeAdapter != null)");
+        codeBlock.addStatement("return typeAdapter");
         codeBlock.endControlFlow();
 
-        codeBlock.add("\n");
+        codeBlock.endControlFlow();
         codeBlock.addStatement("return null");
 
         createMethod.addCode(codeBlock.build());

@@ -4,4 +4,8 @@ import gsonpath.AutoGsonAdapter;
 
 @AutoGsonAdapter
 class TestLoaderSource {
+    @AutoGsonAdapter
+    static class Inner {
+
+    }
 }
