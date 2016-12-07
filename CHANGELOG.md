@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.7.0 *(2016-12-06)*
+----------------------------
+
+* Fix: All method annotations defined within interfaces annotated with `@AutoGsonAdapter` are now copied to the concrete implementation methods.
+* New: Classes and interfaces annotated with `@AutoGsonAdapter` can now be package private
+
 Version 1.6.3 *(2016-11-09)*
 ----------------------------
 
