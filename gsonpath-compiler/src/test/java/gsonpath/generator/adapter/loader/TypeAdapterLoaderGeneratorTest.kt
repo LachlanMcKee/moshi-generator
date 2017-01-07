@@ -1,12 +1,12 @@
-package gsonpath.generator.adapter.loader;
+package gsonpath.generator.adapter.loader
 
-import gsonpath.generator.BaseGeneratorTest;
-import org.junit.Test;
+import gsonpath.generator.BaseGeneratorTest
+import org.junit.Test
 
-public class TypeAdapterLoaderGeneratorTest extends BaseGeneratorTest {
+class TypeAdapterLoaderGeneratorTest : BaseGeneratorTest() {
     @Test
-    public void testGeneratedLoader() {
-        assertGeneratedContent(new BaseGeneratorTest.TestCriteria("adapter/loader")
+    fun testGeneratedLoader() {
+        assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/loader")
                 .addRelativeSource("TestLoaderSource.java")
                 .addRelativeSource("source2/TestLoaderSource.java")
                 .addRelativeSource("source2/TestLoaderSource2.java")
@@ -14,6 +14,6 @@ public class TypeAdapterLoaderGeneratorTest extends BaseGeneratorTest {
                 .addRelativeGenerated("GeneratedTypeAdapterLoader.java")
                 .addRelativeGenerated("PackagePrivateTypeAdapterLoader.java")
                 .addRelativeGenerated("source2/PackagePrivateTypeAdapterLoader.java")
-                .addRelativeGenerated("source3/PackagePrivateTypeAdapterLoader.java"));
+                .addRelativeGenerated("source3/PackagePrivateTypeAdapterLoader.java"))
     }
 }
