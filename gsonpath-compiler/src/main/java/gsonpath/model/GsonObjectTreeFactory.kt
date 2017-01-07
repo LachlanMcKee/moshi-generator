@@ -6,7 +6,6 @@ import gsonpath.PathSubstitution
 import gsonpath.ProcessingException
 
 import java.util.ArrayList
-import java.util.Collections
 import java.util.regex.Pattern
 
 class GsonObjectTreeFactory {
@@ -39,11 +38,11 @@ class GsonObjectTreeFactory {
     }
 
     fun createGsonObjectFromRootField(rootObject: GsonObject, rootField: String, flattenDelimiter: Char): GsonObject {
-        var currentRootObject = rootObject
         if (rootField.isEmpty()) {
-            return currentRootObject
+            return rootObject
         }
 
+        var currentRootObject = rootObject
         val regexSafeDelimiter = Pattern.quote(flattenDelimiter.toString())
         val split = rootField.split(regexSafeDelimiter.toRegex()).dropLastWhile(String::isEmpty).toTypedArray()
 
@@ -69,7 +68,7 @@ class GsonObjectTreeFactory {
         val flattenedFields = ArrayList<GsonField>()
         getFlattenedFields(gsonObject, flattenedFields)
 
-        Collections.sort(flattenedFields) { o1, o2 -> Integer.compare(o1.fieldIndex, o2.fieldIndex) }
+        flattenedFields.sort { o1, o2 -> Integer.compare(o1.fieldIndex, o2.fieldIndex) }
 
         return flattenedFields
     }
@@ -78,8 +77,8 @@ class GsonObjectTreeFactory {
         currentGsonObject.keySet()
                 .map { currentGsonObject[it]!! }
                 .forEach {
-                    if (it.javaClass == GsonField::class.java) {
-                        flattenedFields.add(it as GsonField)
+                    if (it is GsonField) {
+                        flattenedFields.add(it)
 
                     } else {
                         val nextLevelMap = it as GsonObject

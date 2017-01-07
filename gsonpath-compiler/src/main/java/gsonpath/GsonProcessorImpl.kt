@@ -25,8 +25,9 @@ open class GsonProcessorImpl : AbstractProcessor() {
         val generatedAdapters = env.getElementsAnnotatedWith(AutoGsonAdapter::class.java)
 
         // Handle the standard type adapters.
-        val autoGsonAdapterResults = ArrayList<HandleResult>()
         val adapterGenerator = AutoGsonAdapterGenerator(processingEnv)
+
+        val autoGsonAdapterResults = ArrayList<HandleResult>()
         for (element in generatedAdapters) {
             printMessage(String.format("Generating TypeAdapter (%s)", element))
 
@@ -39,7 +40,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
 
         }
 
-        if (autoGsonAdapterResults.size > 0) {
+        if (autoGsonAdapterResults.isNotEmpty()) {
             if (!TypeAdapterLoaderGenerator(processingEnv).generate(autoGsonAdapterResults)) {
                 printError("Error while generating TypeAdapterFactory")
                 return false

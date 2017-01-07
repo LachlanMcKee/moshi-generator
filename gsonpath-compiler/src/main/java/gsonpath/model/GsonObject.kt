@@ -12,7 +12,7 @@ class GsonObject {
     }
 
     fun addObject(branchName: String, gsonObject: GsonObject): GsonObject {
-        fieldMap.put(branchName, gsonObject)
+        fieldMap[branchName] = gsonObject
         return gsonObject
     }
 
@@ -21,7 +21,7 @@ class GsonObject {
         if (containsKey(branchName)) {
             throw IllegalArgumentException("Value already exists")
         }
-        fieldMap.put(branchName, field)
+        fieldMap[branchName] = field
         return field
     }
 

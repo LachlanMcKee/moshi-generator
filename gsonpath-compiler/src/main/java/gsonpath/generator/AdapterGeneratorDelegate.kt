@@ -15,6 +15,15 @@ import java.util.Arrays
 import java.util.HashSet
 
 class AdapterGeneratorDelegate {
+    private val GSON_SUPPORTED_PRIMITIVE = HashSet(Arrays.asList(
+            TypeName.BOOLEAN,
+            TypeName.INT,
+            TypeName.LONG,
+            TypeName.DOUBLE
+    ))
+
+    private val CLASS_NAME_STRING = ClassName.get(String::class.java)
+    private val CLASS_NAME_JSON_ELEMENT = ClassName.get(JsonElement::class.java)
 
     // Used to avoid naming conflicts.
     private var mCounterVariableCount: Int = 0
@@ -288,13 +297,6 @@ class AdapterGeneratorDelegate {
     }
 
     companion object {
-        private val GSON_SUPPORTED_PRIMITIVE = HashSet(Arrays.asList(
-                TypeName.BOOLEAN,
-                TypeName.INT,
-                TypeName.LONG,
-                TypeName.DOUBLE
-        ))
-
         val GSON_SUPPORTED_CLASSES: Set<TypeName> = HashSet(Arrays.asList(
                 TypeName.get(Boolean::class.java).box(),
                 TypeName.get(Int::class.java).box(),
@@ -302,8 +304,5 @@ class AdapterGeneratorDelegate {
                 TypeName.get(Double::class.java).box(),
                 TypeName.get(String::class.java).box()
         ))
-
-        private val CLASS_NAME_STRING = ClassName.get(String::class.java)
-        private val CLASS_NAME_JSON_ELEMENT = ClassName.get(JsonElement::class.java)
     }
 }

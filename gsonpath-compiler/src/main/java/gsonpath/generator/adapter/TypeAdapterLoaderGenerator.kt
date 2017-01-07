@@ -28,7 +28,7 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
             var localResults = packageLocalHandleResults[packageName]
             if (localResults == null) {
                 localResults = ArrayList<HandleResult>()
-                packageLocalHandleResults.put(packageName, localResults)
+                packageLocalHandleResults[packageName] = localResults
             }
 
             localResults.add(generatedGsonAdapter)

@@ -17,14 +17,9 @@ import javax.lang.model.type.TypeMirror
 import java.io.IOException
 
 class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
-    private val adapterGeneratorDelegate: AdapterGeneratorDelegate
-    private val annotationValidator: AnnotationValidator
+    private val adapterGeneratorDelegate: AdapterGeneratorDelegate = AdapterGeneratorDelegate()
+    private val annotationValidator: AnnotationValidator = AnnotationValidator()
     private var mSafeWriteVariableCount: Int = 0
-
-    init {
-        adapterGeneratorDelegate = AdapterGeneratorDelegate()
-        annotationValidator = AnnotationValidator()
-    }
 
     @Throws(ProcessingException::class)
     fun handle(modelElement: TypeElement): HandleResult {
@@ -45,14 +40,13 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                 .build())
 
         val autoGsonAnnotation = modelElement.getAnnotation(AutoGsonAdapter::class.java)
-        val defaultsAnnotation = getDefaultsAnnotation(autoGsonAnnotation)
 
         val concreteClassName: ClassName
         val fieldInfoList: List<FieldInfo>
         val isModelInterface = modelElement.kind.isInterface
 
         val properties = AutoGsonAdapterPropertiesFactory().create(
-                autoGsonAnnotation, defaultsAnnotation, isModelInterface)
+                autoGsonAnnotation, getDefaultsAnnotation(autoGsonAnnotation), isModelInterface)
 
         val fieldInfoFactory = FieldInfoFactory(processingEnv)
         if (!isModelInterface) {
@@ -73,20 +67,19 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
 
         // Adds the mandatory field index constants and also populates the mandatoryInfoMap values.
         val mandatoryInfoMap = MandatoryFieldInfoFactory().createMandatoryFieldsFromGsonObject(rootGsonObject)
-
-        val mandatoryFieldSize = mandatoryInfoMap.size
-        if (mandatoryFieldSize > 0) {
-
-            for ((mandatoryIndex, mandatoryField) in mandatoryInfoMap.values.withIndex()) {
-                adapterTypeBuilder.addField(FieldSpec.builder(TypeName.INT, mandatoryField.indexVariableName)
-                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                        .initializer("" + mandatoryIndex)
-                        .build())
-            }
+        if (mandatoryInfoMap.isNotEmpty()) {
+            mandatoryInfoMap.values
+                    .mapIndexed { mandatoryIndex, mandatoryField ->
+                        FieldSpec.builder(TypeName.INT, mandatoryField.indexVariableName)
+                                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                                .initializer("" + mandatoryIndex)
+                                .build()
+                    }
+                    .forEach { adapterTypeBuilder.addField(it) }
 
             adapterTypeBuilder.addField(FieldSpec.builder(TypeName.INT, "MANDATORY_FIELDS_SIZE")
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                    .initializer("" + mandatoryFieldSize)
+                    .initializer("" + mandatoryInfoMap.size)
                     .build())
         }
 
@@ -365,35 +358,36 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
 
             } else {
                 for (gsonField in flattenedFields) {
-                    val fieldInfo = gsonField.fieldInfo
-
                     // Don't initialise primitives, we rely on validation to throw an exception if the value does not exist.
-                    val typeName = fieldInfo.typeName
-                    val variableDeclaration = String.format("%s %s", typeName, gsonField.variableName)
+                    val typeName = gsonField.fieldInfo.typeName
 
-                    var defaultValue = "null"
-                    if (typeName.isPrimitive) {
-                        if (typeName === TypeName.INT || typeName === TypeName.BYTE || typeName === TypeName.SHORT) {
+                    val defaultValue: String
+                    when (typeName) {
+                        TypeName.INT,
+                        TypeName.BYTE,
+                        TypeName.SHORT ->
                             defaultValue = "0"
 
-                        } else if (typeName === TypeName.LONG) {
+                        TypeName.LONG ->
                             defaultValue = "0L"
 
-                        } else if (typeName === TypeName.FLOAT) {
+                        TypeName.FLOAT ->
                             defaultValue = "0f"
 
-                        } else if (typeName === TypeName.DOUBLE) {
+                        TypeName.DOUBLE ->
                             defaultValue = "0d"
 
-                        } else if (typeName === TypeName.CHAR) {
+                        TypeName.CHAR ->
                             defaultValue = "'\\u0000'"
 
-                        } else if (typeName === TypeName.BOOLEAN) {
+                        TypeName.BOOLEAN ->
                             defaultValue = "false"
-                        }
+
+                        else ->
+                            defaultValue = "null"
                     }
 
-                    codeBlock.addStatement(variableDeclaration + " = " + defaultValue,
+                    codeBlock.addStatement("%s %s = %s".format(typeName, gsonField.variableName, defaultValue),
                             typeName,
                             gsonField.variableName)
                 }
@@ -420,6 +414,7 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
     }
 
     private class AnnotationValidator : AdapterGeneratorDelegate.FieldAnnotationValidator {
+        val CLASS_NAME_STRING: ClassName = ClassName.get(String::class.java)
 
         @Throws(ProcessingException::class)
         override fun validateFieldAnnotations(fieldInfo: FieldInfo) {
@@ -431,10 +426,6 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
             if (fieldInfo.typeName != CLASS_NAME_STRING) {
                 throw ProcessingException("FlattenObject can only be used on String variables", fieldInfo.element)
             }
-        }
-
-        companion object {
-            private val CLASS_NAME_STRING = ClassName.get(String::class.java)
         }
     }
 }

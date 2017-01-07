@@ -61,7 +61,9 @@ internal class AutoGsonAdapterPropertiesFactory {
         // Interfaces must use field validation to prevent issues with primitives.
         if (isInterface) {
             when (gsonFieldValidationType) {
-                GsonFieldValidationType.NO_VALIDATION, GsonFieldValidationType.NO_VALIDATION_OR_INHERIT_DEFAULT_IF_AVAILABLE -> gsonFieldValidationType = GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL
+                GsonFieldValidationType.NO_VALIDATION,
+                GsonFieldValidationType.NO_VALIDATION_OR_INHERIT_DEFAULT_IF_AVAILABLE ->
+                    gsonFieldValidationType = GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL
             }
         }
 

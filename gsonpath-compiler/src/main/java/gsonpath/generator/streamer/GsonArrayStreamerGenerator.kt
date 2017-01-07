@@ -31,18 +31,13 @@ class GsonArrayStreamerGenerator(processingEnv: ProcessingEnvironment) : Generat
         val outputClassName = ClassName.get(streamerClassName.packageName(),
                 adapterGeneratorDelegate.generateClassName(streamerClassName, "GsonArrayStreamer"))
 
-        var gsonArrayStreamerElement: TypeMirror? = null
-        for (typeMirror in streamerElement.interfaces) {
-            val interfaceElement = processingEnv.typeUtils.asElement(typeMirror) as TypeElement
+        val gsonArrayStreamerElement = streamerElement.interfaces
+                .filter {
+                    val interfaceElement = processingEnv.typeUtils.asElement(it) as TypeElement
 
-            if (ClassName.get(interfaceElement) == ClassName.get(GsonArrayStreamer::class.java)) {
-                gsonArrayStreamerElement = typeMirror
-            }
-        }
-
-        if (gsonArrayStreamerElement == null) {
-            throw ProcessingException("Class must extend " + GsonArrayStreamer::class.java.name)
-        }
+                    (ClassName.get(interfaceElement) == ClassName.get(GsonArrayStreamer::class.java))
+                }
+                .firstOrNull() ?: throw ProcessingException("Class must extend " + GsonArrayStreamer::class.java.name)
 
         // Get the actual argument used for json parsing from the interface generics.
         val parameterizedTypeName = TypeName.get(gsonArrayStreamerElement) as ParameterizedTypeName

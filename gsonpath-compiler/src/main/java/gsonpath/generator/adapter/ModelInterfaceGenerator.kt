@@ -68,21 +68,22 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 throw ProcessingException("Gson Path interface methods must have a return type", enclosedElement)
             }
 
-            if (methodType.parameterTypes.size > 0) {
+            if (methodType.parameterTypes.isNotEmpty()) {
                 throw ProcessingException("Gson Path interface methods must not have parameters", enclosedElement)
             }
 
             val methodName = enclosedElement.simpleName.toString()
 
+            //
             // Transform the method name into the field name by removing the first camel-cased portion.
-            var fieldName = methodName
-
-            for (i in 0..fieldName.length - 1 - 1) {
-                val character = fieldName[i]
-                if (Character.isUpperCase(character)) {
-                    fieldName = Character.toLowerCase(character) + fieldName.substring(i + 1)
-                    break
-                }
+            // e.g. 'getName' becomes 'name'
+            //
+            val fieldName: String
+            val indexOfFirst = methodName.indexOfFirst(Char::isUpperCase)
+            if (indexOfFirst != -1) {
+                fieldName = methodName[indexOfFirst].toLowerCase() + methodName.substring(indexOfFirst + 1)
+            } else {
+                fieldName = methodName
             }
 
             typeBuilder.addField(typeName, fieldName, Modifier.PRIVATE, Modifier.FINAL)
