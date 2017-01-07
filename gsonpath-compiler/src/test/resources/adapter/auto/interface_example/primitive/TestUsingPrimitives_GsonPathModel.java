@@ -1,6 +1,5 @@
 package adapter.auto.interface_example.primitive;
 
-import java.lang.Double;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -91,7 +90,7 @@ public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimiti
         long temp;
         int result = intExample;
         result = 31 * result + ((int) (longExample ^ (longExample >>> 32)));
-        temp = Double.doubleToLongBits(doubleExample);
+        temp = java.lang.Double.doubleToLongBits(doubleExample);
         result = 31 * result + ((int) (temp ^ (temp >>> 32)));
         result = 31 * result + ((booleanExample ? 1 : 0));
         result = 31 * result + (java.util.Arrays.hashCode(intArrayExample));
