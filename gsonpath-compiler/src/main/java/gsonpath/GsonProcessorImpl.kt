@@ -3,8 +3,6 @@ package gsonpath
 import gsonpath.generator.HandleResult
 import gsonpath.generator.adapter.AutoGsonAdapterGenerator
 import gsonpath.generator.adapter.TypeAdapterLoaderGenerator
-import gsonpath.generator.streamer.GsonArrayStreamerGenerator
-import gsonpath.generator.streamer.StreamArrayLoaderGenerator
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -47,30 +45,6 @@ open class GsonProcessorImpl : AbstractProcessor() {
             }
         }
 
-        // Handle the array adapters.
-        val generatedArrayAdapters = env.getElementsAnnotatedWith(AutoGsonArrayStreamer::class.java)
-
-        val AutoGsonArrayStreamerResults = ArrayList<HandleResult>()
-        val arrayAdapterGenerator = GsonArrayStreamerGenerator(processingEnv)
-        for (element in generatedArrayAdapters) {
-            printMessage(String.format("Generating StreamAdapter (%s)", element))
-
-            try {
-                AutoGsonArrayStreamerResults.add(arrayAdapterGenerator.handle(element as TypeElement))
-            } catch (e: ProcessingException) {
-                printError(e.message, e.element ?: element)
-                return false
-            }
-
-        }
-
-        if (AutoGsonArrayStreamerResults.isNotEmpty()) {
-            if (!StreamArrayLoaderGenerator(processingEnv).generate(AutoGsonArrayStreamerResults)) {
-                printError("Error while generating StreamAdapterFactory")
-                return false
-            }
-        }
-
         printMessage("Finished annotation processing")
         println()
 
@@ -92,7 +66,6 @@ open class GsonProcessorImpl : AbstractProcessor() {
     override fun getSupportedAnnotationTypes(): Set<String> {
         val supportedTypes = LinkedHashSet<String>()
         supportedTypes.add(AutoGsonAdapter::class.java.canonicalName)
-        supportedTypes.add(AutoGsonArrayStreamer::class.java.canonicalName)
         return supportedTypes
     }
 
