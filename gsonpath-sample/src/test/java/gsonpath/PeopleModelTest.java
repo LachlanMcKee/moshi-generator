@@ -2,9 +2,12 @@ package gsonpath;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import gsonpath.generated.PersonModelList;
 import gsonpath.vanilla.PeopleModelVanilla;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.StringReader;
 
 public class PeopleModelTest {
 
@@ -79,14 +82,13 @@ public class PeopleModelTest {
 
     private long testGsonPath() {
         long start = System.nanoTime();
-        //PersonModel[] gsonPathModel = personModelArrayAdapter.getArray(gsonPath, new StringReader(JSON_TEST_STRING));
+        PersonModelList personModelList = gsonPath.fromJson(new StringReader(JSON_TEST_STRING), PersonModelList.class);
 
-        // TODO: Fix this unit test after adding array implementation.
         long duration = ((System.nanoTime() - start) / 1000000);
-        /*System.out.println("gsonPathModel. Time taken: " + duration);
+        System.out.println("gsonPathModel. Time taken: " + duration);
 
-        Assert.assertEquals(gsonPathModel.length, PEOPLE_SIZE);
-        Assert.assertEquals(gsonPathModel[0].first, "Lachlan");*/
+        Assert.assertEquals(personModelList.size(), PEOPLE_SIZE);
+        Assert.assertEquals(personModelList.get(0).getFirstName(), "Lachlan");
 
         return duration;
     }
