@@ -15,5 +15,7 @@ interface FieldInfo {
 
     val annotationNames: Array<String>
 
-    val element: Element
+    val element: Element?
+
+    val isDirectAccess: Boolean
 }

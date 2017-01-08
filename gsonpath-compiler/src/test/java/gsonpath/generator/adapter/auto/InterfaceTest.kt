@@ -65,4 +65,12 @@ class InterfaceTest : BaseGeneratorTest() {
                 .addRelativeGenerated("TestFlattenJsonWithInterface_GsonPathModel.java")
                 .addRelativeGenerated("TestFlattenJsonWithInterface_GsonTypeAdapter.java"))
     }
+
+    @Test
+    fun testListInterface() {
+        assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/list")
+                .addRelativeSource("TestListInterface.java")
+                .addRelativeGenerated("TestListInterface_GsonPathModel.java")
+                .addRelativeGenerated("TestListInterface_GsonTypeAdapter.java"))
+    }
 }

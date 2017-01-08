@@ -6,21 +6,95 @@ import gsonpath.generator.AdapterGeneratorDelegate
 import gsonpath.generator.Generator
 import gsonpath.model.InterfaceFieldInfo
 import gsonpath.model.InterfaceInfo
-
+import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.*
+import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ExecutableType
-import java.util.ArrayList
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.MethodSpec
+import gsonpath.internal.GsonPathElementList
+import com.squareup.javapoet.TypeSpec
 
 internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
     @Throws(ProcessingException::class)
     fun handle(element: TypeElement): InterfaceInfo {
-        val modelClassName = ClassName.get(element)
+        val interfaces = element.interfaces
+        if (interfaces != null && interfaces.size == 1) {
+            val typeName = TypeName.get(interfaces[0])
 
+            if (typeName is ParameterizedTypeName) {
+                if (typeName.rawType == TypeName.get(List::class.java)) {
+                    return handleList(ClassName.get(element), typeName)
+                }
+            }
+        }
+        return handleStandard(element)
+    }
+
+    private fun createOutputClassName(modelClassName: ClassName): ClassName {
         val adapterGeneratorDelegate = AdapterGeneratorDelegate()
-        val outputClassName = ClassName.get(modelClassName.packageName(),
+        return ClassName.get(modelClassName.packageName(),
                 adapterGeneratorDelegate.generateClassName(modelClassName, "GsonPathModel"))
+    }
+
+    @Throws(ProcessingException::class)
+    private fun handleList(modelClassName: ClassName, listTypeName: ParameterizedTypeName): InterfaceInfo {
+        val outputClassName = createOutputClassName(modelClassName)
+
+        val typeBuilder = TypeSpec.classBuilder(outputClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .superclass(ParameterizedTypeName.get(ClassName.get(GsonPathElementList::class.java), listTypeName.typeArguments[0]))
+                .addSuperinterface(modelClassName)
+
+        typeBuilder.addField(listTypeName, "internalList", Modifier.PRIVATE, Modifier.FINAL)
+
+        val constructorBuilder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+
+        constructorBuilder.addParameter(listTypeName, "internalList")
+        constructorBuilder.addStatement("this.internalList = internalList")
+
+        typeBuilder.addMethod(constructorBuilder.build())
+
+        val getListMethod = MethodSpec.methodBuilder("getList")
+                .addAnnotation(Override::class.java)
+                .addModifiers(Modifier.PROTECTED)
+                .returns(listTypeName)
+
+        getListMethod.addStatement("return internalList")
+
+        typeBuilder.addMethod(getListMethod.build())
+
+        if (!writeFile(outputClassName.packageName(), typeBuilder)) {
+            throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())
+        }
+
+        val fieldInfo = arrayOf(InterfaceFieldInfo(object : InterfaceFieldInfo.ElementInfo {
+            override val underlyingElement: Element?
+                get() = null
+
+            override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+                return null
+            }
+
+            override val annotationNames: Array<String>
+                get() = arrayOf("AutoGsonAdapter", "NonNull")
+
+        }, listTypeName, "internalList", true))
+
+        return InterfaceInfo(outputClassName, fieldInfo)
+    }
+
+    @Throws(ProcessingException::class)
+    private fun handleStandard(element: TypeElement): InterfaceInfo {
+        val modelClassName = ClassName.get(element)
+        val outputClassName: ClassName = createOutputClassName(modelClassName)
 
         val typeBuilder = TypeSpec.classBuilder(outputClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -107,7 +181,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             constructorBuilder.addParameter(typeName, fieldName)
             constructorBuilder.addStatement("this.\$L = \$L", fieldName, fieldName)
 
-            interfaceInfoList.add(InterfaceFieldInfo(enclosedElement, typeName, fieldName))
+            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, fieldName, false))
 
             // Add to the equals method
             if (typeName.isPrimitive) {
@@ -223,6 +297,20 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             it.kind == ElementKind.METHOD && TypeName.get(it.enclosingElement.asType()) != TypeName.OBJECT
         }
         return methodElements
+    }
+
+    private class StandardElementInfo constructor(override val underlyingElement: Element) : InterfaceFieldInfo.ElementInfo {
+
+        override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
+            return underlyingElement.getAnnotation(annotationClass)
+        }
+
+        override val annotationNames: Array<String>
+            get() {
+                return underlyingElement.annotationMirrors.map { it ->
+                    it.annotationType.asElement().simpleName.toString()
+                }.toTypedArray()
+            }
     }
 
 }

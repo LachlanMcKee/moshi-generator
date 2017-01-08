@@ -77,6 +77,19 @@ class AdapterGeneratorDelegate {
             return
         }
 
+        if (jsonMapping.size() == 1) {
+            val value = jsonMapping[jsonMapping.keySet().iterator().next()]
+
+            if (value is GsonField) {
+                val isDirectAccess = value.fieldInfo.isDirectAccess
+
+                if (isDirectAccess) {
+                    handleGsonField(value, codeBlock, createModelAtBeginning, fieldAnnotationValidator, callback)
+                    return
+                }
+            }
+        }
+
         codeBlock.addStatement("int \$L = 0", counterVariableName)
         codeBlock.addStatement("in.beginObject()")
         codeBlock.add("\n")

@@ -57,8 +57,11 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                         }.toTypedArray()
                     }
 
-                override val element: Element
+                override val element: Element?
                     get() = memberElement
+
+                override val isDirectAccess: Boolean
+                    get() = false
             })
         }
         return fieldInfoList
@@ -74,21 +77,20 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                     get() = interfaceInfo.parentClassName.toString()
 
                 override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
-                    return it.methodElement.getAnnotation(annotationClass)
+                    return it.elementInfo.getAnnotation(annotationClass)
                 }
 
                 override val fieldName: String
                     get() = it.fieldName
 
                 override val annotationNames: Array<String>
-                    get() {
-                        return it.methodElement.annotationMirrors.map { it ->
-                            it.annotationType.asElement().simpleName.toString()
-                        }.toTypedArray()
-                    }
+                    get() = it.elementInfo.annotationNames
 
-                override val element: Element
-                    get() = it.methodElement
+                override val element: Element?
+                    get() = it.elementInfo.underlyingElement
+
+                override val isDirectAccess: Boolean
+                    get() = it.isDirectAccess
             }
         }
     }

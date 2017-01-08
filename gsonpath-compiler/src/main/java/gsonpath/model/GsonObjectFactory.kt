@@ -210,7 +210,7 @@ class GsonObjectFactory {
     }
 
     @Throws(ProcessingException::class)
-    private fun throwDuplicateFieldException(field: Element, jsonKey: String) {
+    private fun throwDuplicateFieldException(field: Element?, jsonKey: String) {
         throw ProcessingException("Unexpected duplicate field '" + jsonKey +
                 "' found. Each tree branch must use a unique value!", field)
     }
