@@ -5,11 +5,7 @@ import com.google.common.base.Objects
 import java.util.LinkedHashMap
 
 class GsonObject {
-    private val fieldMap: LinkedHashMap<String, Any>
-
-    init {
-        fieldMap = LinkedHashMap<String, Any>()
-    }
+    private val fieldMap: LinkedHashMap<String, Any> = LinkedHashMap()
 
     fun addObject(branchName: String, gsonObject: GsonObject): GsonObject {
         fieldMap[branchName] = gsonObject

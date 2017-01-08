@@ -1,16 +1,13 @@
 package gsonpath;
 
-import gsonpath.internal.GsonArrayStreamerFactory;
 import gsonpath.internal.GsonPathTypeAdapterFactory;
 
 /**
  * The primary class to use when using the GsonPath library.
  * <p>
- * It supplies factories which expose auto generated class created using the
- * {@link gsonpath.AutoGsonAdapter} and {@link gsonpath.AutoGsonArrayStreamer} annotations.
+ * It supplies factories which expose auto generated class created using the {@link gsonpath.AutoGsonAdapter} annotation.
  */
 public class GsonPath {
-
     /**
      * Creates an instance of the {@link gsonpath.internal.GsonPathTypeAdapterFactory} class.
      * <p>
@@ -25,35 +22,4 @@ public class GsonPath {
     public static GsonPathTypeAdapterFactory createTypeAdapterFactory() {
         return new GsonPathTypeAdapterFactory();
     }
-
-    /**
-     * Creates an instance of the {@link gsonpath.internal.GsonArrayStreamerFactory} class.
-     * <p>
-     * This factory is used to map the auto generated {@link gsonpath.GsonArrayStreamer} classes created using the
-     * {@link gsonpath.AutoGsonArrayStreamer} annotation.
-     * <p>
-     * Only a single use of reflection is used within the constructor, so it isn't critical to hold onto this reference
-     * for later usage.
-     *
-     * @return a new instance of the {@link gsonpath.internal.GsonArrayStreamerFactory} class
-     */
-    public static GsonArrayStreamerFactory getGsonArrayStreamerFactory() {
-        return new GsonArrayStreamerFactory();
-    }
-
-    /**
-     * Creates an instance of the {@link gsonpath.internal.GsonArrayStreamerFactory} class and
-     * returns a generated implementation of a {@link gsonpath.GsonArrayStreamer} for a given class
-     * type which <b>must</b> implement {@link gsonpath.GsonArrayStreamer}.
-     * <p>
-     * See the {@link #getGsonArrayStreamerFactory} documentation for further details.
-     *
-     * @param type the class used to find the corresponding streamer.
-     * @param <T>  a constraint to ensure the target class is of type {@link gsonpath.GsonArrayStreamer}
-     * @return a the array streamer based on the input type.
-     */
-    public static <T extends GsonArrayStreamer> T getArrayStreamer(Class<T> type) {
-        return getGsonArrayStreamerFactory().get(type);
-    }
-
 }
