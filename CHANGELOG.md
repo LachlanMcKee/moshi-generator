@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+Version 1.8.0 *(2017-01-08)*
+----------------------------
+
+* New: Compiler has been rewritten in Kotlin. This should help improve future code quality.
+* New: Special version of annotated interfaces may now be created that extend `List` or `Collection`
+     * This allows developers to directly access a JSON array without creating a container object. Visit the [interfaces guide](guides/interfaces.md) for further details
+* Removed: The `@AutoGsonArrayStreamer` annotation has been removed as it has been superseded by the feature above.
+
 Version 1.7.0 *(2016-12-06)*
 ----------------------------
 
