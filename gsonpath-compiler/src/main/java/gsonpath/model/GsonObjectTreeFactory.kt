@@ -37,7 +37,7 @@ class GsonObjectTreeFactory {
         return absoluteRootObject
     }
 
-    fun createGsonObjectFromRootField(rootObject: GsonObject, rootField: String, flattenDelimiter: Char): GsonObject {
+    private fun createGsonObjectFromRootField(rootObject: GsonObject, rootField: String, flattenDelimiter: Char): GsonObject {
         if (rootField.isEmpty()) {
             return rootObject
         }

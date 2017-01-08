@@ -2,7 +2,7 @@ package gsonpath.generator.adapter
 
 import com.squareup.javapoet.*
 import gsonpath.ProcessingException
-import gsonpath.generator.AdapterGeneratorDelegate
+import gsonpath.generator.AdapterGeneratorUtils
 import gsonpath.generator.Generator
 import gsonpath.model.InterfaceFieldInfo
 import gsonpath.model.InterfaceInfo
@@ -38,9 +38,8 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
     }
 
     private fun createOutputClassName(modelClassName: ClassName): ClassName {
-        val adapterGeneratorDelegate = AdapterGeneratorDelegate()
         return ClassName.get(modelClassName.packageName(),
-                adapterGeneratorDelegate.generateClassName(modelClassName, "GsonPathModel"))
+                AdapterGeneratorUtils().generateClassName(modelClassName, "GsonPathModel"))
     }
 
     @Throws(ProcessingException::class)

@@ -1,6 +1,7 @@
 package gsonpath.generator.adapter
 
 import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
@@ -15,17 +16,38 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 import java.io.IOException
+import java.util.*
 
 class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
-    private val adapterGeneratorDelegate: AdapterGeneratorDelegate = AdapterGeneratorDelegate()
-    private val annotationValidator: AnnotationValidator = AnnotationValidator()
+    private val GSON_SUPPORTED_PRIMITIVE = HashSet(Arrays.asList(
+            TypeName.BOOLEAN,
+            TypeName.INT,
+            TypeName.LONG,
+            TypeName.DOUBLE
+    ))
+
+    private val GSON_SUPPORTED_CLASSES: Set<TypeName> = HashSet(Arrays.asList(
+            TypeName.get(Boolean::class.java).box(),
+            TypeName.get(Int::class.java).box(),
+            TypeName.get(Long::class.java).box(),
+            TypeName.get(Double::class.java).box(),
+            TypeName.get(String::class.java).box()
+    ))
+
+    private val CLASS_NAME_STRING = ClassName.get(String::class.java)
+    private val CLASS_NAME_JSON_ELEMENT = ClassName.get(JsonElement::class.java)
+
+    private val adapterGeneratorUtils = AdapterGeneratorUtils()
+
+    // Used to avoid naming conflicts.
     private var mSafeWriteVariableCount: Int = 0
+    private var mCounterVariableCount: Int = 0
 
     @Throws(ProcessingException::class)
     fun handle(modelElement: TypeElement): HandleResult {
         val modelClassName = ClassName.get(modelElement)
         val adapterClassName = ClassName.get(modelClassName.packageName(),
-                adapterGeneratorDelegate.generateClassName(modelClassName, "GsonTypeAdapter"))
+                adapterGeneratorUtils.generateClassName(modelClassName, "GsonTypeAdapter"))
 
         val adapterTypeBuilder = TypeSpec.classBuilder(adapterClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -129,11 +151,8 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         val codeBlock = CodeBlock.builder()
         val createModelAtBeginning = baseElement == concreteElement
 
-        val objectParserCallback = AdapterObjectParserCallback(
-                codeBlock, mandatoryInfoMap, concreteElement, flattenedFields, createModelAtBeginning)
-
-        adapterGeneratorDelegate.addGsonAdapterReadCode(codeBlock, rootElements, createModelAtBeginning,
-                annotationValidator, objectParserCallback)
+        addGsonAdapterReadCode(codeBlock, rootElements, createModelAtBeginning,
+                mandatoryInfoMap, concreteElement, flattenedFields)
 
         // If we have any mandatory fields, we now check if any values have been missed. If they are, it will raise an exception here.
         if (mandatoryInfoMap.isNotEmpty()) {
@@ -240,7 +259,7 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                 val fieldInfo = value.fieldInfo
 
                 // Make sure the field's annotations don't have any problems.
-                annotationValidator.validateFieldAnnotations(fieldInfo)
+                validateFieldAnnotations(fieldInfo)
 
                 val fieldTypeName = fieldInfo.typeName
                 val isPrimitive = fieldTypeName.isPrimitive
@@ -261,7 +280,7 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                     codeBlock.beginControlFlow("if (\$L != null)", objectName)
                 }
 
-                if (isPrimitive || AdapterGeneratorDelegate.GSON_SUPPORTED_CLASSES.contains(fieldTypeName)) {
+                if (isPrimitive || GSON_SUPPORTED_CLASSES.contains(fieldTypeName)) {
 
                     codeBlock.addStatement("out.value(\$L)", objectName)
 
@@ -342,17 +361,50 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         return defaultsAnnotation
     }
 
-    private class AdapterObjectParserCallback constructor(private val codeBlock: CodeBlock.Builder,
-                                                          private val mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
-                                                          private val concreteElement: ClassName,
-                                                          private val flattenedFields: List<GsonField>,
-                                                          private val createModelAtBeginning: Boolean) : AdapterGeneratorDelegate.ObjectParserCallback {
+    @Throws(ProcessingException::class)
+    private fun addGsonAdapterReadCode(codeBlock: CodeBlock.Builder,
+                                       jsonMapping: GsonObject,
+                                       createModelAtBeginning: Boolean,
+                                       mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
+                                       concreteElement: ClassName,
+                                       flattenedFields: List<GsonField>) {
 
-        override fun onInitialObjectNull() {
+        mCounterVariableCount = 0
+        addGsonAdapterReadCodeInternal(codeBlock, jsonMapping, createModelAtBeginning,
+                mandatoryInfoMap, concreteElement, flattenedFields, 0)
+    }
+
+    @Throws(ProcessingException::class)
+    private fun addGsonAdapterReadCodeInternal(codeBlock: CodeBlock.Builder,
+                                               jsonMapping: GsonObject,
+                                               createModelAtBeginning: Boolean,
+                                               mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
+                                               concreteElement: ClassName,
+                                               flattenedFields: List<GsonField>,
+                                               fieldDepth: Int) {
+
+        val counterVariableName = "jsonFieldCounter" + mCounterVariableCount
+        mCounterVariableCount++
+
+        //
+        // Ensure a Json object exists begin attempting to read it.
+        //
+        codeBlock.add("\n")
+        codeBlock.add("// Ensure the object is not null.\n")
+        codeBlock.beginControlFlow("if (!isValidValue(in))")
+
+        if (fieldDepth == 0) {
+            // Allow the calling method to inject different logic. Typically this would be to return.
             codeBlock.addStatement("return null")
+
+        } else {
+            codeBlock.addStatement("break")
         }
 
-        override fun onInitialise() {
+        codeBlock.endControlFlow() // if
+
+        // This is the first block of code to fire after the object is valid.
+        if (fieldDepth == 0) {
             if (createModelAtBeginning) {
                 codeBlock.addStatement("\$T result = new \$T()", concreteElement, concreteElement)
 
@@ -360,32 +412,7 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                 for (gsonField in flattenedFields) {
                     // Don't initialise primitives, we rely on validation to throw an exception if the value does not exist.
                     val typeName = gsonField.fieldInfo.typeName
-
-                    val defaultValue: String
-                    when (typeName) {
-                        TypeName.INT,
-                        TypeName.BYTE,
-                        TypeName.SHORT ->
-                            defaultValue = "0"
-
-                        TypeName.LONG ->
-                            defaultValue = "0L"
-
-                        TypeName.FLOAT ->
-                            defaultValue = "0f"
-
-                        TypeName.DOUBLE ->
-                            defaultValue = "0d"
-
-                        TypeName.CHAR ->
-                            defaultValue = "'\\u0000'"
-
-                        TypeName.BOOLEAN ->
-                            defaultValue = "false"
-
-                        else ->
-                            defaultValue = "null"
-                    }
+                    val defaultValue = adapterGeneratorUtils.createDefaultVariableValueForTypeName(typeName)
 
                     codeBlock.addStatement("%s %s = %s".format(typeName, gsonField.variableName, defaultValue),
                             typeName,
@@ -397,9 +424,204 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
             if (mandatoryInfoMap.isNotEmpty()) {
                 codeBlock.addStatement("boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE]")
             }
+
+            codeBlock.add("\n")
         }
 
-        override fun onFieldAssigned(fieldName: String) {
+        if (jsonMapping.size() == 0) {
+            return
+        }
+
+        if (jsonMapping.size() == 1) {
+            val value = jsonMapping[jsonMapping.keySet().iterator().next()]
+
+            if (value is GsonField) {
+                val isDirectAccess = value.fieldInfo.isDirectAccess
+
+                if (isDirectAccess) {
+                    handleGsonField(value, codeBlock, createModelAtBeginning, mandatoryInfoMap)
+                    return
+                }
+            }
+        }
+
+        codeBlock.addStatement("int \$L = 0", counterVariableName)
+        codeBlock.addStatement("in.beginObject()")
+        codeBlock.add("\n")
+        codeBlock.beginControlFlow("while (in.hasNext())")
+
+        //
+        // Since all the required fields have been mapped, we can avoid calling 'nextName'.
+        // This ends up yielding performance improvements on large datasets depending on
+        // the ordering of the fields within the JSON.
+        //
+        codeBlock.beginControlFlow("if (\$L == \$L)", counterVariableName, jsonMapping.size())
+        codeBlock.addStatement("in.skipValue()")
+        codeBlock.addStatement("continue")
+        codeBlock.endControlFlow() // if
+        codeBlock.add("\n")
+
+        codeBlock.beginControlFlow("switch (in.nextName())")
+
+        var addBreak = true
+        for (key in jsonMapping.keySet()) {
+            codeBlock.add("case \"\$L\":\n", key)
+            codeBlock.indent()
+
+            // Increment the counter to ensure we track how many fields we have mapped.
+            codeBlock.addStatement("\$L++", counterVariableName)
+
+            val value = jsonMapping[key]
+            if (value is GsonField) {
+                handleGsonField(value, codeBlock, createModelAtBeginning, mandatoryInfoMap)
+
+            } else {
+                val nextLevelMap = value as GsonObject
+                if (nextLevelMap.size() == 0) {
+                    addBreak = false
+
+                } else {
+                    addGsonAdapterReadCodeInternal(codeBlock, nextLevelMap, createModelAtBeginning,
+                            mandatoryInfoMap,
+                            concreteElement,
+                            flattenedFields,
+                            fieldDepth + 1)
+                }
+            }
+
+            if (addBreak) {
+                codeBlock.addStatement("break")
+            }
+
+            codeBlock.add("\n")
+            codeBlock.unindent()
+        }
+
+        codeBlock.add("default:\n")
+        codeBlock.indent()
+        codeBlock.addStatement("in.skipValue()")
+        codeBlock.addStatement("break")
+        codeBlock.unindent()
+
+        codeBlock.endControlFlow() // switch
+        codeBlock.endControlFlow() // while
+        codeBlock.add("\n")
+
+        codeBlock.add("\n")
+
+        codeBlock.addStatement("in.endObject()")
+    }
+
+    @Throws(ProcessingException::class)
+    private fun handleGsonField(gsonField: GsonField, codeBlock: CodeBlock.Builder,
+                                createModelAtBeginning: Boolean,
+                                mandatoryInfoMap: Map<String, MandatoryFieldInfo>) {
+
+        val fieldInfo = gsonField.fieldInfo
+
+        // Make sure the field's annotations don't have any problems.
+        validateFieldAnnotations(fieldInfo)
+
+        val fieldTypeName = fieldInfo.typeName
+
+        // Add a new line to improve readability for the multi-lined mapping.
+        codeBlock.add("\n")
+
+        val variableName = gsonField.variableName
+        var safeVariableName = variableName
+
+        // A model isn't created if the constructor is called at the bottom of the type adapter.
+        var checkIfResultIsNull = createModelAtBeginning
+        if (gsonField.isRequired && !createModelAtBeginning) {
+            safeVariableName += "_safe"
+            checkIfResultIsNull = true
+        }
+
+        var callToString = false
+
+        // If the field type is primitive, ensure that it is a supported primitive.
+        if (fieldTypeName.isPrimitive && !GSON_SUPPORTED_PRIMITIVE.contains(fieldTypeName)) {
+            throw ProcessingException("Unsupported primitive type found. Only boolean, int, double and long can be used.", fieldInfo.element)
+        }
+
+        if (GSON_SUPPORTED_CLASSES.contains(fieldTypeName.box())) {
+            val fieldClassName = fieldTypeName.box() as ClassName
+
+            // Special handling for strings.
+            var handled = false
+            if (fieldTypeName == CLASS_NAME_STRING) {
+                val annotation = fieldInfo.getAnnotation(FlattenJson::class.java)
+                if (annotation != null) {
+                    handled = true
+
+                    // FlattenJson is a special case. We always need to ensure that the JsonObject is not null.
+                    if (!checkIfResultIsNull) {
+                        safeVariableName += "_safe"
+                        checkIfResultIsNull = true
+                    }
+
+                    codeBlock.addStatement("\$T \$L = mGson.getAdapter(\$T.class).read(in)",
+                            CLASS_NAME_JSON_ELEMENT,
+                            safeVariableName,
+                            CLASS_NAME_JSON_ELEMENT)
+
+                    callToString = true
+                }
+            }
+
+            if (!handled) {
+                val variableAssignment = String.format("%s = get%sSafely(in)",
+                        safeVariableName,
+                        fieldClassName.simpleName())
+
+                if (checkIfResultIsNull) {
+                    codeBlock.addStatement("\$L \$L", fieldClassName.simpleName(), variableAssignment)
+
+                } else {
+                    codeBlock.addStatement(variableAssignment)
+                }
+            }
+        } else {
+            val adapterName: String
+
+            if (fieldTypeName is ParameterizedTypeName) {
+                // This is a generic type
+                adapterName = String.format("new com.google.gson.reflect.TypeToken<%s>(){}", fieldTypeName)
+
+            } else {
+                adapterName = fieldTypeName.toString() + ".class"
+            }
+
+            // Handle every other possible class by falling back onto the gson adapter.
+            val variableAssignment = String.format("%s = mGson.getAdapter(%s).read(in)",
+                    safeVariableName,
+                    adapterName)
+
+            if (checkIfResultIsNull) {
+                codeBlock.addStatement("\$L \$L", fieldTypeName, variableAssignment)
+
+            } else {
+                codeBlock.addStatement(variableAssignment)
+            }
+        }
+
+        if (checkIfResultIsNull) {
+            val fieldName = fieldInfo.fieldName
+            codeBlock.beginControlFlow("if (\$L != null)", safeVariableName)
+
+            val assignmentBlock: String
+            if (createModelAtBeginning) {
+                assignmentBlock = "result." + fieldName
+            } else {
+                assignmentBlock = variableName
+            }
+
+            codeBlock.addStatement("\$L = \$L\$L",
+                    assignmentBlock,
+                    safeVariableName,
+                    if (callToString) ".toString()" else "")
+
+
             val mandatoryFieldInfo = mandatoryInfoMap[fieldName]
 
             // When a field has been assigned, if it is a mandatory value, we note this down.
@@ -407,25 +629,26 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                 codeBlock.addStatement("mandatoryFieldsCheckList[\$L] = true", mandatoryFieldInfo.indexVariableName)
                 codeBlock.add("\n")
             }
-        }
 
-        override fun onNodeEmpty() {
+            if (gsonField.isRequired) {
+                codeBlock.nextControlFlow("else")
+                codeBlock.addStatement("throw new gsonpath.JsonFieldMissingException(\"Mandatory " + "JSON element '\$L' was null for class '\$L'\")",
+                        gsonField.jsonPath,
+                        fieldInfo.parentClassName)
+            }
+
+            codeBlock.endControlFlow() // if
         }
     }
 
-    private class AnnotationValidator : AdapterGeneratorDelegate.FieldAnnotationValidator {
-        val CLASS_NAME_STRING: ClassName = ClassName.get(String::class.java)
+    private fun validateFieldAnnotations(fieldInfo: FieldInfo) {
+        // For now, we only ensure that the flatten annotation is only added to a String.
+        if (fieldInfo.getAnnotation(FlattenJson::class.java) == null) {
+            return
+        }
 
-        @Throws(ProcessingException::class)
-        override fun validateFieldAnnotations(fieldInfo: FieldInfo) {
-            // For now, we only ensure that the flatten annotation is only added to a String.
-            if (fieldInfo.getAnnotation(FlattenJson::class.java) == null) {
-                return
-            }
-
-            if (fieldInfo.typeName != CLASS_NAME_STRING) {
-                throw ProcessingException("FlattenObject can only be used on String variables", fieldInfo.element)
-            }
+        if (fieldInfo.typeName != CLASS_NAME_STRING) {
+            throw ProcessingException("FlattenObject can only be used on String variables", fieldInfo.element)
         }
     }
 }
