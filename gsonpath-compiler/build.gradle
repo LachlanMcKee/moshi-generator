@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: "kotlin"
 apply plugin: 'maven'
 apply plugin: 'signing'
 
@@ -8,7 +9,20 @@ version = '1.7.0'
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
 
+buildscript {
+    ext.kotlin_version = '1.0.5'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.5"
+
     compile project(":gsonpath")
     compile 'com.squareup:javapoet:1.7.0'
     compile 'com.google.auto.service:auto-service:1.0-rc2'
