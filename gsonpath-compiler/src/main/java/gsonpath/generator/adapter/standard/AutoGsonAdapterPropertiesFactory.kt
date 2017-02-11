@@ -1,4 +1,4 @@
-package gsonpath.generator.adapter
+package gsonpath.generator.adapter.standard
 
 import com.google.gson.FieldNamingPolicy
 import gsonpath.*
