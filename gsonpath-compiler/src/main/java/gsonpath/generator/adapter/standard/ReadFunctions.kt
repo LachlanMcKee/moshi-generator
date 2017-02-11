@@ -8,10 +8,7 @@ import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.FlattenJson
 import gsonpath.ProcessingException
 import gsonpath.generator.adapter.*
-import gsonpath.model.GsonField
-import gsonpath.model.GsonObject
-import gsonpath.model.GsonObjectTreeFactory
-import gsonpath.model.MandatoryFieldInfo
+import gsonpath.model.*
 import java.io.IOException
 import javax.lang.model.element.Modifier
 
@@ -193,16 +190,6 @@ private fun writeGsonFieldReader(gsonField: GsonField,
     // Make sure the field's annotations don't have any problems.
     validateFieldAnnotations(fieldInfo)
 
-    val variableName = gsonField.variableName
-    var safeVariableName = variableName
-
-    // A model isn't created if the constructor is called at the bottom of the type adapter.
-    var checkIfResultIsNull = !requiresConstructorInjection
-    if (gsonField.isRequired && requiresConstructorInjection) {
-        safeVariableName += "_safe"
-        checkIfResultIsNull = true
-    }
-
     // If the field type is primitive, ensure that it is a supported primitive.
     val fieldTypeName = fieldInfo.typeName
     if (fieldTypeName.isPrimitive && !GSON_SUPPORTED_PRIMITIVE.contains(fieldTypeName)) {
@@ -212,75 +199,24 @@ private fun writeGsonFieldReader(gsonField: GsonField,
     // Add a new line to improve readability for the multi-lined mapping.
     codeBlock.addNewLine()
 
-    var callToString = false
-    if (GSON_SUPPORTED_CLASSES.contains(fieldTypeName.box())) {
-        val fieldClassName = fieldTypeName.box() as ClassName
+    val result =
+            if (GSON_SUPPORTED_CLASSES.contains(fieldTypeName.box()))
+                writeGsonFieldReaderSupported(codeBlock, gsonField, requiresConstructorInjection)
+            else
+                writeGsonFieldReaderUnsupported(codeBlock, gsonField, requiresConstructorInjection)
 
-        // Special handling for strings.
-        var handled = false
-        if (fieldTypeName == CLASS_NAME_STRING) {
-            val annotation = fieldInfo.getAnnotation(FlattenJson::class.java)
-            if (annotation != null) {
-                handled = true
 
-                // FlattenJson is a special case. We always need to ensure that the JsonObject is not null.
-                if (!checkIfResultIsNull) {
-                    safeVariableName += "_safe"
-                    checkIfResultIsNull = true
-                }
-
-                codeBlock.addStatement("\$T $safeVariableName = mGson.getAdapter(\$T.class).read(in)",
-                        CLASS_NAME_JSON_ELEMENT,
-                        CLASS_NAME_JSON_ELEMENT)
-
-                callToString = true
-            }
-        }
-
-        if (!handled) {
-            val variableAssignment = "$safeVariableName = get${fieldClassName.simpleName()}Safely(in)"
-
-            if (checkIfResultIsNull) {
-                codeBlock.addStatement("${fieldClassName.simpleName()} $variableAssignment")
-
-            } else {
-                codeBlock.addStatement(variableAssignment)
-            }
-        }
-    } else {
-        val adapterName: String
-
-        if (fieldTypeName is ParameterizedTypeName) {
-            // This is a generic type
-            adapterName = "new com.google.gson.reflect.TypeToken<$fieldTypeName>(){}"
-
-        } else {
-            adapterName = fieldTypeName.toString() + ".class"
-        }
-
-        // Handle every other possible class by falling back onto the gson adapter.
-        val variableAssignment = "$safeVariableName = mGson.getAdapter($adapterName).read(in)"
-
-        if (checkIfResultIsNull) {
-            codeBlock.addStatement("$fieldTypeName $variableAssignment")
-
-        } else {
-            codeBlock.addStatement(variableAssignment)
-        }
-    }
-
-    if (checkIfResultIsNull) {
-        val fieldName = fieldInfo.fieldName
-        codeBlock.beginControlFlow("if ($safeVariableName != null)")
+    if (result.checkIfNull) {
+        codeBlock.beginControlFlow("if (${result.variableName} != null)")
 
         val assignmentBlock: String
         if (!requiresConstructorInjection) {
-            assignmentBlock = "result." + fieldName
+            assignmentBlock = "result." + fieldInfo.fieldName
         } else {
-            assignmentBlock = variableName
+            assignmentBlock = gsonField.variableName
         }
 
-        codeBlock.addStatement("$assignmentBlock = $safeVariableName${if (callToString) ".toString()" else ""}")
+        codeBlock.addStatement("$assignmentBlock = ${result.variableName}${if (result.callToString) ".toString()" else ""}")
 
         // When a field has been assigned, if it is a mandatory value, we note this down.
         if (mandatoryFieldInfo != null) {
@@ -295,6 +231,87 @@ private fun writeGsonFieldReader(gsonField: GsonField,
 
         codeBlock.endControlFlow() // if
     }
+}
+
+private data class FieldReaderResult(val variableName: String, val checkIfNull: Boolean, val callToString: Boolean = false)
+
+private fun getVariableName(gsonField: GsonField, requiresConstructorInjection: Boolean): String {
+    return if (gsonField.isRequired && requiresConstructorInjection)
+        "${gsonField.variableName}_safe"
+    else
+        gsonField.variableName
+}
+
+private fun isCheckIfNullApplicable(gsonField: GsonField, requiresConstructorInjection: Boolean): Boolean {
+    return !requiresConstructorInjection || gsonField.isRequired
+}
+
+/**
+ * Writes the Java code for field reading that is supported by Gson.
+ */
+private fun writeGsonFieldReaderSupported(codeBlock: CodeBlock.Builder, gsonField: GsonField, requiresConstructorInjection: Boolean): FieldReaderResult {
+    val fieldInfo = gsonField.fieldInfo
+
+    // Special handling for strings.
+    if (fieldInfo.typeName == CLASS_NAME_STRING) {
+        val annotation = fieldInfo.getAnnotation(FlattenJson::class.java)
+        if (annotation != null) {
+            val variableName =
+                    if (requiresConstructorInjection)
+                        "${gsonField.variableName}_safe"
+                    else
+                        gsonField.variableName
+
+            codeBlock.addStatement("\$T $variableName = mGson.getAdapter(\$T.class).read(in)",
+                    CLASS_NAME_JSON_ELEMENT,
+                    CLASS_NAME_JSON_ELEMENT)
+
+            // FlattenJson is a special case. We always need to ensure that the JsonObject is not null.
+            return FieldReaderResult(variableName, checkIfNull = true, callToString = true)
+        }
+    }
+
+    val variableName = getVariableName(gsonField, requiresConstructorInjection)
+    val checkIfResultIsNull = isCheckIfNullApplicable(gsonField, requiresConstructorInjection)
+
+    val fieldClassName = fieldInfo.typeName.box() as ClassName
+    val variableAssignment = "$variableName = get${fieldClassName.simpleName()}Safely(in)"
+    if (checkIfResultIsNull) {
+        codeBlock.addStatement("${fieldClassName.simpleName()} $variableAssignment")
+
+    } else {
+        codeBlock.addStatement(variableAssignment)
+    }
+
+    return FieldReaderResult(variableName, checkIfResultIsNull)
+}
+
+/**
+ * Writes the Java code for field reading that is not supported by Gson.
+ */
+private fun writeGsonFieldReaderUnsupported(codeBlock: CodeBlock.Builder, gsonField: GsonField, requiresConstructorInjection: Boolean): FieldReaderResult {
+    val fieldTypeName = gsonField.fieldInfo.typeName
+
+    // Handle every other possible class by falling back onto the gson adapter.
+    val adapterName =
+            if (fieldTypeName is ParameterizedTypeName)
+                "new com.google.gson.reflect.TypeToken<$fieldTypeName>(){}" // This is a generic type
+            else
+                fieldTypeName.toString() + ".class"
+
+    val variableName = getVariableName(gsonField, requiresConstructorInjection)
+    val checkIfResultIsNull = isCheckIfNullApplicable(gsonField, requiresConstructorInjection)
+
+    val variableAssignment = "$variableName = mGson.getAdapter($adapterName).read(in)"
+
+    if (checkIfResultIsNull) {
+        codeBlock.addStatement("$fieldTypeName $variableAssignment")
+
+    } else {
+        codeBlock.addStatement(variableAssignment)
+    }
+
+    return FieldReaderResult(variableName, checkIfResultIsNull)
 }
 
 /**
