@@ -1,8 +1,7 @@
-package gsonpath.generator.adapter
+package gsonpath.generator.adapter.interf
 
 import com.squareup.javapoet.*
 import gsonpath.ProcessingException
-import gsonpath.generator.AdapterGeneratorUtils
 import gsonpath.generator.Generator
 import gsonpath.model.InterfaceFieldInfo
 import gsonpath.model.InterfaceInfo
@@ -19,6 +18,8 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.MethodSpec
 import gsonpath.internal.GsonPathElementList
 import com.squareup.javapoet.TypeSpec
+import gsonpath.generator.adapter.generateClassName
+import gsonpath.generator.adapter.addNewLine
 
 internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
@@ -38,8 +39,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
     }
 
     private fun createOutputClassName(modelClassName: ClassName): ClassName {
-        return ClassName.get(modelClassName.packageName(),
-                AdapterGeneratorUtils().generateClassName(modelClassName, "GsonPathModel"))
+        return ClassName.get(modelClassName.packageName(), generateClassName(modelClassName, "GsonPathModel"))
     }
 
     @Throws(ProcessingException::class)
@@ -51,24 +51,22 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 .superclass(ParameterizedTypeName.get(ClassName.get(GsonPathElementList::class.java), listTypeName.typeArguments[0]))
                 .addSuperinterface(modelClassName)
 
-        typeBuilder.addField(listTypeName, "internalList", Modifier.PRIVATE, Modifier.FINAL)
+                .addField(listTypeName, "internalList", Modifier.PRIVATE, Modifier.FINAL)
 
-        val constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(listTypeName, "internalList")
 
-        constructorBuilder.addParameter(listTypeName, "internalList")
-        constructorBuilder.addStatement("this.internalList = internalList")
+                        .addStatement("this.internalList = internalList")
+                        .build())
 
-        typeBuilder.addMethod(constructorBuilder.build())
+                .addMethod(MethodSpec.methodBuilder("getList")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PROTECTED)
+                        .returns(listTypeName)
 
-        val getListMethod = MethodSpec.methodBuilder("getList")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PROTECTED)
-                .returns(listTypeName)
-
-        getListMethod.addStatement("return internalList")
-
-        typeBuilder.addMethod(getListMethod.build())
+                        .addStatement("return internalList")
+                        .build())
 
         if (!writeFile(outputClassName.packageName(), typeBuilder)) {
             throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())
@@ -106,18 +104,19 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
 
         // Equals method
         val equalsCodeBlock = CodeBlock.builder()
-        equalsCodeBlock.addStatement("if (this == o) return true")
-        equalsCodeBlock.addStatement("if (o == null || getClass() != o.getClass()) return false")
-        equalsCodeBlock.add("\n")
-        equalsCodeBlock.addStatement("\$T that = (\$T) o", outputClassName, outputClassName)
-        equalsCodeBlock.add("\n")
+                .addStatement("if (this == o) return true")
+                .addStatement("if (o == null || getClass() != o.getClass()) return false")
+                .addNewLine()
+                .addStatement("\$T that = (\$T) o", outputClassName, outputClassName)
+                .addNewLine()
 
         // Hash code method
         val hasCodeCodeBlock = CodeBlock.builder()
 
         // ToString method
         val toStringCodeBlock = CodeBlock.builder()
-        toStringCodeBlock.add("return \"\$L{\" +\n", modelClassName.simpleName())
+                .add("""return "${modelClassName.simpleName()}{" +""")
+                .addNewLine()
 
         // An optimisation for hash codes which prevents us creating too many temp long variables.
         val hasDoubleField = methodElements
@@ -165,8 +164,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                     .addAnnotation(Override::class.java)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(typeName)
-
-            accessorMethod.addCode("return \$L;\n", fieldName)
+                    .addStatement("return $fieldName")
 
             // Copy all annotations from the interface accessor method to the implementing classes accessor.
             val annotationMirrors = enclosedElement.annotationMirrors
@@ -178,19 +176,19 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
 
             // Add the parameter to the constructor
             constructorBuilder.addParameter(typeName, fieldName)
-            constructorBuilder.addStatement("this.\$L = \$L", fieldName, fieldName)
+                    .addStatement("this.$fieldName = $fieldName")
 
             interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, fieldName, false))
 
             // Add to the equals method
             if (typeName.isPrimitive) {
-                equalsCodeBlock.addStatement("if (\$L != that.\$L) return false", fieldName, fieldName)
+                equalsCodeBlock.addStatement("if ($fieldName != that.$fieldName) return false")
             } else {
                 if (typeName is ArrayTypeName) {
-                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals(\$L, that.\$L)) return false", fieldName, fieldName)
+                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals($fieldName, that.$fieldName)) return false")
 
                 } else {
-                    equalsCodeBlock.addStatement("if (\$L != null ? !\$L.equals(that.\$L) : that.\$L != null) return false", fieldName, fieldName, fieldName, fieldName)
+                    equalsCodeBlock.addStatement("if ($fieldName != null ? !$fieldName.equals(that.$fieldName) : that.$fieldName != null) return false")
                 }
             }
 
@@ -203,29 +201,29 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                     hashCodeLine = fieldName
 
                 } else if (typeName == TypeName.LONG) {
-                    hashCodeLine = String.format("(int) (%s ^ (%s >>> 32))", fieldName, fieldName)
+                    hashCodeLine = "(int) ($fieldName ^ ($fieldName >>> 32))"
 
                 } else if (typeName == TypeName.DOUBLE) {
-                    hasCodeCodeBlock.addStatement("temp = java.lang.Double.doubleToLongBits(\$L)", fieldName)
+                    hasCodeCodeBlock.addStatement("temp = java.lang.Double.doubleToLongBits($fieldName)")
                     hashCodeLine = "(int) (temp ^ (temp >>> 32))"
 
                 } else {
                     // Last possible outcome in a boolean.
-                    hashCodeLine = String.format("(%s ? 1 : 0)", fieldName)
+                    hashCodeLine = "($fieldName ? 1 : 0)"
                 }
             } else {
                 if (typeName is ArrayTypeName) {
-                    hashCodeLine = String.format("java.util.Arrays.hashCode(%s)", fieldName)
+                    hashCodeLine = "java.util.Arrays.hashCode($fieldName)"
 
                 } else {
-                    hashCodeLine = String.format("%s != null ? %s.hashCode() : 0", fieldName, fieldName)
+                    hashCodeLine = "$fieldName != null ? $fieldName.hashCode() : 0"
                 }
             }
 
             if (elementIndex == 0) {
-                hasCodeCodeBlock.addStatement("int result = \$L", hashCodeLine)
+                hasCodeCodeBlock.addStatement("int result = $hashCodeLine")
             } else {
-                hasCodeCodeBlock.addStatement("result = 31 * result + (\$L)", hashCodeLine)
+                hasCodeCodeBlock.addStatement("result = 31 * result + ($hashCodeLine)")
             }
 
             // Add to the toString method.
@@ -234,33 +232,27 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 toStringCodeBlock.add(", ")
             }
             if (typeName is ArrayTypeName) {
-                toStringCodeBlock.add("\$L=\" + java.util.Arrays.toString(\$L) +", fieldName, fieldName)
+                toStringCodeBlock.add("""$fieldName=" + java.util.Arrays.toString($fieldName) +""")
 
             } else {
-                toStringCodeBlock.add("\$L=\" + \$L +", fieldName, fieldName)
+                toStringCodeBlock.add("""$fieldName=" + $fieldName +""")
             }
-            toStringCodeBlock.add("\n", fieldName, fieldName)
+            toStringCodeBlock.addNewLine()
         }
 
         typeBuilder.addMethod(constructorBuilder.build())
 
         // Add the equals method
-        val equalsBuilder = MethodSpec.methodBuilder("equals")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(TypeName.BOOLEAN)
-                .addParameter(TypeName.OBJECT, "o")
-
-        equalsCodeBlock.add("\n")
-        equalsCodeBlock.addStatement("return true")
-        equalsBuilder.addCode(equalsCodeBlock.build())
-        typeBuilder.addMethod(equalsBuilder.build())
-
-        // Add the hashCode method
-        val hashCodeBuilder = MethodSpec.methodBuilder("hashCode")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(TypeName.INT)
+        typeBuilder.addMethod(
+                MethodSpec.methodBuilder("equals")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(TypeName.BOOLEAN)
+                        .addParameter(TypeName.OBJECT, "o")
+                        .addCode(equalsCodeBlock.addNewLine()
+                                .addStatement("return true")
+                                .build())
+                        .build())
 
         // If we have no elements, 'result' won't be initialised!
         if (methodElements.isNotEmpty()) {
@@ -269,19 +261,24 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             hasCodeCodeBlock.addStatement("return 0")
         }
 
-        hashCodeBuilder.addCode(hasCodeCodeBlock.build())
-        typeBuilder.addMethod(hashCodeBuilder.build())
-
         // Add the hashCode method
-        val toStringBuilder = MethodSpec.methodBuilder("toString")
+        typeBuilder.addMethod(MethodSpec.methodBuilder("hashCode")
+                .addAnnotation(Override::class.java)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.INT)
+
+                .addCode(hasCodeCodeBlock.build())
+                .build())
+
+        // Add the toString method
+        typeBuilder.addMethod(MethodSpec.methodBuilder("toString")
                 .addAnnotation(Override::class.java)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.get(String::class.java))
 
-        toStringCodeBlock.add("\t\t'}';\n", modelClassName.simpleName())
-
-        toStringBuilder.addCode(toStringCodeBlock.build())
-        typeBuilder.addMethod(toStringBuilder.build())
+                .addCode(toStringCodeBlock.build())
+                .addStatement("\t\t'}'", modelClassName.simpleName())
+                .build())
 
         if (!writeFile(outputClassName.packageName(), typeBuilder)) {
             throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())

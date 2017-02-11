@@ -1,4 +1,4 @@
-package gsonpath.generator.adapter
+package gsonpath.generator.adapter.loader
 
 import com.google.gson.Gson
 import com.google.gson.TypeAdapter
@@ -12,6 +12,7 @@ import javax.lang.model.element.Modifier
 
 import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
+import gsonpath.generator.adapter.addNewLine
 import gsonpath.internal.TypeAdapterLoader
 
 class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
@@ -60,11 +61,11 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
                 .addModifiers(Modifier.PUBLIC)
 
         val constructorCodeBlock = CodeBlock.builder()
-        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new \$T[\$L]", TypeAdapterLoader::class.java, packageLocalHandleResults.size)
+        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new \$T[${packageLocalHandleResults.size}]", TypeAdapterLoader::class.java)
 
         // Add the package local type adapter loaders to the hash map.
         for ((index, packageName) in packageLocalHandleResults.keys.withIndex()) {
-            constructorCodeBlock.addStatement("mPackagePrivateLoaders[\$L] = new \$L.\$L()", index, packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME)
+            constructorCodeBlock.addStatement("mPackagePrivateLoaders[$index] = new $packageName.$PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME()")
         }
 
         constructorBuilder.addCode(constructorCodeBlock.build())
@@ -81,16 +82,16 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
                 .addParameter(TypeToken::class.java, "type")
 
         val codeBlock = CodeBlock.builder()
-        codeBlock.beginControlFlow("for (int i = 0; i < mPackagePrivateLoaders.length; i++)")
-        codeBlock.addStatement("TypeAdapter typeAdapter = mPackagePrivateLoaders[i].create(gson, type)")
-        codeBlock.add("\n")
+                .beginControlFlow("for (int i = 0; i < mPackagePrivateLoaders.length; i++)")
+                .addStatement("TypeAdapter typeAdapter = mPackagePrivateLoaders[i].create(gson, type)")
+                .addNewLine()
 
-        codeBlock.beginControlFlow("if (typeAdapter != null)")
-        codeBlock.addStatement("return typeAdapter")
-        codeBlock.endControlFlow()
+                .beginControlFlow("if (typeAdapter != null)")
+                .addStatement("return typeAdapter")
+                .endControlFlow()
 
-        codeBlock.endControlFlow()
-        codeBlock.addStatement("return null")
+                .endControlFlow()
+                .addStatement("return null")
 
         createMethod.addCode(codeBlock.build())
         typeBuilder.addMethod(createMethod.build())
@@ -114,21 +115,21 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
                 .addParameter(TypeToken::class.java, "type")
 
         val codeBlock = CodeBlock.builder()
-        codeBlock.addStatement("Class rawType = type.getRawType()")
+                .addStatement("Class rawType = type.getRawType()")
 
         for ((currentAdapterIndex, result) in packageLocalGsonAdapters.withIndex()) {
             if (currentAdapterIndex == 0) {
                 codeBlock.beginControlFlow("if (rawType.equals(\$T.class))", result.originalClassName)
             } else {
-                codeBlock.add("\n") // New line for easier readability.
-                codeBlock.nextControlFlow("else if (rawType.equals(\$T.class))", result.originalClassName)
+                codeBlock.addNewLine() // New line for easier readability.
+                        .nextControlFlow("else if (rawType.equals(\$T.class))", result.originalClassName)
             }
             codeBlock.addStatement("return new \$T(gson)", result.generatedClassName)
         }
 
         codeBlock.endControlFlow()
-        codeBlock.add("\n")
-        codeBlock.addStatement("return null")
+                .addNewLine()
+                .addStatement("return null")
 
         createMethod.addCode(codeBlock.build())
         typeBuilder.addMethod(createMethod.build())

@@ -1,8 +1,8 @@
 package gsonpath
 
 import gsonpath.generator.HandleResult
-import gsonpath.generator.adapter.AutoGsonAdapterGenerator
-import gsonpath.generator.adapter.TypeAdapterLoaderGenerator
+import gsonpath.generator.adapter.standard.AutoGsonAdapterGenerator
+import gsonpath.generator.adapter.loader.TypeAdapterLoaderGenerator
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -27,7 +27,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
 
         val autoGsonAdapterResults = ArrayList<HandleResult>()
         for (element in generatedAdapters) {
-            printMessage(String.format("Generating TypeAdapter (%s)", element))
+            printMessage("Generating TypeAdapter ($element)")
 
             try {
                 autoGsonAdapterResults.add(adapterGenerator.handle(element as TypeElement))
