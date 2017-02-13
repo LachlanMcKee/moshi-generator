@@ -49,7 +49,7 @@ public class PeopleModelTest {
         vanillaGson = new GsonBuilder().create();
 
         GsonBuilder gsonPathBuilder = new GsonBuilder();
-        gsonPathBuilder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory());
+        gsonPathBuilder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
         gsonPath = gsonPathBuilder.create();
 
         // Benchmark regular gson.

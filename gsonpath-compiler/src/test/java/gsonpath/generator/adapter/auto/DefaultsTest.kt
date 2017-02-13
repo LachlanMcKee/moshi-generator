@@ -7,6 +7,7 @@ class DefaultsTest : BaseGeneratorTest() {
     @Test
     fun testUseInheritance() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/defaults")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestDefaultsConfig.java")
                 .addRelativeSource("TestDefaultsUseInheritanceModel.java")
                 .addRelativeGenerated("TestDefaultsUseInheritanceModel_GsonTypeAdapter.java"))
@@ -15,6 +16,7 @@ class DefaultsTest : BaseGeneratorTest() {
     @Test
     fun testOverrideInheritance() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/defaults")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestDefaultsConfig.java")
                 .addRelativeSource("TestDefaultsOverrideInheritanceModel.java")
                 .addRelativeGenerated("TestDefaultsOverrideInheritanceModel_GsonTypeAdapter.java"))

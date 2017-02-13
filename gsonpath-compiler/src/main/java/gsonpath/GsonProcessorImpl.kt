@@ -2,7 +2,7 @@ package gsonpath
 
 import gsonpath.generator.HandleResult
 import gsonpath.generator.adapter.standard.AutoGsonAdapterGenerator
-import gsonpath.generator.adapter.loader.TypeAdapterLoaderGenerator
+import gsonpath.generator.adapter.factory.TypeAdapterFactoryGenerator
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -39,7 +39,19 @@ open class GsonProcessorImpl : AbstractProcessor() {
         }
 
         if (autoGsonAdapterResults.isNotEmpty()) {
-            if (!TypeAdapterLoaderGenerator(processingEnv).generate(autoGsonAdapterResults)) {
+            val gsonPathFactories = env.getElementsAnnotatedWith(AutoGsonAdapterFactory::class.java)
+
+            if (gsonPathFactories.count() == 0) {
+                printError("An interface annotated with @AutoGsonAdapterFactory must exist")
+                return false
+            }
+
+            if (gsonPathFactories.count() > 1) {
+                printError("Only one interface annotated with @AutoGsonAdapterFactory can exist")
+                return false
+            }
+
+            if (!TypeAdapterFactoryGenerator(processingEnv).generate(gsonPathFactories.first() as TypeElement, autoGsonAdapterResults)) {
                 printError("Error while generating TypeAdapterFactory")
                 return false
             }
@@ -66,6 +78,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
     override fun getSupportedAnnotationTypes(): Set<String> {
         val supportedTypes = LinkedHashSet<String>()
         supportedTypes.add(AutoGsonAdapter::class.java.canonicalName)
+        supportedTypes.add(AutoGsonAdapterFactory::class.java.canonicalName)
         return supportedTypes
     }
 

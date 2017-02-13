@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import gsonpath.GsonPath;
+import gsonpath.TestGsonTypeFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ public class PolymorphismTest {
     @Test
     public void testPolymorphism() {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory());
+        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
 
         RuntimeTypeAdapterFactory<Type> type = RuntimeTypeAdapterFactory.of(Type.class, "type", false);
         type.registerSubtype(Type1.class, "type1");
