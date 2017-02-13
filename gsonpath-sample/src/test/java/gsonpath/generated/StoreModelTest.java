@@ -3,6 +3,7 @@ package gsonpath.generated;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import gsonpath.GsonPath;
+import gsonpath.TestGsonTypeFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ public class StoreModelTest {
     @Test
     public void test() {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory());
+        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream("BookJson.json");

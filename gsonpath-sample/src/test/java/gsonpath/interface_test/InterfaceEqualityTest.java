@@ -3,6 +3,7 @@ package gsonpath.interface_test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import gsonpath.GsonPath;
+import gsonpath.TestGsonTypeFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class InterfaceEqualityTest {
 
     private void compareJsonFiles(String filename1, String filename2, boolean expectEqual) {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory());
+        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
         Gson gson = builder.create();
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();

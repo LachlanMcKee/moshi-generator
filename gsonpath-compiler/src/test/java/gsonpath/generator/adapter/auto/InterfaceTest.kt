@@ -12,6 +12,7 @@ class InterfaceTest : BaseGeneratorTest() {
     @Test
     fun testValidInterface() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/valid")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestValidInterface.java")
                 .addRelativeGenerated("TestValidInterface_GsonPathModel.java")
                 .addRelativeGenerated("TestValidInterface_GsonTypeAdapter.java"))
@@ -44,6 +45,7 @@ class InterfaceTest : BaseGeneratorTest() {
     @Test
     fun testUsingPrimitives() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/primitive")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestUsingPrimitives.java")
                 .addRelativeGenerated("TestUsingPrimitives_GsonPathModel.java")
                 .addRelativeGenerated("TestUsingPrimitives_GsonTypeAdapter.java"))
@@ -52,6 +54,7 @@ class InterfaceTest : BaseGeneratorTest() {
     @Test
     fun testUsingInheritance() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/inheritance")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestUsingInheritanceBase.java")
                 .addRelativeSource("TestUsingInheritance.java")
                 .addRelativeGenerated("TestUsingInheritance_GsonPathModel.java")
@@ -61,6 +64,7 @@ class InterfaceTest : BaseGeneratorTest() {
     @Test
     fun testFlattenJsonWithInterface() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/flatten_json")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestFlattenJsonWithInterface.java")
                 .addRelativeGenerated("TestFlattenJsonWithInterface_GsonPathModel.java")
                 .addRelativeGenerated("TestFlattenJsonWithInterface_GsonTypeAdapter.java"))
@@ -69,6 +73,7 @@ class InterfaceTest : BaseGeneratorTest() {
     @Test
     fun testListInterface() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/interface_example/list")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestListInterface.java")
                 .addRelativeGenerated("TestListInterface_GsonPathModel.java")
                 .addRelativeGenerated("TestListInterface_GsonTypeAdapter.java"))
