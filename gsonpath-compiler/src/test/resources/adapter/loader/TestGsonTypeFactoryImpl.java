@@ -10,7 +10,7 @@ import java.lang.Override;
 public final class TestGsonTypeFactoryImpl implements TestGsonTypeFactory {
     private final TypeAdapterFactory[] mPackagePrivateLoaders;
 
-    GsonTypeAdapterLoader() {
+    public GsonTypeAdapterLoader() {
         mPackagePrivateLoaders = new TypeAdapterFactory[3];
         mPackagePrivateLoaders[0] = new adapter.loader.PackagePrivateTypeAdapterLoader();
         mPackagePrivateLoaders[1] = new adapter.loader.source3.PackagePrivateTypeAdapterLoader();

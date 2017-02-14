@@ -61,6 +61,7 @@ class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Genera
                 .build())
 
         val constructorBuilder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
 
         val constructorCodeBlock = CodeBlock.builder()
         constructorCodeBlock.addStatement("mPackagePrivateLoaders = new \$T[${packageLocalHandleResults.size}]", TypeAdapterFactory::class.java)

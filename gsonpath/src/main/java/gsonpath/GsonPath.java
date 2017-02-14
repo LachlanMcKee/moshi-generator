@@ -28,7 +28,7 @@ public class GsonPath {
         try {
             return (TypeAdapterFactory) Class.forName(factoryClassName).newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to find generated TypeAdapterFactory '" + factoryClassName + "'");
+            throw new RuntimeException("Unable to instantiate generated TypeAdapterFactory '" + factoryClassName + "'", e);
         }
     }
 }

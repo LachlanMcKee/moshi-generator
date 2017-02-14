@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.0.0-beta2 *(2017-02-14)*
+----------------------------
+
+* Fix: The TypeAdapterFactory generated via the `@AutoGsonAdapterFactory` now has a public constructor
+     * This was causing issues in projects that use proguard.
+
 Version 2.0.0-beta1 *(2017-02-13)*
 ----------------------------
 
