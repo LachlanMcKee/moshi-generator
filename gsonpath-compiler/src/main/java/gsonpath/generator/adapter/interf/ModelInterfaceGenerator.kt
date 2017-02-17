@@ -20,6 +20,7 @@ import gsonpath.internal.GsonPathElementList
 import com.squareup.javapoet.TypeSpec
 import gsonpath.generator.adapter.generateClassName
 import gsonpath.generator.adapter.addNewLine
+import javax.lang.model.type.DeclaredType
 
 internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
@@ -133,8 +134,10 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             val enclosedElement = methodElements[elementIndex]
 
             val methodType = enclosedElement.asType() as ExecutableType
-            val returnType = methodType.returnType
-            val typeName = TypeName.get(returnType)
+
+            // Ensure that any generics have been converted into their actual return types.
+            val typeName = TypeName.get((processingEnv.typeUtils.asMemberOf(element.asType() as DeclaredType, enclosedElement)
+                    as ExecutableType).returnType)
 
             if (typeName == null || typeName == TypeName.VOID) {
                 throw ProcessingException("Gson Path interface methods must have a return type", enclosedElement)
