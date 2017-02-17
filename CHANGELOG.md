@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 1.8.1 *(2017-02-18)*
+----------------------------
+
+* Fix: Generics are now properly supported. Please let me know if you find any unexpected issues. (Issue [#69](../../issues/69))
+* Fix: Fixed a variable naming issues in concrete classes generated for interfaces. This should ensure that conflicts are substiantially less likely. (Issue [#69](../../issues/74))
+
 Version 1.8.0 *(2017-01-08)*
 ----------------------------
 
