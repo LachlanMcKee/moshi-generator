@@ -108,7 +108,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 .addStatement("if (this == o) return true")
                 .addStatement("if (o == null || getClass() != o.getClass()) return false")
                 .addNewLine()
-                .addStatement("\$T that = (\$T) o", outputClassName, outputClassName)
+                .addStatement("\$T equalsOtherType = (\$T) o", outputClassName, outputClassName)
                 .addNewLine()
 
         // Hash code method
@@ -185,13 +185,13 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
 
             // Add to the equals method
             if (typeName.isPrimitive) {
-                equalsCodeBlock.addStatement("if ($fieldName != that.$fieldName) return false")
+                equalsCodeBlock.addStatement("if ($fieldName != equalsOtherType.$fieldName) return false")
             } else {
                 if (typeName is ArrayTypeName) {
-                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals($fieldName, that.$fieldName)) return false")
+                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals($fieldName, equalsOtherType.$fieldName)) return false")
 
                 } else {
-                    equalsCodeBlock.addStatement("if ($fieldName != null ? !$fieldName.equals(that.$fieldName) : that.$fieldName != null) return false")
+                    equalsCodeBlock.addStatement("if ($fieldName != null ? !$fieldName.equals(equalsOtherType.$fieldName) : equalsOtherType.$fieldName != null) return false")
                 }
             }
 
@@ -224,9 +224,9 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             }
 
             if (elementIndex == 0) {
-                hasCodeCodeBlock.addStatement("int result = $hashCodeLine")
+                hasCodeCodeBlock.addStatement("int hashCodeReturnValue = $hashCodeLine")
             } else {
-                hasCodeCodeBlock.addStatement("result = 31 * result + ($hashCodeLine)")
+                hasCodeCodeBlock.addStatement("hashCodeReturnValue = 31 * hashCodeReturnValue + ($hashCodeLine)")
             }
 
             // Add to the toString method.
@@ -257,9 +257,9 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                                 .build())
                         .build())
 
-        // If we have no elements, 'result' won't be initialised!
+        // If we have no elements, 'hashCodeReturnValue' won't be initialised!
         if (methodElements.isNotEmpty()) {
-            hasCodeCodeBlock.addStatement("return result")
+            hasCodeCodeBlock.addStatement("return hashCodeReturnValue")
         } else {
             hasCodeCodeBlock.addStatement("return 0")
         }

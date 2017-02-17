@@ -1,7 +1,6 @@
 package adapter.auto.interface_example.valid;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
@@ -9,13 +8,21 @@ import java.lang.String;
 
 public final class TestValidInterface_GsonPathModel implements TestValidInterface {
     private final Integer value1;
+
     private final Integer value2;
+
     private final Integer value3;
 
-    public TestValidInterface_GsonPathModel(Integer value1, Integer value2, Integer value3) {
+    private final Integer result;
+
+    private final Integer that;
+
+    public TestValidInterface_GsonPathModel(Integer value1, Integer value2, Integer value3, Integer result, Integer that) {
         this.value1 = value1;
         this.value2 = value2;
         this.value3 = value3;
+        this.result = result;
+        this.that = that;
     }
 
     @Override
@@ -36,25 +43,39 @@ public final class TestValidInterface_GsonPathModel implements TestValidInterfac
     }
 
     @Override
+    public Integer getResult() {
+        return result;
+    }
+
+    @Override
+    public Integer getThat() {
+        return that;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TestValidInterface_GsonPathModel that = (TestValidInterface_GsonPathModel) o;
+        TestValidInterface_GsonPathModel equalsOtherType = (TestValidInterface_GsonPathModel) o;
 
-        if (value1 != null ? !value1.equals(that.value1) : that.value1 != null) return false;
-        if (value2 != null ? !value2.equals(that.value2) : that.value2 != null) return false;
-        if (value3 != null ? !value3.equals(that.value3) : that.value3 != null) return false;
+        if (value1 != null ? !value1.equals(equalsOtherType.value1) : equalsOtherType.value1 != null) return false;
+        if (value2 != null ? !value2.equals(equalsOtherType.value2) : equalsOtherType.value2 != null) return false;
+        if (value3 != null ? !value3.equals(equalsOtherType.value3) : equalsOtherType.value3 != null) return false;
+        if (result != null ? !result.equals(equalsOtherType.result) : equalsOtherType.result != null) return false;
+        if (that != null ? !that.equals(equalsOtherType.that) : equalsOtherType.that != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = value1 != null ? value1.hashCode() : 0;
-        result = 31 * result + (value2 != null ? value2.hashCode() : 0);
-        result = 31 * result + (value3 != null ? value3.hashCode() : 0);
-        return result;
+        int hashCodeReturnValue = value1 != null ? value1.hashCode() : 0;
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (value2 != null ? value2.hashCode() : 0);
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (value3 != null ? value3.hashCode() : 0);
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (result != null ? result.hashCode() : 0);
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (that != null ? that.hashCode() : 0);
+        return hashCodeReturnValue;
     }
 
     @Override
@@ -63,6 +84,8 @@ public final class TestValidInterface_GsonPathModel implements TestValidInterfac
                 "value1=" + value1 +
                 ", value2=" + value2 +
                 ", value3=" + value3 +
+                ", result=" + result +
+                ", that=" + that +
                 '}';
     }
 }

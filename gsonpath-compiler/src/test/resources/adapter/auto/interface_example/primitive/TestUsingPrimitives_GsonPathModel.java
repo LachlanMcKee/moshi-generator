@@ -71,16 +71,16 @@ public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimiti
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        TestUsingPrimitives_GsonPathModel that = (TestUsingPrimitives_GsonPathModel) o;
+        TestUsingPrimitives_GsonPathModel equalsOtherType = (TestUsingPrimitives_GsonPathModel) o;
 
-        if (intExample != that.intExample) return false;
-        if (longExample != that.longExample) return false;
-        if (doubleExample != that.doubleExample) return false;
-        if (booleanExample != that.booleanExample) return false;
-        if (!java.util.Arrays.equals(intArrayExample, that.intArrayExample)) return false;
-        if (!java.util.Arrays.equals(longArrayExample, that.longArrayExample)) return false;
-        if (!java.util.Arrays.equals(doubleArrayExample, that.doubleArrayExample)) return false;
-        if (!java.util.Arrays.equals(booleanArrayExample, that.booleanArrayExample)) return false;
+        if (intExample != equalsOtherType.intExample) return false;
+        if (longExample != equalsOtherType.longExample) return false;
+        if (doubleExample != equalsOtherType.doubleExample) return false;
+        if (booleanExample != equalsOtherType.booleanExample) return false;
+        if (!java.util.Arrays.equals(intArrayExample, equalsOtherType.intArrayExample)) return false;
+        if (!java.util.Arrays.equals(longArrayExample, equalsOtherType.longArrayExample)) return false;
+        if (!java.util.Arrays.equals(doubleArrayExample, equalsOtherType.doubleArrayExample)) return false;
+        if (!java.util.Arrays.equals(booleanArrayExample, equalsOtherType.booleanArrayExample)) return false;
 
         return true;
     }
@@ -88,16 +88,16 @@ public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimiti
     @Override
     public int hashCode() {
         long temp;
-        int result = intExample;
-        result = 31 * result + ((int) (longExample ^ (longExample >>> 32)));
+        int hashCodeReturnValue = intExample;
+        hashCodeReturnValue = 31 * hashCodeReturnValue + ((int) (longExample ^ (longExample >>> 32)));
         temp = java.lang.Double.doubleToLongBits(doubleExample);
-        result = 31 * result + ((int) (temp ^ (temp >>> 32)));
-        result = 31 * result + ((booleanExample ? 1 : 0));
-        result = 31 * result + (java.util.Arrays.hashCode(intArrayExample));
-        result = 31 * result + (java.util.Arrays.hashCode(longArrayExample));
-        result = 31 * result + (java.util.Arrays.hashCode(doubleArrayExample));
-        result = 31 * result + (java.util.Arrays.hashCode(booleanArrayExample));
-        return result;
+        hashCodeReturnValue = 31 * hashCodeReturnValue + ((int) (temp ^ (temp >>> 32)));
+        hashCodeReturnValue = 31 * hashCodeReturnValue + ((booleanExample ? 1 : 0));
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (java.util.Arrays.hashCode(intArrayExample));
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (java.util.Arrays.hashCode(longArrayExample));
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (java.util.Arrays.hashCode(doubleArrayExample));
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (java.util.Arrays.hashCode(booleanArrayExample));
+        return hashCodeReturnValue;
     }
 
     @Override
