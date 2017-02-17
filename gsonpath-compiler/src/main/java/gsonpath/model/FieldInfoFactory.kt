@@ -7,6 +7,7 @@ import gsonpath.ExcludeField
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.*
 import java.util.ArrayList
+import javax.lang.model.type.DeclaredType
 
 class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
@@ -36,9 +37,12 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 continue
             }
 
+            // Ensure that any generics have been converted into their actual class.
+            val generifiedElement = processingEnv.typeUtils.asMemberOf(modelElement.asType() as DeclaredType, memberElement)
+
             fieldInfoList.add(object : FieldInfo {
                 override val typeName: TypeName
-                    get() = TypeName.get(memberElement.asType())
+                    get() = TypeName.get(generifiedElement)
 
                 override val parentClassName: String
                     get() = memberElement.enclosingElement.toString()
