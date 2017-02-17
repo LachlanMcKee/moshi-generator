@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-
 import java.io.IOException;
 import java.lang.Override;
 
@@ -19,7 +18,6 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
 
     @Override
     public TestValidInterface read(JsonReader in) throws IOException {
-
         // Ensure the object is not null.
         if (!isValidValue(in)) {
             return null;
@@ -27,12 +25,14 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
         java.lang.Integer value_Json1_Nest1 = null;
         java.lang.Integer value_value2 = null;
         java.lang.Integer value_Json1_Nest3 = null;
+        java.lang.Integer value_result = null;
+        java.lang.Integer value_that = null;
 
         int jsonFieldCounter0 = 0;
         in.beginObject();
 
         while (in.hasNext()) {
-            if (jsonFieldCounter0 == 2) {
+            if (jsonFieldCounter0 == 4) {
                 in.skipValue();
                 continue;
             }
@@ -73,7 +73,6 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
                         }
                     }
 
-
                     in.endObject();
                     break;
 
@@ -81,6 +80,18 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
                     jsonFieldCounter0++;
 
                     value_value2 = getIntegerSafely(in);
+                    break;
+
+                case "result":
+                    jsonFieldCounter0++;
+
+                    value_result = getIntegerSafely(in);
+                    break;
+
+                case "that":
+                    jsonFieldCounter0++;
+
+                    value_that = getIntegerSafely(in);
                     break;
 
                 default:
@@ -93,7 +104,9 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
         return new TestValidInterface_GsonPathModel(
                 value_Json1_Nest1,
                 value_value2,
-                value_Json1_Nest3
+                value_Json1_Nest3,
+                value_result,
+                value_that
         );
     }
 

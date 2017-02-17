@@ -24,17 +24,17 @@ public final class TestFlattenJsonWithInterface_GsonPathModel implements TestFla
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TestFlattenJsonWithInterface_GsonPathModel that = (TestFlattenJsonWithInterface_GsonPathModel) o;
+        TestFlattenJsonWithInterface_GsonPathModel equalsOtherType = (TestFlattenJsonWithInterface_GsonPathModel) o;
 
-        if (flattenExample != null ? !flattenExample.equals(that.flattenExample) : that.flattenExample != null) return false;
+        if (flattenExample != null ? !flattenExample.equals(equalsOtherType.flattenExample) : equalsOtherType.flattenExample != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = flattenExample != null ? flattenExample.hashCode() : 0;
-        return result;
+        int hashCodeReturnValue = flattenExample != null ? flattenExample.hashCode() : 0;
+        return hashCodeReturnValue;
     }
 
     @Override
