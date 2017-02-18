@@ -40,21 +40,21 @@ public final class TestUsingInheritance_GsonPathModel implements TestUsingInheri
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TestUsingInheritance_GsonPathModel that = (TestUsingInheritance_GsonPathModel) o;
+        TestUsingInheritance_GsonPathModel equalsOtherType = (TestUsingInheritance_GsonPathModel) o;
 
-        if (value3 != null ? !value3.equals(that.value3) : that.value3 != null) return false;
-        if (value1 != null ? !value1.equals(that.value1) : that.value1 != null) return false;
-        if (value2 != null ? !value2.equals(that.value2) : that.value2 != null) return false;
+        if (value3 != null ? !value3.equals(equalsOtherType.value3) : equalsOtherType.value3 != null) return false;
+        if (value1 != null ? !value1.equals(equalsOtherType.value1) : equalsOtherType.value1 != null) return false;
+        if (value2 != null ? !value2.equals(equalsOtherType.value2) : equalsOtherType.value2 != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = value3 != null ? value3.hashCode() : 0;
-        result = 31 * result + (value1 != null ? value1.hashCode() : 0);
-        result = 31 * result + (value2 != null ? value2.hashCode() : 0);
-        return result;
+        int hashCodeReturnValue = value3 != null ? value3.hashCode() : 0;
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (value1 != null ? value1.hashCode() : 0);
+        hashCodeReturnValue = 31 * hashCodeReturnValue + (value2 != null ? value2.hashCode() : 0);
+        return hashCodeReturnValue;
     }
 
     @Override

@@ -20,6 +20,7 @@ import gsonpath.internal.GsonPathElementList
 import com.squareup.javapoet.TypeSpec
 import gsonpath.generator.adapter.generateClassName
 import gsonpath.generator.adapter.addNewLine
+import javax.lang.model.type.DeclaredType
 
 internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
@@ -107,7 +108,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 .addStatement("if (this == o) return true")
                 .addStatement("if (o == null || getClass() != o.getClass()) return false")
                 .addNewLine()
-                .addStatement("\$T that = (\$T) o", outputClassName, outputClassName)
+                .addStatement("\$T equalsOtherType = (\$T) o", outputClassName, outputClassName)
                 .addNewLine()
 
         // Hash code method
@@ -133,8 +134,10 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             val enclosedElement = methodElements[elementIndex]
 
             val methodType = enclosedElement.asType() as ExecutableType
-            val returnType = methodType.returnType
-            val typeName = TypeName.get(returnType)
+
+            // Ensure that any generics have been converted into their actual return types.
+            val typeName = TypeName.get((processingEnv.typeUtils.asMemberOf(element.asType() as DeclaredType, enclosedElement)
+                    as ExecutableType).returnType)
 
             if (typeName == null || typeName == TypeName.VOID) {
                 throw ProcessingException("Gson Path interface methods must have a return type", enclosedElement)
@@ -182,13 +185,13 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
 
             // Add to the equals method
             if (typeName.isPrimitive) {
-                equalsCodeBlock.addStatement("if ($fieldName != that.$fieldName) return false")
+                equalsCodeBlock.addStatement("if ($fieldName != equalsOtherType.$fieldName) return false")
             } else {
                 if (typeName is ArrayTypeName) {
-                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals($fieldName, that.$fieldName)) return false")
+                    equalsCodeBlock.addStatement("if (!java.util.Arrays.equals($fieldName, equalsOtherType.$fieldName)) return false")
 
                 } else {
-                    equalsCodeBlock.addStatement("if ($fieldName != null ? !$fieldName.equals(that.$fieldName) : that.$fieldName != null) return false")
+                    equalsCodeBlock.addStatement("if ($fieldName != null ? !$fieldName.equals(equalsOtherType.$fieldName) : equalsOtherType.$fieldName != null) return false")
                 }
             }
 
@@ -221,9 +224,9 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             }
 
             if (elementIndex == 0) {
-                hasCodeCodeBlock.addStatement("int result = $hashCodeLine")
+                hasCodeCodeBlock.addStatement("int hashCodeReturnValue = $hashCodeLine")
             } else {
-                hasCodeCodeBlock.addStatement("result = 31 * result + ($hashCodeLine)")
+                hasCodeCodeBlock.addStatement("hashCodeReturnValue = 31 * hashCodeReturnValue + ($hashCodeLine)")
             }
 
             // Add to the toString method.
@@ -254,9 +257,9 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                                 .build())
                         .build())
 
-        // If we have no elements, 'result' won't be initialised!
+        // If we have no elements, 'hashCodeReturnValue' won't be initialised!
         if (methodElements.isNotEmpty()) {
-            hasCodeCodeBlock.addStatement("return result")
+            hasCodeCodeBlock.addStatement("return hashCodeReturnValue")
         } else {
             hasCodeCodeBlock.addStatement("return 0")
         }
