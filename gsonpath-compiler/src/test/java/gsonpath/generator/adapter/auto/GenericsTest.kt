@@ -7,6 +7,7 @@ class GenericsTest : BaseGeneratorTest() {
     @Test
     fun testUseInheritance() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/generics/interfaces")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("BaseTest.java")
                 .addRelativeSource("GenericsTest.java")
                 .addRelativeGenerated("GenericsTest_GsonPathModel.java")
@@ -16,6 +17,7 @@ class GenericsTest : BaseGeneratorTest() {
     @Test
     fun testUseClass() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/generics/classes")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("BaseTest.java")
                 .addRelativeSource("IntermediateTest.java")
                 .addRelativeSource("GenericsTest.java")
@@ -25,6 +27,7 @@ class GenericsTest : BaseGeneratorTest() {
     @Test
     fun testUseInterfaceAndClass() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/generics/interfaces_and_classs")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("BaseTest.java")
                 .addRelativeSource("IntermediateTest.java")
                 .addRelativeSource("GenericsTest.java")
