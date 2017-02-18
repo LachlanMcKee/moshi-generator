@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+Version 2.0.0 *(2017-02-18)*
+----------------------------
+
+* New: Promoted the changes from the 2.0.0-beta2 into a release build.
+     * The documentation has been improved, and the compiler errors are more informative.
+     * This build (unlike the betas) also includes the changes from 1.8.1.
+     * See the changes below for further details.
+
 Version 1.8.1 *(2017-02-18)*
 ----------------------------
 
