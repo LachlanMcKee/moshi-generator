@@ -12,6 +12,7 @@ class SubstitutionTest : BaseGeneratorTest() {
     @Test
     fun testValidSubstitution() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/substitution/valid")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestSubstitutionBase.java")
                 .addRelativeSource("TestSubstitutionImpl1.java")
                 .addRelativeSource("TestSubstitutionImpl2.java")

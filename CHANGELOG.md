@@ -7,6 +7,37 @@ Version 1.8.1 *(2017-02-18)*
 * Fix: Generics are now properly supported. Please let me know if you find any unexpected issues. (Issue [#69](../../issues/69))
 * Fix: Fixed a variable naming issues in concrete classes generated for interfaces. This should ensure that conflicts are substiantially less likely. (Issue [#69](../../issues/74))
 
+Version 2.0.0-beta2 *(2017-02-14)*
+----------------------------
+
+* Fix: The TypeAdapterFactory generated via the `@AutoGsonAdapterFactory` now has a public constructor
+     * This was causing issues in projects that use proguard.
+
+Version 2.0.0-beta1 *(2017-02-13)*
+----------------------------
+
+* New: Added multi-module support. Previously the library would not allow gsonpath to be used with a library.
+     * This is a breaking API change, to use the library a new `@AutoGsonAdapterFactory` must be used.
+
+     Previously, the factory was added to Gson as follows:
+
+     `builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory())`
+
+     The following step is now required beforehand:
+
+     ```java
+     @AutoGsonAdapterFactory
+     public interface TestGsonTypeFactory extends TypeAdapterFactory {
+     }
+     ```
+
+     Also, notice that the `createTypeAdapterFactory` has now requires a class as an argument.
+
+     `builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))`
+
+     The advantage of this change is that multiple `@AutoGsonAdapterFactory` annotations can be used.
+     *Note: Only one `@AutoGsonAdapterFactory` annotation may be used per module/project*
+
 Version 1.8.0 *(2017-01-08)*
 ----------------------------
 

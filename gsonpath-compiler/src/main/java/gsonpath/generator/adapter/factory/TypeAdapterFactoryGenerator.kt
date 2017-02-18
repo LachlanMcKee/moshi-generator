@@ -1,7 +1,8 @@
-package gsonpath.generator.adapter.loader
+package gsonpath.generator.adapter.factory
 
 import com.google.gson.Gson
 import com.google.gson.TypeAdapter
+import com.google.gson.TypeAdapterFactory
 import com.google.gson.reflect.TypeToken
 import com.squareup.javapoet.*
 
@@ -13,11 +14,11 @@ import javax.lang.model.element.Modifier
 import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
 import gsonpath.generator.adapter.addNewLine
-import gsonpath.internal.TypeAdapterLoader
+import javax.lang.model.element.TypeElement
 
-class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
+class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
-    fun generate(generatedGsonAdapters: List<HandleResult>): Boolean {
+    fun generate(factoryElement: TypeElement, generatedGsonAdapters: List<HandleResult>): Boolean {
         if (generatedGsonAdapters.isEmpty()) {
             return false
         }
@@ -42,18 +43,20 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
             }
         }
 
-        return createRootTypeAdapterLoader(packageLocalHandleResults)
+        return createGsonTypeFactoryImpl(factoryElement, packageLocalHandleResults)
     }
 
     /**
      * Create the GsonPathLoader which is used by the GsonPathTypeAdapterFactory class.
      */
-    private fun createRootTypeAdapterLoader(packageLocalHandleResults: Map<String, List<HandleResult>>): Boolean {
-        val typeBuilder = TypeSpec.classBuilder("GeneratedTypeAdapterLoader")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(TypeAdapterLoader::class.java)
+    private fun createGsonTypeFactoryImpl(factoryElement: TypeElement, packageLocalHandleResults: Map<String, List<HandleResult>>): Boolean {
+        val factoryClassName = ClassName.get(factoryElement)
 
-        typeBuilder.addField(FieldSpec.builder(ArrayTypeName.of(TypeAdapterLoader::class.java), "mPackagePrivateLoaders")
+        val typeBuilder = TypeSpec.classBuilder(factoryClassName.simpleName() + "Impl")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addSuperinterface(factoryClassName)
+
+        typeBuilder.addField(FieldSpec.builder(ArrayTypeName.of(TypeAdapterFactory::class.java), "mPackagePrivateLoaders")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build())
 
@@ -61,7 +64,7 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
                 .addModifiers(Modifier.PUBLIC)
 
         val constructorCodeBlock = CodeBlock.builder()
-        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new \$T[${packageLocalHandleResults.size}]", TypeAdapterLoader::class.java)
+        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new \$T[${packageLocalHandleResults.size}]", TypeAdapterFactory::class.java)
 
         // Add the package local type adapter loaders to the hash map.
         for ((index, packageName) in packageLocalHandleResults.keys.withIndex()) {
@@ -96,13 +99,13 @@ class TypeAdapterLoaderGenerator(processingEnv: ProcessingEnvironment) : Generat
         createMethod.addCode(codeBlock.build())
         typeBuilder.addMethod(createMethod.build())
 
-        return writeFile("gsonpath", typeBuilder)
+        return writeFile(factoryClassName.packageName(), typeBuilder)
     }
 
     private fun createPackageLocalTypeAdapterLoaders(packageName: String, packageLocalGsonAdapters: List<HandleResult>): Boolean {
         val typeBuilder = TypeSpec.classBuilder(ClassName.get(packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(TypeAdapterLoader::class.java)
+                .addSuperinterface(TypeAdapterFactory::class.java)
 
         //
         // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);

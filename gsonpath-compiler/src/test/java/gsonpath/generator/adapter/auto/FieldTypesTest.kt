@@ -12,6 +12,7 @@ class FieldTypesTest : BaseGeneratorTest() {
     @Test
     fun testValidPrimitives() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/field_types/primitives/valid")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestValidPrimitives.java")
                 .addRelativeGenerated("TestValidPrimitives_GsonTypeAdapter.java"))
     }
@@ -31,6 +32,7 @@ class FieldTypesTest : BaseGeneratorTest() {
     @Test
     fun testBoxedPrimitives() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/field_types/boxed_primitives")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestBoxedPrimitives.java")
                 .addRelativeGenerated("TestBoxedPrimitives_GsonTypeAdapter.java"))
     }
@@ -38,6 +40,7 @@ class FieldTypesTest : BaseGeneratorTest() {
     @Test
     fun testGenericFields() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/field_types/generics")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestGenerics.java")
                 .addRelativeGenerated("TestGenerics_GsonTypeAdapter.java"))
     }
@@ -45,6 +48,7 @@ class FieldTypesTest : BaseGeneratorTest() {
     @Test
     fun testCustomFieldType() {
         assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/field_types/custom_field")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
                 .addRelativeSource("TestCustomField.java")
                 .addRelativeGenerated("TestCustomField_GsonTypeAdapter.java"))
     }
