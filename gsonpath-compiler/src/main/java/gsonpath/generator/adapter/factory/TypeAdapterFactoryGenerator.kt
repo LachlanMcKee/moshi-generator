@@ -5,6 +5,7 @@ import com.google.gson.TypeAdapter
 import com.google.gson.TypeAdapterFactory
 import com.google.gson.reflect.TypeToken
 import com.squareup.javapoet.*
+import gsonpath.ProcessingException
 
 import java.util.*
 
@@ -21,6 +22,19 @@ class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Genera
     fun generate(factoryElement: TypeElement, generatedGsonAdapters: List<HandleResult>): Boolean {
         if (generatedGsonAdapters.isEmpty()) {
             return false
+        }
+
+        // Only interfaces are accepted (for simplicity)
+        if (!factoryElement.kind.isInterface) {
+            throw ProcessingException("Types annotated with @AutoGsonAdapterFactory must be an interface " +
+                    "that directly extends com.google.gson.TypeAdapterFactory.", factoryElement)
+        }
+
+        // Ensure that the factory element only extends TypeAdapterFactory
+        val factoryInterfaces = factoryElement.interfaces
+        if (factoryInterfaces.size != 1 || TypeName.get(factoryInterfaces[0]) != TypeName.get(TypeAdapterFactory::class.java)) {
+            throw ProcessingException("Interfaces annotated with @AutoGsonAdapterFactory must extend " +
+                    "com.google.gson.TypeAdapterFactory and no other interfaces.", factoryElement)
         }
 
         val packageLocalHandleResults = HashMap<String, MutableList<HandleResult>>()

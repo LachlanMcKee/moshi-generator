@@ -42,7 +42,9 @@ open class GsonProcessorImpl : AbstractProcessor() {
             val gsonPathFactories = env.getElementsAnnotatedWith(AutoGsonAdapterFactory::class.java)
 
             if (gsonPathFactories.count() == 0) {
-                printError("An interface annotated with @AutoGsonAdapterFactory must exist")
+                printError("An interface annotated with @AutoGsonAdapterFactory (that directly extends " +
+                        "com.google.gson.TypeAdapterFactory) must exist before the annotation processor can succeed. " +
+                        "See the AutoGsonAdapterFactory annotation for further details.")
                 return false
             }
 
@@ -51,8 +53,14 @@ open class GsonProcessorImpl : AbstractProcessor() {
                 return false
             }
 
-            if (!TypeAdapterFactoryGenerator(processingEnv).generate(gsonPathFactories.first() as TypeElement, autoGsonAdapterResults)) {
-                printError("Error while generating TypeAdapterFactory")
+            val factoryElement = gsonPathFactories.first()
+            try {
+                if (!TypeAdapterFactoryGenerator(processingEnv).generate(factoryElement as TypeElement, autoGsonAdapterResults)) {
+                    printError("Error while generating TypeAdapterFactory", factoryElement)
+                    return false
+                }
+            } catch (e: ProcessingException) {
+                printError(e.message, e.element ?: factoryElement)
                 return false
             }
         }
