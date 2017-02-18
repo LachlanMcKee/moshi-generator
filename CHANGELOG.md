@@ -31,7 +31,7 @@ Version 2.0.0-beta1 *(2017-02-13)*
      }
      ```
 
-     Also, notice that the `createTypeAdapterFactory` has now requires a class as an argument.
+     Also, notice that the `createTypeAdapterFactory` now requires a class as an argument.
 
      `builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))`
 
