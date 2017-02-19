@@ -55,7 +55,7 @@ fun getSubTypeGetterName(gsonField: GsonField): String {
  */
 private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField: GsonField, gsonSubType: GsonSubtype): ValidatedGsonSubType {
     if (gsonSubType.fieldName.isBlank()) {
-        throw ProcessingException("fieldName cannot be blank for GsonSubType")
+        throw ProcessingException("fieldName cannot be blank for GsonSubType", gsonField.fieldInfo.element)
     }
 
     var keyType: SubTypeKeyType? = null
@@ -74,10 +74,11 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
     }
 
     if (keyType == null) {
-        throw ProcessingException("Keys must be specified for the GsonSubType")
+        throw ProcessingException("Keys must be specified for the GsonSubType", gsonField.fieldInfo.element)
     }
     if (keyCount > 1) {
-        throw ProcessingException("Only one keys array (string, integer or boolean) may be specified for the GsonSubType")
+        throw ProcessingException("Only one keys array (string, integer or boolean) may be specified for the GsonSubType",
+                gsonField.fieldInfo.element)
     }
 
     //
@@ -90,7 +91,8 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
                     gsonSubType.stringKeys.map { it ->
                         try {
                             it.subtype
-                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
+                                    gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
                             GsonSubTypeKeyAndClass("\"${it.key}\"", mte.typeMirror)
                         }
@@ -100,7 +102,8 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
                     gsonSubType.integerKeys.map { it ->
                         try {
                             it.subtype
-                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
+                                    gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
                             GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
                         }
@@ -110,7 +113,8 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
                     gsonSubType.booleanKeys.map { it ->
                         try {
                             it.subtype
-                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
+                            gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
                             GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
                         }
@@ -121,7 +125,8 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
     val gsonFieldType = getRawType(gsonField)
     genericGsonSubTypeKeys.forEach {
         if (!processingEnv.typeUtils.isSubtype(it.clazzTypeMirror, gsonFieldType)) {
-            throw ProcessingException("subtype ${it.clazzTypeMirror} does not inherit from $gsonFieldType")
+            throw ProcessingException("subtype ${it.clazzTypeMirror} does not inherit from $gsonFieldType",
+                    gsonField.fieldInfo.element)
         }
     }
 
@@ -164,7 +169,7 @@ private fun getRawType(gsonField: GsonField): TypeMirror {
         is ArrayType -> typeMirror.componentType
 
         else -> throw ProcessingException("Unexpected type found for GsonSubtype field, ensure you either use " +
-                "an array, or a List class.")
+                "an array, or a List class.", gsonField.fieldInfo.element)
     }
 }
 
