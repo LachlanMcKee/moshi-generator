@@ -8,6 +8,7 @@ import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.*
 import java.util.ArrayList
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeMirror
 
 class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
@@ -44,6 +45,9 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 override val typeName: TypeName
                     get() = TypeName.get(generifiedElement)
 
+                override val typeMirror: TypeMirror
+                    get() = generifiedElement
+
                 override val parentClassName: String
                     get() = memberElement.enclosingElement.toString()
 
@@ -76,6 +80,9 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
             object : FieldInfo {
                 override val typeName: TypeName
                     get() = it.typeName
+
+                override val typeMirror: TypeMirror
+                    get() = it.typeMirror
 
                 override val parentClassName: String
                     get() = interfaceInfo.parentClassName.toString()

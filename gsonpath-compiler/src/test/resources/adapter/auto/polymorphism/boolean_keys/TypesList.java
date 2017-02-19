@@ -1,4 +1,4 @@
-package adapter.auto.polymorphism.string_keys;
+package adapter.auto.polymorphism.boolean_keys;
 
 import gsonpath.AutoGsonAdapter;
 import gsonpath.GsonSubtype;
