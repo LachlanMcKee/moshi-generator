@@ -10,6 +10,7 @@ import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.*
 import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
+import gsonpath.internal.CollectionTypeAdapter
 import gsonpath.internal.StrictArrayTypeAdapter
 import gsonpath.model.GsonField
 import gsonpath.model.GsonObject
@@ -18,6 +19,7 @@ import java.io.IOException
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.ArrayType
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 
@@ -34,9 +36,16 @@ fun addSubTypeTypeAdapters(processingEnv: ProcessingEnvironment, typeSpecBuilder
         val subTypeAnnotation = gsonField.fieldInfo.getAnnotation(GsonSubtype::class.java) ?: return
         val validatedGsonSubType = validateGsonSubType(processingEnv, gsonField, subTypeAnnotation)
 
-        typeSpecBuilder.addField(arrayTypeAdapterClassName, getSubTypeAdapterVariableName(gsonField), Modifier.PRIVATE)
+        val typeAdapterWrapperClassName =
+                if (isArrayType(processingEnv, gsonField)) {
+                    arrayTypeAdapterClassName
+                } else {
+                    getCollectionTypeAdapterTypeName(gsonField)
+                }
 
-        createGetter(typeSpecBuilder, gsonField)
+        typeSpecBuilder.addField(typeAdapterWrapperClassName, getSubTypeAdapterVariableName(gsonField), Modifier.PRIVATE)
+
+        createGetter(processingEnv, typeSpecBuilder, gsonField)
         createSubTypeAdapter(processingEnv, typeSpecBuilder, gsonField, validatedGsonSubType)
     }
 }
@@ -114,7 +123,7 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
                         try {
                             it.subtype
                             throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
-                            gsonField.fieldInfo.element)
+                                    gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
                             GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
                         }
@@ -140,23 +149,65 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
  * Creates the getter for the type adapter.
  * This implementration lazily loads, and then cached the result for subsequent usages.
  */
-private fun createGetter(typeSpecBuilder: TypeSpec.Builder, gsonField: GsonField) {
+private fun createGetter(processingEnv: ProcessingEnvironment, typeSpecBuilder: TypeSpec.Builder, gsonField: GsonField) {
     val variableName = getSubTypeAdapterVariableName(gsonField)
+
+    val isArrayType = isArrayType(processingEnv, gsonField)
+    val typeAdapterClassName =
+            if (isArrayType) {
+                arrayTypeAdapterClassName
+            } else {
+                getCollectionTypeAdapterTypeName(gsonField)
+            }
+
+    val getterCodeBuilder = CodeBlock.builder()
+            .beginControlFlow("if ($variableName == null)")
+
+    if (isArrayType) {
+        getterCodeBuilder.addStatement("$variableName = new \$T<>(new ${getSubTypeAdapterClassName(gsonField)}(mGson), \$T.class)",
+                typeAdapterClassName, getRawTypeName(gsonField))
+    } else {
+        getterCodeBuilder.addStatement("$variableName = new \$T(new ${getSubTypeAdapterClassName(gsonField)}(mGson))",
+                typeAdapterClassName)
+    }
+
+    getterCodeBuilder.endControlFlow()
+            .addStatement("return $variableName")
 
     typeSpecBuilder.addMethod(MethodSpec.methodBuilder(getSubTypeGetterName(gsonField))
             .addModifiers(Modifier.PRIVATE)
-            .returns(arrayTypeAdapterClassName)
+            .returns(typeAdapterClassName)
 
-            .addCode(CodeBlock.builder()
-                    .beginControlFlow("if ($variableName == null)")
-
-                    .addStatement("$variableName = new \$T<>(new ${getSubTypeAdapterClassName(gsonField)}(mGson), \$T.class)",
-                            arrayTypeAdapterClassName, getRawTypeName(gsonField))
-
-                    .endControlFlow()
-                    .addStatement("return $variableName")
-                    .build())
+            .addCode(getterCodeBuilder.build())
             .build())
+}
+
+/**
+ * Determines whether the type is an array or a collection type.
+ */
+private fun isArrayType(processingEnv: ProcessingEnvironment, gsonField: GsonField): Boolean {
+    val typeMirror = gsonField.fieldInfo.typeMirror
+    if (typeMirror is ArrayType) {
+        return true
+    }
+
+    // Create a 'Collection<T>' type and ensure that the collection type provided is a subtype.
+    val collectionTypeElement = processingEnv.elementUtils.getTypeElement(Collection::class.java.name)
+    val collectionType = processingEnv.typeUtils.getDeclaredType(collectionTypeElement, getRawType(gsonField))
+
+    if (processingEnv.typeUtils.isSubtype(typeMirror, collectionType)) {
+        return false
+    }
+
+    throw ProcessingException("Unexpected type found for GsonSubtype field, ensure you either use " +
+            "an array, or a collection class (List, Collection, etc).", gsonField.fieldInfo.element)
+}
+
+/**
+ * Creates a collection type adapter class name and uses the fields type as the generic parameter.
+ */
+private fun getCollectionTypeAdapterTypeName(gsonField: GsonField): ParameterizedTypeName {
+    return ParameterizedTypeName.get(ClassName.get(CollectionTypeAdapter::class.java), TypeName.get(getRawType(gsonField)))
 }
 
 /**
@@ -167,6 +218,8 @@ private fun getRawType(gsonField: GsonField): TypeMirror {
     val typeMirror = gsonField.fieldInfo.typeMirror
     return when (typeMirror) {
         is ArrayType -> typeMirror.componentType
+
+        is DeclaredType -> typeMirror.typeArguments.first()
 
         else -> throw ProcessingException("Unexpected type found for GsonSubtype field, ensure you either use " +
                 "an array, or a List class.", gsonField.fieldInfo.element)

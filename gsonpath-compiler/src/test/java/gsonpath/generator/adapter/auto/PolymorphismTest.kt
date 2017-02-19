@@ -52,6 +52,17 @@ class PolymorphismTest : BaseGeneratorTest() {
     }
 
     @Test
+    fun givenStringKeysWithListField_whenProcessorExecuted_expectValidGsonTypeAdapter() {
+        assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/polymorphism/using_list")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type1.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type2.java")
+                .addRelativeSource("TypesList.java")
+                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+    }
+
+    @Test
     fun givenNoKeys_whenProcessorExecuted_expectNoKeysError() {
         assertPolymorphismFailure("no_keys", "Gson Path: Keys must be specified for the GsonSubType")
     }
