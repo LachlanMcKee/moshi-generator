@@ -115,9 +115,25 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
     val typeAdapterType = ParameterizedTypeName.get(ClassName.get(TypeAdapter::class.java), WildcardTypeName.subtypeOf(rawTypeName))
     val classConstainedType = ParameterizedTypeName.get(ClassName.get(Class::class.java), WildcardTypeName.subtypeOf(rawTypeName))
 
+    // Check which key types are being used.
+    val keyType: SubTypeKeyType =
+            when {
+                (annotation.stringKeys.isNotEmpty()) -> SubTypeKeyType.STRING
+                (annotation.integerKeys.isNotEmpty()) -> SubTypeKeyType.INTEGER
+                (annotation.booleanKeys.isNotEmpty()) -> SubTypeKeyType.BOOLEAN
+                else -> throw ProcessingException("Keys must be specified for the GsonSubType")
+            }
+
+    val valueMapClassName =
+            when (keyType) {
+                SubTypeKeyType.STRING -> ClassName.get(String::class.java)
+                SubTypeKeyType.INTEGER -> TypeName.get(Int::class.java).box()
+                SubTypeKeyType.BOOLEAN -> TypeName.get(Boolean::class.java).box()
+            }
+
     subTypeAdapterBuilder.addField(
             FieldSpec.builder(
-                    ParameterizedTypeName.get(ClassName.get(Map::class.java), ClassName.get(String::class.java), typeAdapterType), "typeAdaptersDelegatedByValueMap")
+                    ParameterizedTypeName.get(ClassName.get(Map::class.java), valueMapClassName, typeAdapterType), "typeAdaptersDelegatedByValueMap")
                     .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                     .build())
 
@@ -135,21 +151,49 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
             .addStatement("typeAdaptersDelegatedByValueMap = new java.util.HashMap<>()")
             .addStatement("typeAdaptersDelegatedByClassMap = new java.util.HashMap<>()")
 
+    //
+    // Convert the provided keys into a unified type. Unfortunately due to how annotations work, this isn't
+    // as clean as it could be.
+    //
+    val genericGsonSubTypeKeys: List<GsonSubTypeKeyAndClass> =
+            when (keyType) {
+                SubTypeKeyType.STRING ->
+                    annotation.stringKeys.map { it ->
+                        try {
+                            it.subtype
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                        } catch (mte: MirroredTypeException) {
+                            GsonSubTypeKeyAndClass("\"${it.key}\"", mte.typeMirror)
+                        }
+                    }
+
+                SubTypeKeyType.INTEGER ->
+                    annotation.integerKeys.map { it ->
+                        try {
+                            it.subtype
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                        } catch (mte: MirroredTypeException) {
+                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
+                        }
+                    }
+
+                SubTypeKeyType.BOOLEAN ->
+                    annotation.booleanKeys.map { it ->
+                        try {
+                            it.subtype
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                        } catch (mte: MirroredTypeException) {
+                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
+                        }
+                    }
+            }
+
     // Instantiate each subtype delegated adapter
-    annotation.stringKeys.forEach {
-        var defaultsTypeMirror: TypeMirror? = null
-
-        // Obtaining the class from an annotation is messy...
-        try {
-            it.subtype
-        } catch (mte: MirroredTypeException) {
-            defaultsTypeMirror = mte.typeMirror
-        }
-
-        val subtypeElement = processingEnv.typeUtils.asElement(defaultsTypeMirror)
+    genericGsonSubTypeKeys.forEach {
+        val subtypeElement = processingEnv.typeUtils.asElement(it.clazzTypeMirror)
 
         constructorBuilder.addCode("\n")
-        constructorBuilder.addStatement("typeAdaptersDelegatedByValueMap.put(\"${it.key}\", gson.getAdapter($subtypeElement.class))")
+        constructorBuilder.addStatement("typeAdaptersDelegatedByValueMap.put(${it.key}, gson.getAdapter($subtypeElement.class))")
         constructorBuilder.addStatement("typeAdaptersDelegatedByClassMap.put($subtypeElement.class, gson.getAdapter($subtypeElement.class))")
     }
 
@@ -179,9 +223,14 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
 
             .endControlFlow()
 
-            .addStatement("java.lang.String value = typeValueJsonElement.getAsString()")
+    // Obtain the value using the correct type.
+    when (keyType) {
+        SubTypeKeyType.STRING -> readMethod.addStatement("java.lang.String value = typeValueJsonElement.getAsString()")
+        SubTypeKeyType.INTEGER -> readMethod.addStatement("int value = typeValueJsonElement.getAsInt()")
+        SubTypeKeyType.BOOLEAN -> readMethod.addStatement("boolean value = typeValueJsonElement.getAsBoolean()")
+    }
 
-            .addStatement("\$T<? extends $rawTypeName> delegate = typeAdaptersDelegatedByValueMap.get(value)", TypeAdapter::class.java)
+    readMethod.addStatement("\$T<? extends $rawTypeName> delegate = typeAdaptersDelegatedByValueMap.get(value)", TypeAdapter::class.java)
             .beginControlFlow("if (delegate == null)")
             .addStatement("return null")
             .endControlFlow()
@@ -212,4 +261,17 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
 
     // Add the new subtype type adapter to the root class.
     typeSpecBuilder.addType(subTypeAdapterBuilder.build())
+}
+
+/**
+ * A data class that is used to convert the annotation 'stringKeys' 'booleanKeys' and 'integerKeys'
+ * into a common reusable structure.
+ */
+data class GsonSubTypeKeyAndClass(val key: String, val clazzTypeMirror: TypeMirror)
+
+/**
+ * The type of key used when determining the correct subtype
+ */
+enum class SubTypeKeyType {
+    STRING, INTEGER, BOOLEAN
 }
