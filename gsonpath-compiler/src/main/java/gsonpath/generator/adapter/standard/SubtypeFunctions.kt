@@ -17,6 +17,7 @@ import gsonpath.model.GsonObjectTreeFactory
 import java.io.IOException
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
+import javax.lang.model.type.ArrayType
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 
@@ -31,11 +32,12 @@ fun addSubTypeTypeAdapters(processingEnv: ProcessingEnvironment, typeSpecBuilder
     flattenedFields.forEach { gsonField ->
         // Ignore any fields that do not have a GsonSubtype annotation.
         val subTypeAnnotation = gsonField.fieldInfo.getAnnotation(GsonSubtype::class.java) ?: return
+        val validatedGsonSubType = validateGsonSubType(processingEnv, gsonField, subTypeAnnotation)
 
         typeSpecBuilder.addField(arrayTypeAdapterClassName, getSubTypeAdapterVariableName(gsonField), Modifier.PRIVATE)
 
         createGetter(typeSpecBuilder, gsonField)
-        createSubTypeAdapter(processingEnv, typeSpecBuilder, gsonField, subTypeAnnotation)
+        createSubTypeAdapter(processingEnv, typeSpecBuilder, gsonField, validatedGsonSubType)
     }
 }
 
@@ -45,6 +47,88 @@ fun addSubTypeTypeAdapters(processingEnv: ProcessingEnvironment, typeSpecBuilder
 fun getSubTypeGetterName(gsonField: GsonField): String {
     val variableName = getSubTypeAdapterVariableName(gsonField)
     return "get${variableName[0].toUpperCase()}${variableName.substring(1)}"
+}
+
+/**
+ * Validates the GsonSubType annotation and returns a valid version that contains no incorrect data.
+ * Any incorrect usages will cause an exception to be thrown.
+ */
+private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField: GsonField, gsonSubType: GsonSubtype): ValidatedGsonSubType {
+    if (gsonSubType.fieldName.isBlank()) {
+        throw ProcessingException("fieldName cannot be blank for GsonSubType")
+    }
+
+    var keyType: SubTypeKeyType? = null
+    var keyCount = 0
+    if (gsonSubType.stringKeys.isNotEmpty()) {
+        keyType = SubTypeKeyType.STRING
+        keyCount++
+    }
+    if (gsonSubType.integerKeys.isNotEmpty()) {
+        keyType = SubTypeKeyType.INTEGER
+        keyCount++
+    }
+    if (gsonSubType.booleanKeys.isNotEmpty()) {
+        keyType = SubTypeKeyType.BOOLEAN
+        keyCount++
+    }
+
+    if (keyType == null) {
+        throw ProcessingException("Keys must be specified for the GsonSubType")
+    }
+    if (keyCount > 1) {
+        throw ProcessingException("Only one keys array (string, integer or boolean) may be specified for the GsonSubType")
+    }
+
+    //
+    // Convert the provided keys into a unified type. Unfortunately due to how annotations work, this isn't
+    // as clean as it could be.
+    //
+    val genericGsonSubTypeKeys: List<GsonSubTypeKeyAndClass> =
+            when (keyType) {
+                SubTypeKeyType.STRING ->
+                    gsonSubType.stringKeys.map { it ->
+                        try {
+                            it.subtype
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                        } catch (mte: MirroredTypeException) {
+                            GsonSubTypeKeyAndClass("\"${it.key}\"", mte.typeMirror)
+                        }
+                    }
+
+                SubTypeKeyType.INTEGER ->
+                    gsonSubType.integerKeys.map { it ->
+                        try {
+                            it.subtype
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                        } catch (mte: MirroredTypeException) {
+                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
+                        }
+                    }
+
+                SubTypeKeyType.BOOLEAN ->
+                    gsonSubType.booleanKeys.map { it ->
+                        try {
+                            it.subtype
+                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
+                        } catch (mte: MirroredTypeException) {
+                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
+                        }
+                    }
+            }
+
+    // Ensure that each subtype inherits from the annotated field.
+    val gsonFieldType = getRawType(gsonField)
+    genericGsonSubTypeKeys.forEach {
+        if (!processingEnv.typeUtils.isSubtype(it.clazzTypeMirror, gsonFieldType)) {
+            throw ProcessingException("subtype ${it.clazzTypeMirror} does not inherit from $gsonFieldType")
+        }
+    }
+
+    return ValidatedGsonSubType(
+            fieldName = gsonSubType.fieldName,
+            keyType = keyType,
+            gsonSubTypeKeys = genericGsonSubTypeKeys)
 }
 
 /**
@@ -62,7 +146,7 @@ private fun createGetter(typeSpecBuilder: TypeSpec.Builder, gsonField: GsonField
                     .beginControlFlow("if ($variableName == null)")
 
                     .addStatement("$variableName = new \$T<>(new ${getSubTypeAdapterClassName(gsonField)}(mGson), \$T.class)",
-                            arrayTypeAdapterClassName, getRawType(gsonField))
+                            arrayTypeAdapterClassName, getRawTypeName(gsonField))
 
                     .endControlFlow()
                     .addStatement("return $variableName")
@@ -74,15 +158,18 @@ private fun createGetter(typeSpecBuilder: TypeSpec.Builder, gsonField: GsonField
  * Obtains the actual type name that is either contained within the array or the list.
  * e.g. for 'String[]' or 'List<String>' the returned type name is 'String'
  */
-private fun getRawType(gsonField: GsonField): TypeName {
-    val typeName = gsonField.fieldInfo.typeName
-    return when (typeName) {
-        is ArrayTypeName -> typeName.componentType
-        is ParameterizedTypeName -> typeName.rawType
+private fun getRawType(gsonField: GsonField): TypeMirror {
+    val typeMirror = gsonField.fieldInfo.typeMirror
+    return when (typeMirror) {
+        is ArrayType -> typeMirror.componentType
 
         else -> throw ProcessingException("Unexpected type found for GsonSubtype field, ensure you either use " +
                 "an array, or a List class.")
     }
+}
+
+private fun getRawTypeName(gsonField: GsonField): TypeName {
+    return TypeName.get(getRawType(gsonField))
 }
 
 /**
@@ -104,8 +191,10 @@ private fun getSubTypeAdapterClassName(gsonField: GsonField): String {
  * <p>
  * Only gson fields that are annotated with 'GsonSubtype' should invoke this method
  */
-private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecBuilder: TypeSpec.Builder, gsonField: GsonField, annotation: GsonSubtype) {
-    val rawTypeName = getRawType(gsonField)
+private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecBuilder: TypeSpec.Builder, gsonField: GsonField,
+                                 validatedGsonSubType: ValidatedGsonSubType) {
+
+    val rawTypeName = getRawTypeName(gsonField)
 
     val subTypeAdapterBuilder = TypeSpec.classBuilder(getSubTypeAdapterClassName(gsonField))
             .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -115,17 +204,8 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
     val typeAdapterType = ParameterizedTypeName.get(ClassName.get(TypeAdapter::class.java), WildcardTypeName.subtypeOf(rawTypeName))
     val classConstainedType = ParameterizedTypeName.get(ClassName.get(Class::class.java), WildcardTypeName.subtypeOf(rawTypeName))
 
-    // Check which key types are being used.
-    val keyType: SubTypeKeyType =
-            when {
-                (annotation.stringKeys.isNotEmpty()) -> SubTypeKeyType.STRING
-                (annotation.integerKeys.isNotEmpty()) -> SubTypeKeyType.INTEGER
-                (annotation.booleanKeys.isNotEmpty()) -> SubTypeKeyType.BOOLEAN
-                else -> throw ProcessingException("Keys must be specified for the GsonSubType")
-            }
-
     val valueMapClassName =
-            when (keyType) {
+            when (validatedGsonSubType.keyType) {
                 SubTypeKeyType.STRING -> ClassName.get(String::class.java)
                 SubTypeKeyType.INTEGER -> TypeName.get(Int::class.java).box()
                 SubTypeKeyType.BOOLEAN -> TypeName.get(Boolean::class.java).box()
@@ -151,45 +231,8 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
             .addStatement("typeAdaptersDelegatedByValueMap = new java.util.HashMap<>()")
             .addStatement("typeAdaptersDelegatedByClassMap = new java.util.HashMap<>()")
 
-    //
-    // Convert the provided keys into a unified type. Unfortunately due to how annotations work, this isn't
-    // as clean as it could be.
-    //
-    val genericGsonSubTypeKeys: List<GsonSubTypeKeyAndClass> =
-            when (keyType) {
-                SubTypeKeyType.STRING ->
-                    annotation.stringKeys.map { it ->
-                        try {
-                            it.subtype
-                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
-                        } catch (mte: MirroredTypeException) {
-                            GsonSubTypeKeyAndClass("\"${it.key}\"", mte.typeMirror)
-                        }
-                    }
-
-                SubTypeKeyType.INTEGER ->
-                    annotation.integerKeys.map { it ->
-                        try {
-                            it.subtype
-                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
-                        } catch (mte: MirroredTypeException) {
-                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
-                        }
-                    }
-
-                SubTypeKeyType.BOOLEAN ->
-                    annotation.booleanKeys.map { it ->
-                        try {
-                            it.subtype
-                            throw ProcessingException("Unexpected annotation processing defect while obtaining class.")
-                        } catch (mte: MirroredTypeException) {
-                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
-                        }
-                    }
-            }
-
     // Instantiate each subtype delegated adapter
-    genericGsonSubTypeKeys.forEach {
+    validatedGsonSubType.gsonSubTypeKeys.forEach {
         val subtypeElement = processingEnv.typeUtils.asElement(it.clazzTypeMirror)
 
         constructorBuilder.addCode("\n")
@@ -215,16 +258,16 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
     // to. If not, the deserializer may return null, or throw an exception depending on the GsonSubtype annotation settings.
     //
     readMethod.addStatement("\$T jsonElement = \$T.parse(in)", JsonElement::class.java, Streams::class.java)
-            .addStatement("\$T typeValueJsonElement = jsonElement.getAsJsonObject().remove(\"${annotation.fieldName}\")", JsonElement::class.java)
+            .addStatement("\$T typeValueJsonElement = jsonElement.getAsJsonObject().remove(\"${validatedGsonSubType.fieldName}\")", JsonElement::class.java)
 
             .beginControlFlow("if (typeValueJsonElement == null)")
-            .addStatement("throw new \$T(\"cannot deserialize $rawTypeName because it does not define a field named '${annotation.fieldName}'\")",
+            .addStatement("throw new \$T(\"cannot deserialize $rawTypeName because it does not define a field named '${validatedGsonSubType.fieldName}'\")",
                     JsonParseException::class.java)
 
             .endControlFlow()
 
     // Obtain the value using the correct type.
-    when (keyType) {
+    when (validatedGsonSubType.keyType) {
         SubTypeKeyType.STRING -> readMethod.addStatement("java.lang.String value = typeValueJsonElement.getAsString()")
         SubTypeKeyType.INTEGER -> readMethod.addStatement("int value = typeValueJsonElement.getAsInt()")
         SubTypeKeyType.BOOLEAN -> readMethod.addStatement("boolean value = typeValueJsonElement.getAsBoolean()")
@@ -268,6 +311,11 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
  * into a common reusable structure.
  */
 data class GsonSubTypeKeyAndClass(val key: String, val clazzTypeMirror: TypeMirror)
+
+data class ValidatedGsonSubType(
+        val fieldName: String,
+        val keyType: SubTypeKeyType,
+        val gsonSubTypeKeys: List<GsonSubTypeKeyAndClass>)
 
 /**
  * The type of key used when determining the correct subtype

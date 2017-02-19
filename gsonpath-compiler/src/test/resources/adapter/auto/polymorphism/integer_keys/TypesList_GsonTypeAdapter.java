@@ -1,4 +1,4 @@
-package adapter.auto.polymorphism.string_keys;
+package adapter.auto.polymorphism.integer_keys;
 
 import static gsonpath.GsonUtil.*;
 

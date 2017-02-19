@@ -1,4 +1,4 @@
-package adapter.auto.polymorphism.boolean_keys;
+package adapter.auto.polymorphism.string_keys;
 
 import static gsonpath.GsonUtil.*;
 
@@ -12,9 +12,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import gsonpath.internal.StrictArrayTypeAdapter;
 import java.io.IOException;
-import java.lang.Boolean;
 import java.lang.Class;
 import java.lang.Override;
+import java.lang.String;
 import java.util.Map;
 
 public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
@@ -90,7 +90,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
     }
 
     private static final class ItemsGsonSubtype extends TypeAdapter<Type> {
-        private final Map<Boolean, TypeAdapter<? extends Type>> typeAdaptersDelegatedByValueMap;
+        private final Map<String, TypeAdapter<? extends Type>> typeAdaptersDelegatedByValueMap;
 
         private final Map<Class<? extends Type>, TypeAdapter<? extends Type>> typeAdaptersDelegatedByClassMap;
 
@@ -98,10 +98,10 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
             typeAdaptersDelegatedByValueMap = new java.util.HashMap<>();
             typeAdaptersDelegatedByClassMap = new java.util.HashMap<>();
 
-            typeAdaptersDelegatedByValueMap.put(true, gson.getAdapter(adapter.auto.polymorphism.Type1.class));
+            typeAdaptersDelegatedByValueMap.put("type1", gson.getAdapter(adapter.auto.polymorphism.Type1.class));
             typeAdaptersDelegatedByClassMap.put(adapter.auto.polymorphism.Type1.class, gson.getAdapter(adapter.auto.polymorphism.Type1.class));
 
-            typeAdaptersDelegatedByValueMap.put(false, gson.getAdapter(adapter.auto.polymorphism.Type2.class));
+            typeAdaptersDelegatedByValueMap.put("type2", gson.getAdapter(adapter.auto.polymorphism.Type2.class));
             typeAdaptersDelegatedByClassMap.put(adapter.auto.polymorphism.Type2.class, gson.getAdapter(adapter.auto.polymorphism.Type2.class));
         }
 
@@ -112,7 +112,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
             if (typeValueJsonElement == null) {
                 throw new JsonParseException("cannot deserialize adapter.auto.polymorphism.Type because it does not define a field named 'type'");
             }
-            boolean value = typeValueJsonElement.getAsBoolean();
+            java.lang.String value = typeValueJsonElement.getAsString();
             TypeAdapter<? extends adapter.auto.polymorphism.Type> delegate = typeAdaptersDelegatedByValueMap.get(value);
             if (delegate == null) {
                 return null;
