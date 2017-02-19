@@ -1,9 +1,17 @@
 package gsonpath.polymorphism;
 
 import gsonpath.AutoGsonAdapter;
+import gsonpath.GsonSubtype;
 
-import java.util.List;
-
-@AutoGsonAdapter(rootField = "items")
-interface TypesList extends List<Type> {
+@AutoGsonAdapter
+interface TypesList {
+    @GsonSubtype(
+            fieldName = "type",
+            stringKeys = {
+                    @GsonSubtype.StringKey(key = "type1", subtype = Type1.class),
+                    @GsonSubtype.StringKey(key = "type2", subtype = Type2.class),
+                    @GsonSubtype.StringKey(key = "type3", subtype = Type3.class)
+            }
+    )
+    Type[] getItems();
 }

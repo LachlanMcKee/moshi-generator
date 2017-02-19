@@ -6,6 +6,7 @@ import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.FlattenJson
+import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
 import gsonpath.generator.adapter.*
 import gsonpath.model.*
@@ -302,7 +303,15 @@ private fun writeGsonFieldReaderUnsupported(codeBlock: CodeBlock.Builder, gsonFi
     val variableName = getVariableName(gsonField, requiresConstructorInjection)
     val checkIfResultIsNull = isCheckIfNullApplicable(gsonField, requiresConstructorInjection)
 
-    val variableAssignment = "$variableName = mGson.getAdapter($adapterName).read(in)"
+    val subTypeAnnotation = gsonField.fieldInfo.getAnnotation(GsonSubtype::class.java)
+    val variableAssignment =
+            if (subTypeAnnotation != null) {
+                // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
+                "$variableName = ($fieldTypeName) ${getSubTypeGetterName(gsonField)}().read(in)"
+            } else {
+                // Otherwise we request the type adapter from gson.
+                "$variableName = mGson.getAdapter($adapterName).read(in)"
+            }
 
     if (checkIfResultIsNull) {
         codeBlock.addStatement("$fieldTypeName $variableAssignment")
