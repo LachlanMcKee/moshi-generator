@@ -98,6 +98,9 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
             adapterTypeBuilder.addMethod(writeMethod.build())
         }
 
+        // Adds any required subtype type adapters depending on the usage of the GsonSubtype annotation.
+        addSubTypeTypeAdapters(processingEnv, adapterTypeBuilder, rootGsonObject)
+
         if (writeFile(adapterClassName.packageName(), adapterTypeBuilder)) {
             return HandleResult(modelClassName, adapterClassName)
         }
