@@ -18,9 +18,11 @@ import java.util.List;
  */
 public final class CollectionTypeAdapter<E> extends TypeAdapter<Collection<E>> {
     private final TypeAdapter<E> componentTypeAdapter;
+    private boolean filterNulls;
 
-    public CollectionTypeAdapter(TypeAdapter<E> componentTypeAdapter) {
+    public CollectionTypeAdapter(TypeAdapter<E> componentTypeAdapter, boolean filterNulls) {
         this.componentTypeAdapter = componentTypeAdapter;
+        this.filterNulls = filterNulls;
     }
 
     @Override
@@ -34,6 +36,11 @@ public final class CollectionTypeAdapter<E> extends TypeAdapter<Collection<E>> {
         in.beginArray();
         while (in.hasNext()) {
             E instance = componentTypeAdapter.read(in);
+
+            if (filterNulls && instance == null) {
+                continue;
+            }
+
             list.add(instance);
         }
         in.endArray();

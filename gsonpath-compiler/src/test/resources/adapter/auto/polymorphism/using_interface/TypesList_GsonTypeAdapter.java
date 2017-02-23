@@ -68,7 +68,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
 
     private StrictArrayTypeAdapter getItemsGsonSubtype() {
         if (itemsGsonSubtype == null) {
-            itemsGsonSubtype = new StrictArrayTypeAdapter<>(new ItemsGsonSubtype(mGson), Type.class);
+            itemsGsonSubtype = new StrictArrayTypeAdapter<>(new ItemsGsonSubtype(mGson), Type.class, false);
         }
         return itemsGsonSubtype;
     }
@@ -101,7 +101,8 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
             if (delegate == null) {
                 return null;
             }
-            return delegate.fromJsonTree(jsonElement);
+            adapter.auto.polymorphism.Type result = delegate.fromJsonTree(jsonElement);
+            return result;
         }
 
         @Override

@@ -19,11 +19,13 @@ import java.util.List;
  */
 public final class StrictArrayTypeAdapter<E> extends TypeAdapter<Object> {
     private final Class<E> componentType;
+    private final boolean filterNulls;
     private final TypeAdapter<E> componentTypeAdapter;
 
-    public StrictArrayTypeAdapter(TypeAdapter<E> componentTypeAdapter, Class<E> componentType) {
+    public StrictArrayTypeAdapter(TypeAdapter<E> componentTypeAdapter, Class<E> componentType, boolean filterNulls) {
         this.componentTypeAdapter = componentTypeAdapter;
         this.componentType = componentType;
+        this.filterNulls = filterNulls;
     }
 
     @Override
@@ -37,6 +39,11 @@ public final class StrictArrayTypeAdapter<E> extends TypeAdapter<Object> {
         in.beginArray();
         while (in.hasNext()) {
             E instance = componentTypeAdapter.read(in);
+
+            if (filterNulls && instance == null) {
+                continue;
+            }
+
             list.add(instance);
         }
         in.endArray();

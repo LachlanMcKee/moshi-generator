@@ -22,11 +22,21 @@ public @interface GsonSubtype {
     String fieldName();
 
     /**
-     * Whether the TypeAdapter should throw an exception when an unexpected type is found.
+     * Determines the behaviour of the generated subtype adapter when an unknown subtype is found, or the subtype
+     * fails to be deserailized (i.e. it returns a null value)
      *
-     * @return true if the TypeAdapter should throw an exception.
+     * @return the enum value which defines the outcome.
      */
-    boolean failOnMissingKey() default false;
+    GsonSubTypeFailureOutcome subTypeFailureOutcome() default GsonSubTypeFailureOutcome.NULL_OR_DEFAULT_VALUE;
+
+    /**
+     * The default type that is used if an unexpected key is encountered.
+     * Note: This will only be used if {@link #subTypeFailureOutcome} is set to
+     * {@link GsonSubTypeFailureOutcome#NULL_OR_DEFAULT_VALUE}
+     *
+     * @return the fall-back type to use.
+     */
+    Class defaultType() default void.class;
 
     /**
      * An array of string keys and their related subtype class, this may be empty, however one of the 'keys' arrays
