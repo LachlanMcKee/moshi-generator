@@ -21,6 +21,7 @@ import com.squareup.javapoet.TypeSpec
 import gsonpath.generator.adapter.generateClassName
 import gsonpath.generator.adapter.addNewLine
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeMirror
 
 internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
@@ -28,11 +29,12 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
     fun handle(element: TypeElement): InterfaceInfo {
         val interfaces = element.interfaces
         if (interfaces != null && interfaces.size == 1) {
-            val typeName = TypeName.get(interfaces[0])
+            val listTypeMirror = interfaces[0]
+            val typeName = TypeName.get(listTypeMirror)
 
             if (typeName is ParameterizedTypeName) {
                 if (typeName.rawType == TypeName.get(List::class.java)) {
-                    return handleList(ClassName.get(element), typeName)
+                    return handleList(ClassName.get(element), typeName, listTypeMirror)
                 }
             }
         }
@@ -44,7 +46,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
     }
 
     @Throws(ProcessingException::class)
-    private fun handleList(modelClassName: ClassName, listTypeName: ParameterizedTypeName): InterfaceInfo {
+    private fun handleList(modelClassName: ClassName, listTypeName: ParameterizedTypeName, listTypeMirror: TypeMirror): InterfaceInfo {
         val outputClassName = createOutputClassName(modelClassName)
 
         val typeBuilder = TypeSpec.classBuilder(outputClassName)
@@ -84,7 +86,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             override val annotationNames: Array<String>
                 get() = arrayOf("AutoGsonAdapter", "NonNull")
 
-        }, listTypeName, "internalList", true))
+        }, listTypeName, listTypeMirror, "internalList", true))
 
         return InterfaceInfo(outputClassName, fieldInfo)
     }
@@ -136,8 +138,9 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             val methodType = enclosedElement.asType() as ExecutableType
 
             // Ensure that any generics have been converted into their actual return types.
-            val typeName = TypeName.get((processingEnv.typeUtils.asMemberOf(element.asType() as DeclaredType, enclosedElement)
-                    as ExecutableType).returnType)
+            val returnTypeMirror: TypeMirror = (processingEnv.typeUtils.asMemberOf(element.asType() as DeclaredType, enclosedElement)
+                    as ExecutableType).returnType
+            val typeName = TypeName.get(returnTypeMirror)
 
             if (typeName == null || typeName == TypeName.VOID) {
                 throw ProcessingException("Gson Path interface methods must have a return type", enclosedElement)
@@ -181,7 +184,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             constructorBuilder.addParameter(typeName, fieldName)
                     .addStatement("this.$fieldName = $fieldName")
 
-            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, fieldName, false))
+            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, returnTypeMirror, fieldName, false))
 
             // Add to the equals method
             if (typeName.isPrimitive) {

@@ -1,6 +1,45 @@
 Change Log
 ==========
 
+Version 2.1.0 *(2017-02-26)*
+----------------------------
+
+* New: Added polymorphism within the type adapters by introducing a new annotation called `GsonSubtype` (Promposed within Issue [#78](../../issues/78))
+     * This adds subtyping to the generated `TypeAdapters`.
+     * Some example usages are as follows:
+
+     ```java
+     @AutoGsonAdapter
+     class SubTypesExample {
+         @GsonSubtype(
+                 subTypeKey = "type",
+                 stringValueSubtypes = {
+                         @GsonSubtype.StringValueSubtype(key = "type1", subtype = Type1.class),
+                         @GsonSubtype.StringValueSubtype(key = "type2", subtype = Type2.class)
+                 }
+         )
+         Type[] items;
+     }
+     ```
+
+     Or potentially:
+
+     ```java
+     @AutoGsonAdapter
+     class SubTypesExample {
+         @GsonSubtype(
+                 subTypeKey = "type",
+                 defaultType = TypeDefault.class,
+                 subTypeFailureOutcome = GsonSubTypeFailureOutcome.NULL_OR_DEFAULT_VALUE,
+                 stringValueSubtypes = {
+                         @GsonSubtype.StringValueSubtype(key = "type1", subtype = Type1.class),
+                         @GsonSubtype.StringValueSubtype(key = "type2", subtype = Type2.class)
+                 }
+         )
+         Type[] items;
+     }
+     ```
+
 Version 2.0.0 *(2017-02-18)*
 ----------------------------
 

@@ -5,6 +5,7 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
+import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
 import gsonpath.generator.adapter.GSON_SUPPORTED_CLASSES
 import gsonpath.generator.adapter.addComment
@@ -99,7 +100,17 @@ private fun writeGsonFieldWriter(fieldDepth: Int,
                     adapterName = fieldTypeName.toString() + ".class"
                 }
 
-                codeBlock.addStatement("mGson.getAdapter($adapterName).write(out, $objectName)")
+                val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
+                val writeLine =
+                        if (subTypeAnnotation != null) {
+                            // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
+                            "${getSubTypeGetterName(value)}().write(out, $objectName)"
+                        } else {
+                            // Otherwise we request the type adapter from gson.
+                            "mGson.getAdapter($adapterName).write(out, $objectName)"
+                        }
+
+                codeBlock.addStatement(writeLine)
             }
 
             // If we are serializing nulls, we need to ensure we output it here.
