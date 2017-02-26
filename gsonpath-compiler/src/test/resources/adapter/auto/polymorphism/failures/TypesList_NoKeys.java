@@ -6,7 +6,7 @@ import gsonpath.GsonSubtype;
 @AutoGsonAdapter
 class TypesList_NoKeys {
     @GsonSubtype(
-            fieldName = "type"
+            subTypeKey = "type"
     )
     Type[] items;
 }

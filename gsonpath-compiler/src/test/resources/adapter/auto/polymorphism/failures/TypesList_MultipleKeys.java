@@ -7,12 +7,12 @@ import gsonpath.GsonSubtype;
 @AutoGsonAdapter
 class TypesList_MultipleKeys {
     @GsonSubtype(
-            fieldName = "type",
-            stringKeys = {
-                    @GsonSubtype.StringKey(key = "type1", subtype = Type1.class)
+            subTypeKey = "type",
+            stringValueSubtypes = {
+                    @GsonSubtype.StringValueSubtype(value = "type1", subtype = Type1.class)
             },
-            integerKeys = {
-                    @GsonSubtype.IntegerKey(key = 1, subtype = Type1.class)
+            integerValueSubtypes = {
+                    @GsonSubtype.IntegerValueSubtype(value = 1, subtype = Type1.class)
             }
     )
     Type[] items;

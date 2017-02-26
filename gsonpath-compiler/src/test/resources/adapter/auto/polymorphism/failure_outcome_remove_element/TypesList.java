@@ -11,11 +11,11 @@ import adapter.auto.polymorphism.Type2;
 @AutoGsonAdapter
 class TypesList {
     @GsonSubtype(
-            fieldName = "type",
+            subTypeKey = "type",
             subTypeFailureOutcome = GsonSubTypeFailureOutcome.REMOVE_ELEMENT,
-            stringKeys = {
-                    @GsonSubtype.StringKey(key = "type1", subtype = Type1.class),
-                    @GsonSubtype.StringKey(key = "type2", subtype = Type2.class)
+            stringValueSubtypes = {
+                    @GsonSubtype.StringValueSubtype(value = "type1", subtype = Type1.class),
+                    @GsonSubtype.StringValueSubtype(value = "type2", subtype = Type2.class)
             }
     )
     Type[] items;

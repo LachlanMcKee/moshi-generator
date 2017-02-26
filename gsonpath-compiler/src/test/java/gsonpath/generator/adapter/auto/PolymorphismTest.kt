@@ -110,7 +110,7 @@ class PolymorphismTest : BaseGeneratorTest() {
     @Test
     fun givenBlankFieldName_whenProcessorExecuted_expectBlankFieldNameError() {
         assertPolymorphismFailure("TypesList_BlankFieldName.java",
-                "Gson Path: fieldName cannot be blank for GsonSubType")
+                "Gson Path: subTypeKey cannot be blank for GsonSubType")
     }
 
     @Test

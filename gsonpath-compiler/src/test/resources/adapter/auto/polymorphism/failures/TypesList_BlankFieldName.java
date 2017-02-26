@@ -7,9 +7,9 @@ import gsonpath.GsonSubtype;
 @AutoGsonAdapter
 class TypesList_BlankFieldName {
     @GsonSubtype(
-            fieldName = "",
-            stringKeys = {
-                    @GsonSubtype.StringKey(key = "type1", subtype = Type1.class)
+            subTypeKey = "",
+            stringValueSubtypes = {
+                    @GsonSubtype.StringValueSubtype(value = "type1", subtype = Type1.class)
             }
     )
     Type[] items;

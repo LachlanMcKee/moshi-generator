@@ -67,21 +67,21 @@ fun getSubTypeGetterName(gsonField: GsonField): String {
  * Any incorrect usages will cause an exception to be thrown.
  */
 private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField: GsonField, gsonSubType: GsonSubtype): ValidatedGsonSubType {
-    if (gsonSubType.fieldName.isBlank()) {
-        throw ProcessingException("fieldName cannot be blank for GsonSubType", gsonField.fieldInfo.element)
+    if (gsonSubType.subTypeKey.isBlank()) {
+        throw ProcessingException("subTypeKey cannot be blank for GsonSubType", gsonField.fieldInfo.element)
     }
 
     var keyType: SubTypeKeyType? = null
     var keyCount = 0
-    if (gsonSubType.stringKeys.isNotEmpty()) {
+    if (gsonSubType.stringValueSubtypes.isNotEmpty()) {
         keyType = SubTypeKeyType.STRING
         keyCount++
     }
-    if (gsonSubType.integerKeys.isNotEmpty()) {
+    if (gsonSubType.integerValueSubtypes.isNotEmpty()) {
         keyType = SubTypeKeyType.INTEGER
         keyCount++
     }
-    if (gsonSubType.booleanKeys.isNotEmpty()) {
+    if (gsonSubType.booleanValueSubtypes.isNotEmpty()) {
         keyType = SubTypeKeyType.BOOLEAN
         keyCount++
     }
@@ -101,35 +101,35 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
     val genericGsonSubTypeKeys: List<GsonSubTypeKeyAndClass> =
             when (keyType) {
                 SubTypeKeyType.STRING ->
-                    gsonSubType.stringKeys.map { it ->
+                    gsonSubType.stringValueSubtypes.map { it ->
                         try {
                             it.subtype
                             throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
                                     gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
-                            GsonSubTypeKeyAndClass("\"${it.key}\"", mte.typeMirror)
+                            GsonSubTypeKeyAndClass("\"${it.value}\"", mte.typeMirror)
                         }
                     }
 
                 SubTypeKeyType.INTEGER ->
-                    gsonSubType.integerKeys.map { it ->
+                    gsonSubType.integerValueSubtypes.map { it ->
                         try {
                             it.subtype
                             throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
                                     gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
-                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
+                            GsonSubTypeKeyAndClass("${it.value}", mte.typeMirror)
                         }
                     }
 
                 SubTypeKeyType.BOOLEAN ->
-                    gsonSubType.booleanKeys.map { it ->
+                    gsonSubType.booleanValueSubtypes.map { it ->
                         try {
                             it.subtype
                             throw ProcessingException("Unexpected annotation processing defect while obtaining class.",
                                     gsonField.fieldInfo.element)
                         } catch (mte: MirroredTypeException) {
-                            GsonSubTypeKeyAndClass("${it.key}", mte.typeMirror)
+                            GsonSubTypeKeyAndClass("${it.value}", mte.typeMirror)
                         }
                     }
             }
@@ -161,7 +161,7 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
     }
 
     return ValidatedGsonSubType(
-            fieldName = gsonSubType.fieldName,
+            fieldName = gsonSubType.subTypeKey,
             keyType = keyType,
             gsonSubTypeKeys = genericGsonSubTypeKeys,
             defaultType = defaultsElement?.asType(),
@@ -437,7 +437,7 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
 }
 
 /**
- * A data class that is used to convert the annotation 'stringKeys' 'booleanKeys' and 'integerKeys'
+ * A data class that is used to convert the annotation 'stringValueSubtypes' 'booleanValueSubtypes' and 'integerValueSubtypes'
  * into a common reusable structure.
  */
 data class GsonSubTypeKeyAndClass(val key: String, val clazzTypeMirror: TypeMirror)
@@ -450,7 +450,7 @@ data class ValidatedGsonSubType(
         val failureOutcome: GsonSubTypeFailureOutcome)
 
 /**
- * The type of key used when determining the correct subtype
+ * The type of value used when determining the correct subtype
  */
 enum class SubTypeKeyType {
     STRING, INTEGER, BOOLEAN

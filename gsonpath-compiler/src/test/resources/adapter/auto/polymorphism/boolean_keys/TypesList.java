@@ -10,10 +10,10 @@ import adapter.auto.polymorphism.Type2;
 @AutoGsonAdapter
 class TypesList {
     @GsonSubtype(
-            fieldName = "type",
-            booleanKeys = {
-                    @GsonSubtype.BooleanKey(key = true, subtype = Type1.class),
-                    @GsonSubtype.BooleanKey(key = false, subtype = Type2.class)
+            subTypeKey = "type",
+            booleanValueSubtypes = {
+                    @GsonSubtype.BooleanValueSubtype(value = true, subtype = Type1.class),
+                    @GsonSubtype.BooleanValueSubtype(value = false, subtype = Type2.class)
             }
     )
     Type[] items;

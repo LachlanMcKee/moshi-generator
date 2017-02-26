@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Allows a developer to mark a gson field as heterogenous, and exposes the ability to map specific types to a key value
+ * Allows a developer to mark a gson field as heterogenous, and exposes the ability to map specific types to a value value
  * that is found within the field name defined within the model being deserialized.
  */
 @Retention(RetentionPolicy.SOURCE)
@@ -19,7 +19,7 @@ public @interface GsonSubtype {
      *
      * @return a non-null field name that belongs to either a String, Integer or Boolean value.
      */
-    String fieldName();
+    String subTypeKey();
 
     /**
      * Determines the behaviour of the generated subtype adapter when an unknown subtype is found, or the subtype
@@ -30,7 +30,7 @@ public @interface GsonSubtype {
     GsonSubTypeFailureOutcome subTypeFailureOutcome() default GsonSubTypeFailureOutcome.NULL_OR_DEFAULT_VALUE;
 
     /**
-     * The default type that is used if an unexpected key is encountered.
+     * The default type that is used if an unexpected value is encountered.
      * Note: This will only be used if {@link #subTypeFailureOutcome} is set to
      * {@link GsonSubTypeFailureOutcome#NULL_OR_DEFAULT_VALUE}
      *
@@ -39,45 +39,44 @@ public @interface GsonSubtype {
     Class defaultType() default void.class;
 
     /**
-     * An array of string keys and their related subtype class, this may be empty, however one of the 'keys' arrays
+     * An array of string values and their related subtype class, this may be empty, however one of the 'values' arrays
      * must be assigned, otherwise the processor will fail.
      *
-     * @return the array of string keys and their related subtype class.
+     * @return the array of string values and their related subtype class.
      */
-    StringKey[] stringKeys() default {};
+    StringValueSubtype[] stringValueSubtypes() default {};
 
     /**
-     * An array of integer keys and their related subtype class, this may be empty, however one of the 'keys' arrays
+     * An array of integer values and their related subtype class, this may be empty, however one of the 'values' arrays
      * must be assigned, otherwise the processor will fail.
      *
-     * @return the array of integer keys and their related subtype class.
+     * @return the array of integer values and their related subtype class.
      */
-    IntegerKey[] integerKeys() default {};
+    IntegerValueSubtype[] integerValueSubtypes() default {};
 
     /**
-     * An array of boolean keys and their related subtype class, this may be empty, however one of the 'keys' arrays
+     * An array of boolean values and their related subtype class, this may be empty, however one of the 'values' arrays
      * must be assigned, otherwise the processor will fail.
      *
-     * @return the array of boolean keys and their related subtype class.
+     * @return the array of boolean values and their related subtype class.
      */
-    BooleanKey[] booleanKeys() default {};
+    BooleanValueSubtype[] booleanValueSubtypes() default {};
 
     /**
-     * Represents a string key and its related subtype class.
-     * Whenever the key value is found, the associated subtype will be instatiated.
+     * Represents a string value and its related subtype class.
+     * Whenever the value value is found, the associated subtype will be instatiated.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-    @interface StringKey {
+    @interface StringValueSubtype {
         /**
-         * The key that maps to the subtype.
+         * The value that maps to the subtype.
          *
-         * @return a non-null key.
+         * @return a non-null value.
          */
-        String key();
+        String value();
 
         /**
-         * The subtype that is used when the appropriate key is found.
+         * The subtype that is used when the appropriate value is found.
          * This class MUST be a subtype of either:
          * 1. The annotated field
          * 2. The method return type (for interfaces)
@@ -89,21 +88,20 @@ public @interface GsonSubtype {
     }
 
     /**
-     * Represents a integer key and its related subtype class.
-     * Whenever the key value is found, the associated subtype will be instatiated.
+     * Represents a integer value and its related subtype class.
+     * Whenever the value value is found, the associated subtype will be instatiated.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-    @interface IntegerKey {
+    @interface IntegerValueSubtype {
         /**
-         * The key that maps to the subtype.
+         * The value that maps to the subtype.
          *
-         * @return a non-null key.
+         * @return a non-null value.
          */
-        int key();
+        int value();
 
         /**
-         * The subtype that is used when the appropriate key is found.
+         * The subtype that is used when the appropriate value is found.
          * This class MUST be a subtype of either:
          * 1. The annotated field
          * 2. The method return type (for interfaces)
@@ -115,21 +113,20 @@ public @interface GsonSubtype {
     }
 
     /**
-     * Represents a boolean key and its related subtype class.
-     * Whenever the key value is found, the associated subtype will be instatiated.
+     * Represents a boolean value and its related subtype class.
+     * Whenever the value value is found, the associated subtype will be instatiated.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-    @interface BooleanKey {
+    @interface BooleanValueSubtype {
         /**
-         * The key that maps to the subtype.
+         * The value that maps to the subtype.
          *
-         * @return a non-null key.
+         * @return a non-null value.
          */
-        boolean key();
+        boolean value();
 
         /**
-         * The subtype that is used when the appropriate key is found.
+         * The subtype that is used when the appropriate value is found.
          * This class MUST be a subtype of either:
          * 1. The annotated field
          * 2. The method return type (for interfaces)
