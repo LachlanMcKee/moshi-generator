@@ -1,4 +1,4 @@
-package adapter.auto.polymorphism.type_no_inheritance;
+package adapter.auto.polymorphism.failures;
 
 import java.lang.String;
 
@@ -8,7 +8,7 @@ import gsonpath.AutoGsonAdapter;
 import gsonpath.GsonSubtype;
 
 @AutoGsonAdapter
-class TypesList {
+class TypesList_TypeInvalidInheritance {
     @GsonSubtype(
             fieldName = "type",
             stringKeys = {

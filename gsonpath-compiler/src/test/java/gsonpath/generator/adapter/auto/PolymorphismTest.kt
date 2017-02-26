@@ -63,29 +63,66 @@ class PolymorphismTest : BaseGeneratorTest() {
     }
 
     @Test
+    fun givenDefaultValueAndDefaultFailureOutcome_whenProcessorExecuted_expectValidGsonTypeAdapter() {
+        assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/polymorphism/default_value")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type1.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type2.java")
+                .addRelativeSource("TypesList.java")
+                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+    }
+
+    @Test
+    fun givenRemoveElementFailureOutcome_whenProcessorExecuted_expectValidGsonTypeAdapter() {
+        assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/polymorphism/failure_outcome_remove_element")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type1.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type2.java")
+                .addRelativeSource("TypesList.java")
+                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+    }
+
+    @Test
+    fun givenFailFailureOutcome_whenProcessorExecuted_expectValidGsonTypeAdapter() {
+        assertGeneratedContent(BaseGeneratorTest.TestCriteria("adapter/auto/polymorphism/failure_outcome_fail")
+                .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type1.java")
+                .addAbsoluteSource("adapter/auto/polymorphism/Type2.java")
+                .addRelativeSource("TypesList.java")
+                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+    }
+
+    @Test
     fun givenNoKeys_whenProcessorExecuted_expectNoKeysError() {
-        assertPolymorphismFailure("no_keys", "Gson Path: Keys must be specified for the GsonSubType")
+        assertPolymorphismFailure("TypesList_NoKeys.java",
+                "Gson Path: Keys must be specified for the GsonSubType")
     }
 
     @Test
     fun givenMultipleKeys_whenProcessorExecuted_expectMultipleKeysError() {
-        assertPolymorphismFailure("multiple_keys", "Only one keys array (string, integer or boolean) may be specified for the GsonSubType")
+        assertPolymorphismFailure("TypesList_MultipleKeys.java",
+                "Only one keys array (string, integer or boolean) may be specified for the GsonSubType")
     }
 
     @Test
     fun givenBlankFieldName_whenProcessorExecuted_expectBlankFieldNameError() {
-        assertPolymorphismFailure("blank_field", "Gson Path: fieldName cannot be blank for GsonSubType")
+        assertPolymorphismFailure("TypesList_BlankFieldName.java",
+                "Gson Path: fieldName cannot be blank for GsonSubType")
     }
 
     @Test
     fun givenNoInheritanceLink_whenProcessorExecuted_expectBlankFieldNameError() {
-        assertPolymorphismFailure("type_no_inheritance", "Gson Path: subtype java.lang.String does not inherit from adapter.auto.polymorphism.Type")
+        assertPolymorphismFailure("TypesList_TypeInvalidInheritance.java",
+                "Gson Path: subtype java.lang.String does not inherit from adapter.auto.polymorphism.Type")
     }
 
-    private fun assertPolymorphismFailure(directoryName: String, errorMessage: String) {
-        val criteria = BaseGeneratorTest.TestCriteria("adapter/auto/polymorphism/$directoryName")
+    private fun assertPolymorphismFailure(className: String, errorMessage: String) {
+        val criteria = BaseGeneratorTest.TestCriteria("adapter/auto/polymorphism/failures")
                 .addAbsoluteSource("adapter/auto/TestGsonTypeFactory.java")
-                .addRelativeSource("TypesList.java")
+                .addRelativeSource(className)
 
         val sourceFilesSize = criteria.sourceFilesSize
         val sources = (0..sourceFilesSize - 1).map { criteria.getSourceFileObject(it) }

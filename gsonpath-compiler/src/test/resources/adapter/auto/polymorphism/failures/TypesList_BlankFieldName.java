@@ -1,11 +1,11 @@
-package adapter.auto.polymorphism.blank_field;
+package adapter.auto.polymorphism.failures;
 
 import adapter.auto.polymorphism.Type1;
 import gsonpath.AutoGsonAdapter;
 import gsonpath.GsonSubtype;
 
 @AutoGsonAdapter
-class TypesList {
+class TypesList_BlankFieldName {
     @GsonSubtype(
             fieldName = "",
             stringKeys = {

@@ -1,4 +1,4 @@
-package adapter.auto.polymorphism.using_list;
+package adapter.auto.polymorphism.default_value;
 
 import static gsonpath.GsonUtil.*;
 
@@ -10,18 +10,17 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.internal.CollectionTypeAdapter;
+import gsonpath.internal.StrictArrayTypeAdapter;
 import java.io.IOException;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
-import java.util.List;
 import java.util.Map;
 
 public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
     private final Gson mGson;
 
-    private CollectionTypeAdapter<Type> itemsGsonSubtype;
+    private StrictArrayTypeAdapter itemsGsonSubtype;
 
     public TypesList_GsonTypeAdapter(Gson gson) {
         this.mGson = gson;
@@ -48,7 +47,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                 case "items":
                     jsonFieldCounter0++;
 
-                    java.util.List<adapter.auto.polymorphism.Type> value_items = (java.util.List<adapter.auto.polymorphism.Type>) getItemsGsonSubtype().read(in);
+                    adapter.auto.polymorphism.Type[] value_items = (adapter.auto.polymorphism.Type[]) getItemsGsonSubtype().read(in);
                     if (value_items != null) {
                         result.items = value_items;
                     }
@@ -73,7 +72,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
 
         // Begin
         out.beginObject();
-        List<Type> obj0 = value.items;
+        Type[] obj0 = value.items;
         if (obj0 != null) {
             out.name("items");
             getItemsGsonSubtype().write(out, obj0);
@@ -83,9 +82,9 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
         out.endObject();
     }
 
-    private CollectionTypeAdapter<Type> getItemsGsonSubtype() {
+    private StrictArrayTypeAdapter getItemsGsonSubtype() {
         if (itemsGsonSubtype == null) {
-            itemsGsonSubtype = new CollectionTypeAdapter<Type>(new ItemsGsonSubtype(mGson), false);
+            itemsGsonSubtype = new StrictArrayTypeAdapter<>(new ItemsGsonSubtype(mGson), Type.class, false);
         }
         return itemsGsonSubtype;
     }
@@ -95,15 +94,15 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
 
         private final Map<Class<? extends Type>, TypeAdapter<? extends Type>> typeAdaptersDelegatedByClassMap;
 
+        private final TypeAdapter<? extends Type> defaultTypeAdapterDelegate;
+
         private ItemsGsonSubtype(Gson gson) {
             typeAdaptersDelegatedByValueMap = new java.util.HashMap<>();
             typeAdaptersDelegatedByClassMap = new java.util.HashMap<>();
 
             typeAdaptersDelegatedByValueMap.put("type1", gson.getAdapter(adapter.auto.polymorphism.Type1.class));
             typeAdaptersDelegatedByClassMap.put(adapter.auto.polymorphism.Type1.class, gson.getAdapter(adapter.auto.polymorphism.Type1.class));
-
-            typeAdaptersDelegatedByValueMap.put("type2", gson.getAdapter(adapter.auto.polymorphism.Type2.class));
-            typeAdaptersDelegatedByClassMap.put(adapter.auto.polymorphism.Type2.class, gson.getAdapter(adapter.auto.polymorphism.Type2.class));
+            defaultTypeAdapterDelegate = gson.getAdapter(adapter.auto.polymorphism.Type2.class);
         }
 
         @Override
@@ -116,7 +115,8 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
             java.lang.String value = typeValueJsonElement.getAsString();
             TypeAdapter<? extends adapter.auto.polymorphism.Type> delegate = typeAdaptersDelegatedByValueMap.get(value);
             if (delegate == null) {
-                return null;
+                // Use the default type adapter if the type is unknown.
+                delegate = defaultTypeAdapterDelegate;
             }
             adapter.auto.polymorphism.Type result = delegate.fromJsonTree(jsonElement);
             return result;
@@ -129,6 +129,10 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                 return;
             }
             TypeAdapter delegate = typeAdaptersDelegatedByClassMap.get(value.getClass());
+            if (delegate == null) {
+                // Use the default type adapter if the type is unknown.
+                delegate = defaultTypeAdapterDelegate;
+            }
             delegate.write(out, value);
         }
     }

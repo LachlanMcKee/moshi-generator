@@ -1,4 +1,4 @@
-package adapter.auto.polymorphism.using_list;
+package adapter.auto.polymorphism.string_keys;
 
 import static gsonpath.GsonUtil.*;
 
@@ -10,18 +10,17 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.internal.CollectionTypeAdapter;
+import gsonpath.internal.StrictArrayTypeAdapter;
 import java.io.IOException;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
-import java.util.List;
 import java.util.Map;
 
 public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
     private final Gson mGson;
 
-    private CollectionTypeAdapter<Type> itemsGsonSubtype;
+    private StrictArrayTypeAdapter itemsGsonSubtype;
 
     public TypesList_GsonTypeAdapter(Gson gson) {
         this.mGson = gson;
@@ -48,7 +47,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                 case "items":
                     jsonFieldCounter0++;
 
-                    java.util.List<adapter.auto.polymorphism.Type> value_items = (java.util.List<adapter.auto.polymorphism.Type>) getItemsGsonSubtype().read(in);
+                    adapter.auto.polymorphism.Type[] value_items = (adapter.auto.polymorphism.Type[]) getItemsGsonSubtype().read(in);
                     if (value_items != null) {
                         result.items = value_items;
                     }
@@ -73,7 +72,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
 
         // Begin
         out.beginObject();
-        List<Type> obj0 = value.items;
+        Type[] obj0 = value.items;
         if (obj0 != null) {
             out.name("items");
             getItemsGsonSubtype().write(out, obj0);
@@ -83,9 +82,9 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
         out.endObject();
     }
 
-    private CollectionTypeAdapter<Type> getItemsGsonSubtype() {
+    private StrictArrayTypeAdapter getItemsGsonSubtype() {
         if (itemsGsonSubtype == null) {
-            itemsGsonSubtype = new CollectionTypeAdapter<Type>(new ItemsGsonSubtype(mGson), false);
+            itemsGsonSubtype = new StrictArrayTypeAdapter<>(new ItemsGsonSubtype(mGson), Type.class, true);
         }
         return itemsGsonSubtype;
     }

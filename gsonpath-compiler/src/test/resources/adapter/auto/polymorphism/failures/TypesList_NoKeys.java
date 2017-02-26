@@ -1,10 +1,10 @@
-package adapter.auto.polymorphism.no_keys;
+package adapter.auto.polymorphism.failures;
 
 import gsonpath.AutoGsonAdapter;
 import gsonpath.GsonSubtype;
 
 @AutoGsonAdapter
-class TypesList {
+class TypesList_NoKeys {
     @GsonSubtype(
             fieldName = "type"
     )
