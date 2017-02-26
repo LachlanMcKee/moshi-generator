@@ -205,6 +205,6 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
 This library is available on Maven, you can add it to your project using the following gradle dependencies:
 
 ```gradle
-compile 'net.lachlanmckee:gsonpath:2.0.0'
-apt 'net.lachlanmckee:gsonpath-compiler:2.0.0'
+compile 'net.lachlanmckee:gsonpath:2.1.0'
+apt 'net.lachlanmckee:gsonpath-compiler:2.1.0'
 ```

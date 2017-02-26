@@ -1,24 +1,39 @@
 Change Log
 ==========
 
-Version 2.1.0-beta1 *(2017-02-19)*
+Version 2.1.0 *(2017-02-26)*
 ----------------------------
 
 * New: Added polymorphism within the type adapters by introducing a new annotation called `GsonSubtype` (Promposed within Issue [#78](../../issues/78))
-     * This will allow developers to let the annotation processor do all the subtyping behind the scenes.
-     * This is not a complete implementation (hence the beta) there will be further changes to this new API such as:
-          * Handling unknown types (possibly throw an exception, remove the element from the array, or return null)
-          * Specifying a fallback type that would be used when there is an unknown type.
-     * Usage would be similar to the following:
+     * This adds subtyping to the generated `TypeAdapters`.
+     * Some example usages are as follows:
 
      ```java
      @AutoGsonAdapter
      class SubTypesExample {
          @GsonSubtype(
-                 fieldName = "type",
-                 stringKeys = {
-                         @GsonSubtype.StringKey(key = "type1", subtype = Type1.class),
-                         @GsonSubtype.StringKey(key = "type2", subtype = Type2.class)
+                 subTypeKey = "type",
+                 stringValueSubtypes = {
+                         @GsonSubtype.StringValueSubtype(key = "type1", subtype = Type1.class),
+                         @GsonSubtype.StringValueSubtype(key = "type2", subtype = Type2.class)
+                 }
+         )
+         Type[] items;
+     }
+     ```
+
+     Or potentially:
+
+     ```java
+     @AutoGsonAdapter
+     class SubTypesExample {
+         @GsonSubtype(
+                 subTypeKey = "type",
+                 defaultType = TypeDefault.class,
+                 subTypeFailureOutcome = GsonSubTypeFailureOutcome.NULL_OR_DEFAULT_VALUE,
+                 stringValueSubtypes = {
+                         @GsonSubtype.StringValueSubtype(key = "type1", subtype = Type1.class),
+                         @GsonSubtype.StringValueSubtype(key = "type2", subtype = Type2.class)
                  }
          )
          Type[] items;
