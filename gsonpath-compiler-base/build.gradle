@@ -4,7 +4,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'net.lachlanmckee'
-version = '2.2.0'
+version = '1.0.0' // This version is distinct from gsonpath/gsonpath-compiler as it is not public facing.
 
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
@@ -22,20 +22,9 @@ buildscript {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.5"
-
-    compile project(":gsonpath")
-    compile project(":gsonpath-compiler-base")
-
     compile 'com.squareup:javapoet:1.7.0'
-    compile 'com.google.auto.service:auto-service:1.0-rc2'
-    compile 'com.google.auto:auto-common:0.6'
-    compile 'com.google.code.gson:gson:2.6.2'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'com.google.truth:truth:0.27'
-    testCompile 'com.google.testing.compile:compile-testing:0.7'
-    testCompile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -70,7 +59,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 }
 
                 pom.project {
-                    name 'gsonpath-compiler'
+                    name 'gsonpath-compiler-base'
                     packaging 'jar'
                     description 'An annotation processor which generates Type Adapters for the Google Gson library'
                     url 'http://lachlanmckee.net/gsonpath/'

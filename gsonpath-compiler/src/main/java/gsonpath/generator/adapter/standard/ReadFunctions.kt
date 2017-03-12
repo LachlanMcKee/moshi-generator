@@ -1,26 +1,32 @@
 package gsonpath.generator.adapter.standard
 
+import com.google.common.collect.ImmutableList
+import com.google.gson.JsonElement
 import com.google.gson.stream.JsonReader
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
-import gsonpath.FlattenJson
-import gsonpath.GsonSubtype
-import gsonpath.ProcessingException
-import gsonpath.generator.adapter.*
+import gsonpath.*
+import gsonpath.compiler.GsonPathExtension
+import gsonpath.compiler.*
 import gsonpath.model.*
 import java.io.IOException
+import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
+
+val CLASS_NAME_JSON_ELEMENT: ClassName = ClassName.get(JsonElement::class.java)
 
 /**
  * public T read(JsonReader in) throws IOException {
  */
 @Throws(ProcessingException::class)
-fun createReadMethod(baseElement: ClassName,
+fun createReadMethod(processingEnvironment: ProcessingEnvironment,
+                     baseElement: ClassName,
                      concreteElement: ClassName,
                      mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
-                     rootElements: GsonObject): MethodSpec {
+                     rootElements: GsonObject,
+                     extensions: ImmutableList<GsonPathExtension>): MethodSpec {
 
     // Create a flat list of the variables and ensure they are ordered by their original field index within the POJO
     val flattenedFields = GsonObjectTreeFactory().getFlattenedFieldsFromGsonObject(rootElements)
@@ -60,7 +66,8 @@ fun createReadMethod(baseElement: ClassName,
     codeBlock.addNewLine()
 
     // Add the read code recursively for every single defined element
-    addReadCodeForElements(codeBlock, rootElements, requiresConstructorInjection, mandatoryInfoMap)
+    addReadCodeForElements(processingEnvironment, codeBlock, rootElements, requiresConstructorInjection,
+            mandatoryInfoMap, extensions)
 
     // Validate the mandatory fields (if any exist)
     addMandatoryValuesCheck(codeBlock, mandatoryInfoMap, concreteElement)
@@ -99,10 +106,12 @@ fun createReadMethod(baseElement: ClassName,
  * This is a recursive function.
  */
 @Throws(ProcessingException::class)
-private fun addReadCodeForElements(codeBlock: CodeBlock.Builder,
+private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
+                                   codeBlock: CodeBlock.Builder,
                                    jsonMapping: GsonObject,
                                    requiresConstructorInjection: Boolean,
                                    mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
+                                   extensions: ImmutableList<GsonPathExtension>,
                                    recursionCount: Int = 0): Int {
 
     val jsonMappingSize = jsonMapping.size()
@@ -114,7 +123,9 @@ private fun addReadCodeForElements(codeBlock: CodeBlock.Builder,
         val value = jsonMapping[jsonMapping.keySet().iterator().next()]
 
         if (value is GsonField && value.fieldInfo.isDirectAccess) {
-            writeGsonFieldReader(value, codeBlock, requiresConstructorInjection, mandatoryInfoMap[value.fieldInfo.fieldName])
+            writeGsonFieldReader(processingEnvironment, value, codeBlock, requiresConstructorInjection,
+                    mandatoryInfoMap[value.fieldInfo.fieldName], extensions)
+
             return recursionCount + 1
         }
     }
@@ -150,14 +161,15 @@ private fun addReadCodeForElements(codeBlock: CodeBlock.Builder,
 
         val value = jsonMapping[key]
         if (value is GsonField) {
-            writeGsonFieldReader(value, codeBlock, requiresConstructorInjection, mandatoryInfoMap[value.fieldInfo.fieldName])
+            writeGsonFieldReader(processingEnvironment, value, codeBlock, requiresConstructorInjection,
+                    mandatoryInfoMap[value.fieldInfo.fieldName], extensions)
 
         } else if (value is GsonObject) {
             codeBlock.addNewLine()
             addValidValueCheck(codeBlock, false)
 
-            newRecursionCount = addReadCodeForElements(codeBlock, value, requiresConstructorInjection,
-                    mandatoryInfoMap, newRecursionCount)
+            newRecursionCount = addReadCodeForElements(processingEnvironment, codeBlock, value,
+                    requiresConstructorInjection, mandatoryInfoMap, extensions, newRecursionCount)
         }
 
         codeBlock.addStatement("break")
@@ -181,10 +193,12 @@ private fun addReadCodeForElements(codeBlock: CodeBlock.Builder,
 }
 
 @Throws(ProcessingException::class)
-private fun writeGsonFieldReader(gsonField: GsonField,
+private fun writeGsonFieldReader(processingEnvironment: ProcessingEnvironment,
+                                 gsonField: GsonField,
                                  codeBlock: CodeBlock.Builder,
                                  requiresConstructorInjection: Boolean,
-                                 mandatoryFieldInfo: MandatoryFieldInfo?) {
+                                 mandatoryFieldInfo: MandatoryFieldInfo?,
+                                 extensions: ImmutableList<GsonPathExtension>) {
 
     val fieldInfo = gsonField.fieldInfo
 
@@ -231,6 +245,37 @@ private fun writeGsonFieldReader(gsonField: GsonField,
         }
 
         codeBlock.endControlFlow() // if
+    }
+
+    // Execute any extensions and add the code blocks if they exist.
+    val extensionsCodeBlockBuilder = CodeBlock.builder()
+    extensions.forEach { extension ->
+        val validationCodeBlock: CodeBlock? = extension.createFieldReadCodeBlock(processingEnvironment, fieldInfo, result.variableName)
+
+        if (validationCodeBlock != null && !validationCodeBlock.isEmpty) {
+            extensionsCodeBlockBuilder.addNewLine()
+                    .addComment("Extension - ${extension.extensionName}")
+                    .add(validationCodeBlock)
+                    .addNewLine()
+        }
+    }
+
+    // Wrap all of the extensions inside a block and potentially wrap it with a null-check.
+    val extensionsCodeBlock = extensionsCodeBlockBuilder.build()
+    if (!extensionsCodeBlock.isEmpty) {
+        codeBlock.addNewLine()
+                .addComment("Gsonpath Extensions")
+
+        // Handle the null-checking for the extensions to avoid repetition inside the extension implementations.
+        if (!fieldTypeName.isPrimitive) {
+            codeBlock.beginControlFlow("if (${result.variableName} != null)")
+        }
+
+        codeBlock.add(extensionsCodeBlock)
+
+        if (!fieldTypeName.isPrimitive) {
+            codeBlock.endControlFlow()
+        }
     }
 }
 

@@ -10,12 +10,30 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
+import com.google.common.collect.ImmutableList
+import gsonpath.compiler.GsonPathExtension
 
 open class GsonProcessorImpl : AbstractProcessor() {
 
     override fun process(annotations: Set<TypeElement>?, env: RoundEnvironment): Boolean {
         if (annotations == null || annotations.isEmpty()) {
             return false
+        }
+
+        // Load any extensions that are also available at compile time.
+        println()
+        val extensions: ImmutableList<GsonPathExtension> =
+                try {
+                    ImmutableList.copyOf(ServiceLoader.load(GsonPathExtension::class.java, javaClass.classLoader))
+
+                } catch (t: Throwable) {
+                    printError("Failed to load one or more GsonPath extensions. Cause: ${t.message}")
+                    return false
+                }
+
+        // Print the extensions for auditing purposes.
+        extensions.forEach {
+            printMessage("Extension found: " + it.extensionName)
         }
 
         println()
@@ -30,7 +48,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
             printMessage("Generating TypeAdapter ($element)")
 
             try {
-                autoGsonAdapterResults.add(adapterGenerator.handle(element as TypeElement))
+                autoGsonAdapterResults.add(adapterGenerator.handle(element as TypeElement, extensions))
             } catch (e: ProcessingException) {
                 printError(e.message, e.element ?: element)
                 return false
