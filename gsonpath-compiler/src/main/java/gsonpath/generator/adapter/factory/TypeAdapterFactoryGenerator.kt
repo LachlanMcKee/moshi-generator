@@ -6,6 +6,7 @@ import com.google.gson.TypeAdapterFactory
 import com.google.gson.reflect.TypeToken
 import com.squareup.javapoet.*
 import gsonpath.ProcessingException
+import gsonpath.compiler.addNewLine
 
 import java.util.*
 
@@ -14,7 +15,6 @@ import javax.lang.model.element.Modifier
 
 import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
-import gsonpath.generator.adapter.addNewLine
 import javax.lang.model.element.TypeElement
 
 class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {

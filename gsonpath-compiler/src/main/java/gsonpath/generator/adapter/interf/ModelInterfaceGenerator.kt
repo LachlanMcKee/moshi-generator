@@ -18,8 +18,8 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.MethodSpec
 import gsonpath.internal.GsonPathElementList
 import com.squareup.javapoet.TypeSpec
-import gsonpath.generator.adapter.generateClassName
-import gsonpath.generator.adapter.addNewLine
+import gsonpath.compiler.generateClassName
+import gsonpath.compiler.addNewLine
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 

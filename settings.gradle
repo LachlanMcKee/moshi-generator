@@ -1,3 +1,4 @@
 include ':gsonpath'
 include ':gsonpath-sample'
+include ':gsonpath-compiler-base'
 include ':gsonpath-compiler'
