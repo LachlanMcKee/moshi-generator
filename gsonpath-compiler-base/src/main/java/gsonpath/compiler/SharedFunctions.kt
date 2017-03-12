@@ -1,11 +1,12 @@
-package gsonpath.generator.adapter
+package gsonpath.compiler
 
-import com.google.gson.JsonElement
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
-import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import java.util.*
+import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeMirror
 
 val GSON_SUPPORTED_CLASSES: Set<TypeName> = HashSet(Arrays.asList(
         TypeName.get(Boolean::class.java).box(),
@@ -21,7 +22,6 @@ val GSON_SUPPORTED_PRIMITIVE = HashSet(Arrays.asList(
         TypeName.LONG,
         TypeName.DOUBLE
 ))
-val CLASS_NAME_JSON_ELEMENT: ClassName = ClassName.get(JsonElement::class.java)
 val CLASS_NAME_STRING: ClassName = ClassName.get(String::class.java)
 
 fun createDefaultVariableValueForTypeName(typeName: TypeName): String {
@@ -63,6 +63,19 @@ fun generateClassName(className: ClassName, classNameSuffix: String): String {
 
     // Make sure no '.' managed to sneak through!
     return fileName.replace(".", "_") + classNameSuffix
+}
+
+fun isFieldCollectionType(processingEnv: ProcessingEnvironment, typeMirror: TypeMirror): Boolean {
+    val rawType: TypeMirror = when (typeMirror) {
+        is DeclaredType -> typeMirror.typeArguments.first()
+
+        else -> return false
+    }
+
+    val collectionTypeElement = processingEnv.elementUtils.getTypeElement(Collection::class.java.name)
+    val collectionType = processingEnv.typeUtils.getDeclaredType(collectionTypeElement, rawType)
+
+    return processingEnv.typeUtils.isSubtype(typeMirror, collectionType)
 }
 
 fun CodeBlock.Builder.addWithNewLine(format: String, vararg args: Any): CodeBlock.Builder {

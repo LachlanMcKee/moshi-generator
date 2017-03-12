@@ -1,14 +1,17 @@
 package gsonpath.generator.adapter.standard
 
+import com.google.common.collect.ImmutableList
 import com.google.gson.Gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.*
 import gsonpath.*
+import gsonpath.compiler.GsonPathExtension
+import gsonpath.ProcessingException
+import gsonpath.compiler.generateClassName
 import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
 import gsonpath.generator.adapter.interf.ModelInterfaceGenerator
-import gsonpath.generator.adapter.generateClassName
 import gsonpath.model.*
 import java.io.IOException
 import javax.annotation.processing.ProcessingEnvironment
@@ -20,7 +23,7 @@ import javax.lang.model.type.TypeMirror
 class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
     @Throws(ProcessingException::class)
-    fun handle(modelElement: TypeElement): HandleResult {
+    fun handle(modelElement: TypeElement, extensions: ImmutableList<GsonPathExtension>): HandleResult {
         val modelClassName = ClassName.get(modelElement)
         val adapterClassName = ClassName.get(modelClassName.packageName(),
                 generateClassName(modelClassName, "GsonTypeAdapter"))
@@ -81,7 +84,8 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                     .build())
         }
 
-        adapterTypeBuilder.addMethod(createReadMethod(modelClassName, concreteClassName, mandatoryInfoMap, rootGsonObject))
+        adapterTypeBuilder.addMethod(createReadMethod(processingEnv, modelClassName, concreteClassName,
+                mandatoryInfoMap, rootGsonObject, extensions))
 
         if (!isModelInterface) {
             adapterTypeBuilder.addMethod(createWriteMethod(modelClassName, rootGsonObject, properties.serializeNulls))

@@ -2,7 +2,7 @@ package gsonpath.generator.adapter.standard
 
 import gsonpath.FlattenJson
 import gsonpath.ProcessingException
-import gsonpath.generator.adapter.CLASS_NAME_STRING
+import gsonpath.compiler.CLASS_NAME_STRING
 import gsonpath.model.FieldInfo
 
 fun validateFieldAnnotations(fieldInfo: FieldInfo) {

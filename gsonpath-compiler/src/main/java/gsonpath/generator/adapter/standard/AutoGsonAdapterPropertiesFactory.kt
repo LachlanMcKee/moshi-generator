@@ -2,6 +2,7 @@ package gsonpath.generator.adapter.standard
 
 import com.google.gson.FieldNamingPolicy
 import gsonpath.*
+import gsonpath.ProcessingException
 import gsonpath.model.GsonFieldNamingPolicyFactory
 
 import java.util.HashSet

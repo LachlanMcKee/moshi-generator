@@ -12,7 +12,8 @@ import gsonpath.GsonSubTypeFailureOutcome
 import gsonpath.GsonSubtype
 import gsonpath.GsonSubTypeFailureException
 import gsonpath.ProcessingException
-import gsonpath.generator.adapter.addComment
+import gsonpath.compiler.addComment
+import gsonpath.compiler.isFieldCollectionType
 import gsonpath.internal.CollectionTypeAdapter
 import gsonpath.internal.StrictArrayTypeAdapter
 import gsonpath.model.GsonField
@@ -224,11 +225,7 @@ private fun isArrayType(processingEnv: ProcessingEnvironment, gsonField: GsonFie
         return true
     }
 
-    // Create a 'Collection<T>' type and ensure that the collection type provided is a subtype.
-    val collectionTypeElement = processingEnv.elementUtils.getTypeElement(Collection::class.java.name)
-    val collectionType = processingEnv.typeUtils.getDeclaredType(collectionTypeElement, getRawType(gsonField))
-
-    if (processingEnv.typeUtils.isSubtype(typeMirror, collectionType)) {
+    if (isFieldCollectionType(processingEnv, typeMirror)) {
         return false
     }
 

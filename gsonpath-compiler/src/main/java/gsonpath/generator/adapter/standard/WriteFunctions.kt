@@ -7,9 +7,9 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
-import gsonpath.generator.adapter.GSON_SUPPORTED_CLASSES
-import gsonpath.generator.adapter.addComment
-import gsonpath.generator.adapter.addNewLine
+import gsonpath.compiler.GSON_SUPPORTED_CLASSES
+import gsonpath.compiler.addComment
+import gsonpath.compiler.addNewLine
 import gsonpath.model.GsonField
 import gsonpath.model.GsonObject
 import java.io.IOException
