@@ -1,8 +1,8 @@
 package gsonpath
 
 import gsonpath.generator.HandleResult
-import gsonpath.generator.adapter.standard.AutoGsonAdapterGenerator
-import gsonpath.generator.adapter.factory.TypeAdapterFactoryGenerator
+import gsonpath.generator.standard.AutoGsonAdapterGenerator
+import gsonpath.generator.factory.TypeAdapterFactoryGenerator
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
