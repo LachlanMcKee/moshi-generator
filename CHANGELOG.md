@@ -4,7 +4,7 @@ Change Log
 Version 2.2.0 *(2017-03-12)*
 ----------------------------
 
-* New: Added extension support (Promposed within Issue [#87](../../issues/87))
+* New: Added extension support (Proposed within Issue [#87](../../issues/87))
      * This allows other libraries to extend the existing field validation.
      * The first extension implementation adds validation for fields annotated with [Android Support Library annotations](https://developer.android.com/reference/android/support/annotation/package-summary.html) annotations. This library can be found [here](https://github.com/LachlanMcKee/gsonpath-extensions-android).
           * This library adds support for validating `@FloatRange`, `@IntRange`, `@StringDef` and `@IntDef`
