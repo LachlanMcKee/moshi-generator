@@ -10,8 +10,6 @@ targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
 
 buildscript {
-    ext.kotlin_version = '1.0.5'
-
     repositories {
         mavenCentral()
     }
@@ -21,20 +19,20 @@ buildscript {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:1.0.5"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     compile project(":gsonpath")
     compile project(":gsonpath-compiler-base")
 
-    compile 'com.squareup:javapoet:1.7.0'
-    compile 'com.google.auto.service:auto-service:1.0-rc2'
-    compile 'com.google.auto:auto-common:0.6'
-    compile 'com.google.code.gson:gson:2.6.2'
+    compile "com.squareup:javapoet:$javapoet_version"
+    compile "com.google.auto.service:auto-service:1.0-rc2"
+    compile "com.google.auto:auto-common:0.6"
+    compile "com.google.code.gson:gson:$gson_version"
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'com.google.truth:truth:0.27'
-    testCompile 'com.google.testing.compile:compile-testing:0.7'
+    testCompile "junit:junit:$junit_version"
+    testCompile "org.mockito:mockito-core:1.10.19"
+    testCompile "com.google.truth:truth:0.34"
+    testCompile "com.google.testing.compile:compile-testing:0.11"
     testCompile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
 }
 

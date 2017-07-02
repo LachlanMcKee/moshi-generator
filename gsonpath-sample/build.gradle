@@ -17,11 +17,11 @@ buildscript {
 apply plugin: "net.ltgt.apt"
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.6.2'
+    compile "com.google.code.gson:gson:$gson_version"
 
     compile project(":gsonpath")
     apt project(":gsonpath-compiler")
 
-    testCompile 'junit:junit:4.12'
+    testCompile "junit:junit:$junit_version"
     testApt project(":gsonpath-compiler")
 }
