@@ -21,7 +21,7 @@ open class BaseGsonObjectFactoryTest {
     @JvmOverloads internal fun mockFieldInfo(fieldName: String, jsonPath: String? = null): FieldInfo {
         val fieldInfo = mock(FieldInfo::class.java)
         `when`(fieldInfo.typeName).thenReturn(TypeName.INT)
-        `when`(fieldInfo.annotationNames).thenReturn(emptyArray())
+        `when`(fieldInfo.annotationNames).thenReturn(emptyList())
         `when`(fieldInfo.fieldName).thenReturn(fieldName)
 
         if (jsonPath != null) {

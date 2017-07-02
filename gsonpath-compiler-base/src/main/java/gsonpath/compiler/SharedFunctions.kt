@@ -56,13 +56,10 @@ fun generateClassName(className: ClassName, classNameSuffix: String): String {
     // We need to ensure that nested classes are have include their parent class as part of the name.
     // Otherwise this could cause file name contention when other nested classes have the same name
     //
-    var fileName = ""
-    for (name in className.simpleNames()) {
-        fileName += name + "_"
-    }
+    val fileName = className.simpleNames().joinToString("_")
 
     // Make sure no '.' managed to sneak through!
-    return fileName.replace(".", "_") + classNameSuffix
+    return fileName.replace(".", "_") + "_" + classNameSuffix
 }
 
 fun isFieldCollectionType(processingEnv: ProcessingEnvironment, typeMirror: TypeMirror): Boolean {

@@ -6,9 +6,16 @@ import org.junit.Test
 class NestedClassTest : BaseGeneratorTest() {
     @Test
     fun testNestedClasses() {
-        assertGeneratedContent(TestCriteria("generator/standard/nested_class")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestNestedClass.java")
-                .addRelativeGenerated("TestNestedClass_Nested_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/nested_class",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestNestedClass.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestNestedClass_Nested_GsonTypeAdapter.java")
+        ))
     }
 }

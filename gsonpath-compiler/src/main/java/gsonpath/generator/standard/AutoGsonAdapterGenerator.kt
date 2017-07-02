@@ -1,6 +1,5 @@
 package gsonpath.generator.standard
 
-import com.google.common.collect.ImmutableList
 import com.google.gson.Gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonWriter
@@ -23,7 +22,7 @@ import javax.lang.model.type.TypeMirror
 class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
     @Throws(ProcessingException::class)
-    fun handle(modelElement: TypeElement, extensions: ImmutableList<GsonPathExtension>): HandleResult {
+    fun handle(modelElement: TypeElement, extensions: List<GsonPathExtension>): HandleResult {
         val modelClassName = ClassName.get(modelElement)
         val adapterClassName = ClassName.get(modelClassName.packageName(),
                 generateClassName(modelClassName, "GsonTypeAdapter"))
@@ -119,26 +118,22 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
     @Throws(ProcessingException::class)
     private fun getDefaultsAnnotation(autoGsonAnnotation: AutoGsonAdapter): GsonPathDefaultConfiguration? {
         // Annotation processors seem to make obtaining this value difficult!
-        var defaultsTypeMirror: TypeMirror? = null
-
-        try {
-            autoGsonAnnotation.defaultConfiguration
-        } catch (mte: MirroredTypeException) {
-            defaultsTypeMirror = mte.typeMirror
-        }
+        val defaultsTypeMirror: TypeMirror? =
+                try {
+                    autoGsonAnnotation.defaultConfiguration
+                    null
+                } catch (mte: MirroredTypeException) {
+                    mte.typeMirror
+                }
 
         val defaultsElement = processingEnv.typeUtils.asElement(defaultsTypeMirror)
 
-        var defaultsAnnotation: GsonPathDefaultConfiguration? = null
         if (defaultsElement != null) {
             // If an inheritable annotation is used, used the default instead.
-            defaultsAnnotation = defaultsElement.getAnnotation(GsonPathDefaultConfiguration::class.java)
-
-            if (defaultsAnnotation == null) {
-                throw ProcessingException("Defaults property must point to a class which uses the @GsonPathDefaultConfiguration annotation")
-            }
+            return defaultsElement.getAnnotation(GsonPathDefaultConfiguration::class.java) ?:
+                    throw ProcessingException("Defaults property must point to a class which uses the @GsonPathDefaultConfiguration annotation")
         }
 
-        return defaultsAnnotation
+        return null
     }
 }

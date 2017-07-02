@@ -10,7 +10,6 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
-import com.google.common.collect.ImmutableList
 import gsonpath.compiler.GsonPathExtension
 
 open class GsonProcessorImpl : AbstractProcessor() {
@@ -22,9 +21,9 @@ open class GsonProcessorImpl : AbstractProcessor() {
 
         // Load any extensions that are also available at compile time.
         println()
-        val extensions: ImmutableList<GsonPathExtension> =
+        val extensions: List<GsonPathExtension> =
                 try {
-                    ImmutableList.copyOf(ServiceLoader.load(GsonPathExtension::class.java, javaClass.classLoader))
+                    ServiceLoader.load(GsonPathExtension::class.java, javaClass.classLoader).toList()
 
                 } catch (t: Throwable) {
                     printError("Failed to load one or more GsonPath extensions. Cause: ${t.message}")
@@ -43,18 +42,17 @@ open class GsonProcessorImpl : AbstractProcessor() {
         // Handle the standard type adapters.
         val adapterGenerator = AutoGsonAdapterGenerator(processingEnv)
 
-        val autoGsonAdapterResults = ArrayList<HandleResult>()
-        for (element in generatedAdapters) {
-            printMessage("Generating TypeAdapter ($element)")
+        val autoGsonAdapterResults: List<HandleResult> =
+                generatedAdapters.map {
+                    printMessage("Generating TypeAdapter ($it)")
 
-            try {
-                autoGsonAdapterResults.add(adapterGenerator.handle(element as TypeElement, extensions))
-            } catch (e: ProcessingException) {
-                printError(e.message, e.element ?: element)
-                return false
-            }
-
-        }
+                    try {
+                        adapterGenerator.handle(it as TypeElement, extensions)
+                    } catch (e: ProcessingException) {
+                        printError(e.message, e.element ?: it)
+                        return false
+                    }
+                }
 
         if (autoGsonAdapterResults.isNotEmpty()) {
             val gsonPathFactories = env.getElementsAnnotatedWith(AutoGsonAdapterFactory::class.java)
@@ -102,10 +100,9 @@ open class GsonProcessorImpl : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): Set<String> {
-        val supportedTypes = LinkedHashSet<String>()
-        supportedTypes.add(AutoGsonAdapter::class.java.canonicalName)
-        supportedTypes.add(AutoGsonAdapterFactory::class.java.canonicalName)
-        return supportedTypes
+        return setOf(
+                AutoGsonAdapter::class.java.canonicalName,
+                AutoGsonAdapterFactory::class.java.canonicalName)
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {

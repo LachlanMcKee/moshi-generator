@@ -75,7 +75,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())
         }
 
-        val fieldInfo = arrayOf(InterfaceFieldInfo(object : InterfaceFieldInfo.ElementInfo {
+        val fieldInfo = listOf(InterfaceFieldInfo(object : InterfaceFieldInfo.ElementInfo {
             override val underlyingElement: Element?
                 get() = null
 
@@ -83,8 +83,8 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 return null
             }
 
-            override val annotationNames: Array<String>
-                get() = arrayOf("AutoGsonAdapter", "NonNull")
+            override val annotationNames: List<String>
+                get() = listOf("AutoGsonAdapter", "NonNull")
 
         }, listTypeName, listTypeMirror, "internalList", true))
 
@@ -290,7 +290,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())
         }
 
-        return InterfaceInfo(outputClassName, interfaceInfoList.toTypedArray())
+        return InterfaceInfo(outputClassName, interfaceInfoList)
     }
 
     private fun getMethodElements(element: TypeElement): List<Element> {
@@ -307,11 +307,11 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             return underlyingElement.getAnnotation(annotationClass)
         }
 
-        override val annotationNames: Array<String>
+        override val annotationNames: List<String>
             get() {
                 return underlyingElement.annotationMirrors.map { it ->
                     it.annotationType.asElement().simpleName.toString()
-                }.toTypedArray()
+                }
             }
     }
 

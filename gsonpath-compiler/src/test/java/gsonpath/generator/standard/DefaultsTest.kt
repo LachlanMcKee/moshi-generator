@@ -6,19 +6,33 @@ import org.junit.Test
 class DefaultsTest : BaseGeneratorTest() {
     @Test
     fun testUseInheritance() {
-        assertGeneratedContent(TestCriteria("generator/standard/defaults")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestDefaultsConfig.java")
-                .addRelativeSource("TestDefaultsUseInheritanceModel.java")
-                .addRelativeGenerated("TestDefaultsUseInheritanceModel_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/defaults",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestDefaultsConfig.java",
+                        "TestDefaultsUseInheritanceModel.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestDefaultsUseInheritanceModel_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testOverrideInheritance() {
-        assertGeneratedContent(TestCriteria("generator/standard/defaults")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestDefaultsConfig.java")
-                .addRelativeSource("TestDefaultsOverrideInheritanceModel.java")
-                .addRelativeGenerated("TestDefaultsOverrideInheritanceModel_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/defaults",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestDefaultsConfig.java",
+                        "TestDefaultsOverrideInheritanceModel.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestDefaultsOverrideInheritanceModel_GsonTypeAdapter.java")
+        ))
     }
 }

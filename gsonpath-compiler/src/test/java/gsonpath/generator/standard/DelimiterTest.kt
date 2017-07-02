@@ -7,26 +7,47 @@ class DelimiterTest : BaseGeneratorTest() {
 
     @Test
     fun testStandardDelimiter() {
-        assertGeneratedContent(TestCriteria("generator/standard/delimiter/standard")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestStandardDelimiter.java")
-                .addRelativeGenerated("TestStandardDelimiter_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/delimiter/standard",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestStandardDelimiter.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestStandardDelimiter_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testCustomDelimiter() {
-        assertGeneratedContent(TestCriteria("generator/standard/delimiter/custom")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestCustomDelimiter.java")
-                .addRelativeGenerated("TestCustomDelimiter_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/delimiter/custom",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestCustomDelimiter.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestCustomDelimiter_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testMultipleDelimiters() {
-        assertGeneratedContent(TestCriteria("generator/standard/delimiter/multiple")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestMultipleDelimiters.java")
-                .addRelativeGenerated("TestMultipleDelimiters_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/delimiter/multiple",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestMultipleDelimiters.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestMultipleDelimiters_GsonTypeAdapter.java")
+        ))
     }
 
 }
