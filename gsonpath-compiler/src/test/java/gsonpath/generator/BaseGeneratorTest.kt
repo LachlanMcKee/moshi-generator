@@ -5,7 +5,6 @@ import com.google.testing.compile.ProcessedCompileTesterFactory
 import gsonpath.GsonProcessorImpl
 
 import javax.tools.JavaFileObject
-import java.util.ArrayList
 import java.util.Arrays
 
 import com.google.common.truth.Truth.assertAbout
@@ -47,38 +46,11 @@ abstract class BaseGeneratorTest {
         }
     }
 
-    class TestCriteria(private val resourcePath: String) {
-        private val relativeSourceNames: MutableList<String>
-        private val relativeGeneratedNames: MutableList<String>
-        private val absoluteSourceNames: MutableList<String>
-        private val absoluteGeneratedNames: MutableList<String>
-
-        init {
-            this.relativeSourceNames = ArrayList<String>()
-            this.relativeGeneratedNames = ArrayList<String>()
-            this.absoluteSourceNames = ArrayList<String>()
-            this.absoluteGeneratedNames = ArrayList<String>()
-        }
-
-        fun addRelativeSource(fileName: String): TestCriteria {
-            this.relativeSourceNames.add(fileName)
-            return this
-        }
-
-        fun addRelativeGenerated(fileName: String): TestCriteria {
-            this.relativeGeneratedNames.add(fileName)
-            return this
-        }
-
-        fun addAbsoluteSource(fileName: String): TestCriteria {
-            this.absoluteSourceNames.add(fileName)
-            return this
-        }
-
-        fun addAbsoluteGenerated(fileName: String): TestCriteria {
-            this.absoluteGeneratedNames.add(fileName)
-            return this
-        }
+    data class TestCriteria(private val resourcePath: String,
+                            val relativeSourceNames: List<String> = emptyList(),
+                            val relativeGeneratedNames: List<String> = emptyList(),
+                            val absoluteSourceNames: List<String> = emptyList(),
+                            val absoluteGeneratedNames: List<String> = emptyList()) {
 
         internal val sourceFilesSize: Int
             get() = relativeSourceNames.size + absoluteSourceNames.size

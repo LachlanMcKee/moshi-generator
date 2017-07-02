@@ -9,90 +9,146 @@ import org.junit.Test
 class PolymorphismTest : BaseGeneratorTest() {
     @Test
     fun givenStringKeys_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/string_keys")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/string_keys",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenIntegerKeys_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/integer_keys")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/integer_keys",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenBooleanKeys_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/boolean_keys")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/boolean_keys",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenStringKeysWithInterface_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/using_interface")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/using_interface",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenStringKeysWithListField_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/using_list")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/using_list",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenDefaultValueAndDefaultFailureOutcome_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/default_value")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/default_value",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenRemoveElementFailureOutcome_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/failure_outcome_remove_element")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/failure_outcome_remove_element",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun givenFailFailureOutcome_whenProcessorExecuted_expectValidGsonTypeAdapter() {
-        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/failure_outcome_fail")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type1.java")
-                .addAbsoluteSource("generator/standard/polymorphism/Type2.java")
-                .addRelativeSource("TypesList.java")
-                .addRelativeGenerated("TypesList_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/polymorphism/failure_outcome_fail",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java",
+                        "generator/standard/polymorphism/Type.java",
+                        "generator/standard/polymorphism/Type1.java",
+                        "generator/standard/polymorphism/Type2.java"),
+
+                relativeSourceNames = listOf(
+                        "TypesList.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TypesList_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
@@ -120,9 +176,13 @@ class PolymorphismTest : BaseGeneratorTest() {
     }
 
     private fun assertPolymorphismFailure(className: String, errorMessage: String) {
-        val criteria = TestCriteria("generator/standard/polymorphism/failures")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource(className)
+        val criteria = TestCriteria("generator/standard/polymorphism/failures",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        className))
 
         val sourceFilesSize = criteria.sourceFilesSize
         val sources = (0..sourceFilesSize - 1).map { criteria.getSourceFileObject(it) }

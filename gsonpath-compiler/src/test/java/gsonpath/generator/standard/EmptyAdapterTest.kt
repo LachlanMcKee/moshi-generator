@@ -17,25 +17,46 @@ class EmptyAdapterTest : BaseGeneratorTest() {
      */
     @Test
     fun testAutoGsonAdapterOnly() {
-        assertGeneratedContent(TestCriteria("generator/standard/empty/annotation_only")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestAnnotationOnly.java")
-                .addRelativeGenerated("TestAnnotationOnly_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/empty/annotation_only",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestAnnotationOnly.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestAnnotationOnly_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testRequiresAnnotation() {
-        assertGeneratedContent(TestCriteria("generator/standard/empty/ignored_fields")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestIgnoredFields.java")
-                .addRelativeGenerated("TestIgnoredFields_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/empty/ignored_fields",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestIgnoredFields.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestIgnoredFields_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testIgnoreInvalidFields() {
-        assertGeneratedContent(TestCriteria("generator/standard/empty/invalid_fields")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestInvalidFields.java")
-                .addRelativeGenerated("TestInvalidFields_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/empty/invalid_fields",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestInvalidFields.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestInvalidFields_GsonTypeAdapter.java")
+        ))
     }
 }

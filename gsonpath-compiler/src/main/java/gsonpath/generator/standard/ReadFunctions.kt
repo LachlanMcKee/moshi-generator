@@ -1,6 +1,5 @@
 package gsonpath.generator.standard
 
-import com.google.common.collect.ImmutableList
 import com.google.gson.JsonElement
 import com.google.gson.stream.JsonReader
 import com.squareup.javapoet.ClassName
@@ -26,7 +25,7 @@ fun createReadMethod(processingEnvironment: ProcessingEnvironment,
                      concreteElement: ClassName,
                      mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
                      rootElements: GsonObject,
-                     extensions: ImmutableList<GsonPathExtension>): MethodSpec {
+                     extensions: List<GsonPathExtension>): MethodSpec {
 
     // Create a flat list of the variables and ensure they are ordered by their original field index within the POJO
     val flattenedFields = GsonObjectTreeFactory().getFlattenedFieldsFromGsonObject(rootElements)
@@ -111,7 +110,7 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
                                    jsonMapping: GsonObject,
                                    requiresConstructorInjection: Boolean,
                                    mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
-                                   extensions: ImmutableList<GsonPathExtension>,
+                                   extensions: List<GsonPathExtension>,
                                    recursionCount: Int = 0): Int {
 
     val jsonMappingSize = jsonMapping.size()
@@ -120,7 +119,7 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
     }
 
     if (jsonMappingSize == 1) {
-        val value = jsonMapping[jsonMapping.keySet().iterator().next()]
+        val value = jsonMapping.entries().first().value
 
         if (value is GsonField && value.fieldInfo.isDirectAccess) {
             writeGsonFieldReader(processingEnvironment, value, codeBlock, requiresConstructorInjection,
@@ -131,7 +130,6 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
     }
 
     val counterVariableName = "jsonFieldCounter" + recursionCount
-    var newRecursionCount = recursionCount + 1
 
     codeBlock.addStatement("int $counterVariableName = 0")
             .addStatement("in.beginObject()")
@@ -151,7 +149,7 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
 
             .beginControlFlow("switch (in.nextName())")
 
-    for (key in jsonMapping.keySet()) {
+    val overallRecursionCount = jsonMapping.entries().fold(recursionCount + 1) { currentOverallRecursionCount, (key, value) ->
         codeBlock.add("""case "$key":""")
                 .addNewLine()
                 .indent()
@@ -159,22 +157,30 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
                 // Increment the counter to ensure we track how many fields we have mapped.
                 .addStatement("$counterVariableName++")
 
-        val value = jsonMapping[key]
-        if (value is GsonField) {
-            writeGsonFieldReader(processingEnvironment, value, codeBlock, requiresConstructorInjection,
-                    mandatoryInfoMap[value.fieldInfo.fieldName], extensions)
+        val recursionCountForModel: Int =
+                when (value) {
+                    is GsonField -> {
+                        writeGsonFieldReader(processingEnvironment, value, codeBlock, requiresConstructorInjection,
+                                mandatoryInfoMap[value.fieldInfo.fieldName], extensions)
 
-        } else if (value is GsonObject) {
-            codeBlock.addNewLine()
-            addValidValueCheck(codeBlock, false)
+                        // No extra recursion has happened.
+                        currentOverallRecursionCount
+                    }
 
-            newRecursionCount = addReadCodeForElements(processingEnvironment, codeBlock, value,
-                    requiresConstructorInjection, mandatoryInfoMap, extensions, newRecursionCount)
-        }
+                    is GsonObject -> {
+                        codeBlock.addNewLine()
+                        addValidValueCheck(codeBlock, false)
+
+                        addReadCodeForElements(processingEnvironment, codeBlock, value,
+                                requiresConstructorInjection, mandatoryInfoMap, extensions, currentOverallRecursionCount)
+                    }
+                }
 
         codeBlock.addStatement("break")
                 .addNewLine()
                 .unindent()
+
+        return@fold recursionCountForModel
     }
 
     codeBlock.addWithNewLine("default:")
@@ -189,7 +195,7 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
 
             .addStatement("in.endObject()")
 
-    return newRecursionCount
+    return overallRecursionCount
 }
 
 @Throws(ProcessingException::class)
@@ -198,7 +204,7 @@ private fun writeGsonFieldReader(processingEnvironment: ProcessingEnvironment,
                                  codeBlock: CodeBlock.Builder,
                                  requiresConstructorInjection: Boolean,
                                  mandatoryFieldInfo: MandatoryFieldInfo?,
-                                 extensions: ImmutableList<GsonPathExtension>) {
+                                 extensions: List<GsonPathExtension>) {
 
     val fieldInfo = gsonField.fieldInfo
 

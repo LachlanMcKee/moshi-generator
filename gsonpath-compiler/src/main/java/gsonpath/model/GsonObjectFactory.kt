@@ -30,32 +30,28 @@ class GsonObjectFactory {
 
         val serializedNameAnnotation = fieldInfo.getAnnotation(SerializedName::class.java)
         val fieldName = fieldInfo.fieldName
-        var jsonFieldPath: String
+        val jsonFieldPath: String =
+                if (serializedNameAnnotation != null && serializedNameAnnotation.value.isNotEmpty()) {
+                    if (pathSubstitutions.isNotEmpty()) {
 
-        if (serializedNameAnnotation != null && serializedNameAnnotation.value.isNotEmpty()) {
-            jsonFieldPath = serializedNameAnnotation.value
+                        // Check if the serialized name needs any values to be substituted
+                        pathSubstitutions.fold(serializedNameAnnotation.value) { fieldPath, substitution ->
+                            fieldPath.replace("{${substitution.original}}", substitution.replacement)
+                        }
 
-            // Check if the serialized name needs any values to be substituted
-            for (substitution in pathSubstitutions) {
-                jsonFieldPath = jsonFieldPath.replace(("\\{" + substitution.original + "\\}").toRegex(), substitution.replacement)
-            }
+                    } else {
+                        serializedNameAnnotation.value
+                    }
 
-        } else {
-            // Since the serialized annotation wasn't specified, we need to apply the naming policy instead.
-            jsonFieldPath = applyFieldNamingPolicy(gsonFieldNamingPolicy, fieldName)
-        }
-
-        var isMandatory = false
-        var isOptional = false
+                } else {
+                    // Since the serialized annotation wasn't specified, we need to apply the naming policy instead.
+                    applyFieldNamingPolicy(gsonFieldNamingPolicy, fieldName)
+                }
 
         // Attempt to find a Nullable or NonNull annotation type.
-        for (annotationName in fieldInfo.annotationNames) {
-            when (annotationName) {
-                "Nullable" -> isOptional = true
-
-            // Intentional fall-through. There are several different variations!
-                "NonNull", "Nonnull", "NotNull", "Notnull" -> isMandatory = true
-            }
+        val isOptional: Boolean = fieldInfo.annotationNames.any { it == "Nullable" }
+        val isMandatory: Boolean = fieldInfo.annotationNames.any {
+            arrayOf("NonNull", "Nonnull", "NotNull", "Notnull").contains(it)
         }
 
         // Fields cannot use both annotations.
@@ -69,23 +65,24 @@ class GsonObjectFactory {
             throw ProcessingException("Primitives should not use NonNull or Nullable annotations", fieldInfo.element)
         }
 
-        var isRequired = isMandatory
+        val isRequired = when {
+            isOptional ->
+                // Optionals will never fail regardless of the policy.
+                false
 
-        when (gsonFieldValidationType) {
-            GsonFieldValidationType.VALIDATE_ALL_EXCEPT_NULLABLE ->
+            gsonFieldValidationType == GsonFieldValidationType.VALIDATE_ALL_EXCEPT_NULLABLE ->
                 // Using this policy everything is mandatory except for optionals.
-                isRequired = true
+                true
 
-            GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL ->
+            gsonFieldValidationType == GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL && isPrimitive ->
                 // Primitives are treated as non-null implicitly.
-                if (isPrimitive) {
-                    isRequired = true
-                }
-        }
+                true
 
-        // Optionals will never fail regardless of the policy.
-        if (isOptional || gsonFieldValidationType == GsonFieldValidationType.NO_VALIDATION) {
-            isRequired = false
+            gsonFieldValidationType == GsonFieldValidationType.NO_VALIDATION ->
+                false
+
+            else ->
+                isMandatory
         }
 
         if (jsonFieldPath.contains(flattenDelimiter.toString())) {
@@ -106,54 +103,58 @@ class GsonObjectFactory {
                               isRequired: Boolean,
                               fieldName: String) {
 
-        var jsonFieldPath = initialJsonFieldPath
-        //
-        // When the last character is a delimiter, we should append the variable name to
-        // the end of the field name, as this may reduce annotation repetition.
-        //
-        if (jsonFieldPath[jsonFieldPath.length - 1] == flattenDelimiter) {
-            jsonFieldPath += fieldName
-        }
+        val jsonFieldPath =
+                //
+                // When the last character is a delimiter, we should append the variable name to
+                // the end of the field name, as this may reduce annotation repetition.
+                //
+                if (initialJsonFieldPath[initialJsonFieldPath.length - 1] == flattenDelimiter) {
+                    initialJsonFieldPath + fieldName
+                } else {
+                    initialJsonFieldPath
+                }
 
         // Ensure that the delimiter is correctly escaped before attempting to pathSegments the string.
-        val regexSafeDelimiter = Pattern.quote(flattenDelimiter.toString())
-        val pathSegments = jsonFieldPath.split(regexSafeDelimiter.toRegex()).dropLastWhile(String::isEmpty).toTypedArray()
+        val regexSafeDelimiter: Regex = Pattern.quote(flattenDelimiter.toString()).toRegex()
+        val pathSegments: List<String> = jsonFieldPath.split(regexSafeDelimiter)
 
         val lastPathIndex = pathSegments.size - 1
-        var currentGsonType: Any = gsonPathObject
 
-        for (currentSegmentIndex in 0..lastPathIndex + 1 - 1) {
-            val pathSegment = pathSegments[currentSegmentIndex]
+        (0..lastPathIndex).fold(gsonPathObject as GsonModel) { current: GsonModel, index ->
+            val pathSegment = pathSegments[index]
 
-            if (currentSegmentIndex < lastPathIndex) {
+            if (index < lastPathIndex) {
 
-                if (currentGsonType.javaClass == GsonObject::class.java) {
-                    val currentGsonObject = currentGsonType as GsonObject
-                    val o = currentGsonObject[pathSegment]
+                if (current is GsonObject) {
+                    val gsonType = current[pathSegment]
 
-                    if (o != null) {
-                        if (o.javaClass == GsonObject::class.java) {
-                            currentGsonType = o
+                    if (gsonType != null) {
+                        if (gsonType is GsonObject) {
+                            return@fold gsonType
 
                         } else {
                             // If this value already exists, and it is not a tree branch, that means we have an invalid duplicate.
-                            throwDuplicateFieldException(fieldInfo.element, pathSegment)
+                            throw ProcessingException("Unexpected duplicate field '" + pathSegment +
+                                    "' found. Each tree branch must use a unique value!", fieldInfo.element)
                         }
                     } else {
                         val newMap = GsonObject()
-                        currentGsonObject.addObject(pathSegment, newMap)
-                        currentGsonType = newMap
+                        current.addObject(pathSegment, newMap)
+                        return@fold newMap
                     }
+                } else {
+                    throw ProcessingException("This should not happen!", fieldInfo.element)
                 }
 
             } else {
                 // We have reached the end of this object branch, add the field at the end.
                 try {
                     val field = GsonField(fieldInfoIndex, fieldInfo, jsonFieldPath, isRequired)
-                    (currentGsonType as GsonObject).addField(pathSegment, field)
+                    return@fold (current as GsonObject).addField(pathSegment, field)
 
                 } catch (e: IllegalArgumentException) {
-                    throwDuplicateFieldException(fieldInfo.element, pathSegment)
+                    throw ProcessingException("Unexpected duplicate field '" + pathSegment +
+                            "' found. Each tree branch must use a unique value!", fieldInfo.element)
                 }
 
             }

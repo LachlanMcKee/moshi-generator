@@ -11,13 +11,20 @@ import com.google.testing.compile.JavaSourceSubjectFactory.javaSource
 class SubstitutionTest : BaseGeneratorTest() {
     @Test
     fun testValidSubstitution() {
-        assertGeneratedContent(TestCriteria("generator/standard/substitution/valid")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestSubstitutionBase.java")
-                .addRelativeSource("TestSubstitutionImpl1.java")
-                .addRelativeSource("TestSubstitutionImpl2.java")
-                .addRelativeGenerated("TestSubstitutionImpl1_GsonTypeAdapter.java")
-                .addRelativeGenerated("TestSubstitutionImpl2_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/substitution/valid",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestSubstitutionBase.java",
+                        "TestSubstitutionImpl1.java",
+                        "TestSubstitutionImpl2.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestSubstitutionImpl1_GsonTypeAdapter.java",
+                        "TestSubstitutionImpl2_GsonTypeAdapter.java")
+        ))
     }
 
     @Test

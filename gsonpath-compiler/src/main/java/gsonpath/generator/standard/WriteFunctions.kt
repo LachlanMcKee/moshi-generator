@@ -41,108 +41,113 @@ fun createWriteMethod(elementClassName: ClassName,
             .addNewLine()
             .addComment("Begin")
 
-    writeGsonFieldWriter(0, codeBlock, rootElements, "", serializeNulls, mutableListOf())
+    writeGsonFieldWriter(codeBlock, rootElements, "", serializeNulls, 0)
 
     writeMethod.addCode(codeBlock.build())
     return writeMethod.build()
 }
 
 @Throws(ProcessingException::class)
-private fun writeGsonFieldWriter(fieldDepth: Int,
-                                 codeBlock: CodeBlock.Builder,
+private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
                                  jsonMapping: GsonObject,
                                  currentPath: String,
                                  serializeNulls: Boolean,
-                                 arrayNameCounterList: MutableList<Boolean>) {
+                                 currentFieldCount: Int): Int {
 
     codeBlock.addStatement("out.beginObject()")
 
-    for (key in jsonMapping.keySet()) {
-        val value = jsonMapping[key]
+    val overallFieldCount: Int = jsonMapping.entries().fold(currentFieldCount) { fieldCount, (key, value) ->
+        when (value) {
+            is GsonField -> {
+                val fieldInfo = value.fieldInfo
 
-        if (value is GsonField) {
-            val fieldInfo = value.fieldInfo
+                // Make sure the field's annotations don't have any problems.
+                validateFieldAnnotations(fieldInfo)
 
-            // Make sure the field's annotations don't have any problems.
-            validateFieldAnnotations(fieldInfo)
+                val fieldTypeName = fieldInfo.typeName
+                val isPrimitive = fieldTypeName.isPrimitive
 
-            val fieldTypeName = fieldInfo.typeName
-            val isPrimitive = fieldTypeName.isPrimitive
+                val objectName = "obj" + fieldCount
 
-            val objectName = "obj" + arrayNameCounterList.size
-            arrayNameCounterList.add(true)
+                codeBlock.addStatement("\$T $objectName = value.${fieldInfo.fieldName}", fieldTypeName)
 
-            codeBlock.addStatement("\$T $objectName = value.${fieldInfo.fieldName}", fieldTypeName)
+                // If we aren't serializing nulls, we need to prevent the 'out.name' code being executed.
+                if (!isPrimitive && !serializeNulls) {
+                    codeBlock.beginControlFlow("if ($objectName != null)")
+                }
+                codeBlock.addStatement("""out.name("$key")""")
 
-            // If we aren't serializing nulls, we need to prevent the 'out.name' code being executed.
-            if (!isPrimitive && !serializeNulls) {
-                codeBlock.beginControlFlow("if ($objectName != null)")
-            }
-            codeBlock.addStatement("""out.name("$key")""")
+                // Since we are serializing nulls, we defer the if-statement until after the name is written.
+                if (!isPrimitive && serializeNulls) {
+                    codeBlock.beginControlFlow("if ($objectName != null)")
+                }
 
-            // Since we are serializing nulls, we defer the if-statement until after the name is written.
-            if (!isPrimitive && serializeNulls) {
-                codeBlock.beginControlFlow("if ($objectName != null)")
-            }
+                if (isPrimitive || GSON_SUPPORTED_CLASSES.contains(fieldTypeName)) {
 
-            if (isPrimitive || GSON_SUPPORTED_CLASSES.contains(fieldTypeName)) {
-
-                codeBlock.addStatement("out.value($objectName)")
-
-            } else {
-                val adapterName: String
-
-                if (fieldTypeName is ParameterizedTypeName) {
-                    // This is a generic type
-                    adapterName = "new com.google.gson.reflect.TypeToken<$fieldTypeName>(){}"
+                    codeBlock.addStatement("out.value($objectName)")
 
                 } else {
-                    adapterName = fieldTypeName.toString() + ".class"
+                    val adapterName: String
+
+                    if (fieldTypeName is ParameterizedTypeName) {
+                        // This is a generic type
+                        adapterName = "new com.google.gson.reflect.TypeToken<$fieldTypeName>(){}"
+
+                    } else {
+                        adapterName = fieldTypeName.toString() + ".class"
+                    }
+
+                    val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
+                    val writeLine =
+                            if (subTypeAnnotation != null) {
+                                // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
+                                "${getSubTypeGetterName(value)}().write(out, $objectName)"
+                            } else {
+                                // Otherwise we request the type adapter from gson.
+                                "mGson.getAdapter($adapterName).write(out, $objectName)"
+                            }
+
+                    codeBlock.addStatement(writeLine)
                 }
 
-                val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
-                val writeLine =
-                        if (subTypeAnnotation != null) {
-                            // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
-                            "${getSubTypeGetterName(value)}().write(out, $objectName)"
-                        } else {
-                            // Otherwise we request the type adapter from gson.
-                            "mGson.getAdapter($adapterName).write(out, $objectName)"
-                        }
-
-                codeBlock.addStatement(writeLine)
-            }
-
-            // If we are serializing nulls, we need to ensure we output it here.
-            if (!isPrimitive) {
-                if (serializeNulls) {
-                    codeBlock.nextControlFlow("else")
-                            .addStatement("out.nullValue()")
+                // If we are serializing nulls, we need to ensure we output it here.
+                if (!isPrimitive) {
+                    if (serializeNulls) {
+                        codeBlock.nextControlFlow("else")
+                                .addStatement("out.nullValue()")
+                    }
+                    codeBlock.endControlFlow()
                 }
-                codeBlock.endControlFlow()
-            }
-            codeBlock.addNewLine()
-
-        } else {
-            val nextLevelMap = value as GsonObject
-            if (nextLevelMap.size() > 0) {
-                val newPath: String
-                if (currentPath.isNotEmpty()) {
-                    newPath = currentPath + "" + key
-                } else {
-                    newPath = key
-                }
-
-                // Add a comment mentioning what nested object we are current pointing at.
                 codeBlock.addNewLine()
-                        .addComment("Begin $newPath")
-                        .addStatement("""out.name("$key")""")
 
-                writeGsonFieldWriter(fieldDepth + 1, codeBlock, nextLevelMap, newPath, serializeNulls, arrayNameCounterList)
+                return@fold fieldCount + 1
+            }
+
+            is GsonObject -> {
+                if (value.size() > 0) {
+                    val newPath: String
+                    if (currentPath.isNotEmpty()) {
+                        newPath = currentPath + "" + key
+                    } else {
+                        newPath = key
+                    }
+
+                    // Add a comment mentioning what nested object we are current pointing at.
+                    codeBlock.addNewLine()
+                            .addComment("Begin $newPath")
+                            .addStatement("""out.name("$key")""")
+
+                    return@fold writeGsonFieldWriter(codeBlock, value, newPath, serializeNulls, fieldCount)
+                }
             }
         }
+
+        // The count has not changed
+        return@fold fieldCount
     }
 
     codeBlock.addComment("End $currentPath")
             .addStatement("out.endObject()")
+
+    return overallFieldCount
 }

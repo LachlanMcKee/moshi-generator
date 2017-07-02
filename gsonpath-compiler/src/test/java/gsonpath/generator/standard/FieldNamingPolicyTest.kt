@@ -6,41 +6,76 @@ import org.junit.Test
 class FieldNamingPolicyTest : BaseGeneratorTest() {
     @Test
     fun testIdentity() {
-        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/identity")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestNamePolicyIdentity.java")
-                .addRelativeGenerated("TestNamePolicyIdentity_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/identity",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestNamePolicyIdentity.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestNamePolicyIdentity_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testLowerCaseWithDashes() {
-        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/lowercase_dashes")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestNamePolicyLowerCaseDashes.java")
-                .addRelativeGenerated("TestNamePolicyLowerCaseDashes_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/lowercase_dashes",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestNamePolicyLowerCaseDashes.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestNamePolicyLowerCaseDashes_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testLowerCaseWithUnderscores() {
-        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/lowercase_underscores")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestNamePolicyLowerCaseUnderscores.java")
-                .addRelativeGenerated("TestNamePolicyLowerCaseUnderscores_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/lowercase_underscores",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestNamePolicyLowerCaseUnderscores.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestNamePolicyLowerCaseUnderscores_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testUpperCamelCase() {
-        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/upper_camel_case")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestNamePolicyUpperCamelCase.java")
-                .addRelativeGenerated("TestNamePolicyUpperCamelCase_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/upper_camel_case",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestNamePolicyUpperCamelCase.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestNamePolicyUpperCamelCase_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testUpperCamelCaseWithSpaces() {
-        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/upper_camel_case_spaces")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestNamePolicyUpperCamelCaseSpaces.java")
-                .addRelativeGenerated("TestNamePolicyUpperCamelCaseSpaces_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/naming_policy/upper_camel_case_spaces",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestNamePolicyUpperCamelCaseSpaces.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestNamePolicyUpperCamelCaseSpaces_GsonTypeAdapter.java")
+        ))
     }
 }

@@ -7,17 +7,31 @@ class FieldAnnotationsTest : BaseGeneratorTest() {
 
     @Test
     fun testFlattenJson() {
-        assertGeneratedContent(TestCriteria("generator/standard/field_annotations/flatten_json")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestFlattenJson.java")
-                .addRelativeGenerated("TestFlattenJson_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/field_annotations/flatten_json",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestFlattenJson.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestFlattenJson_GsonTypeAdapter.java")
+        ))
     }
 
     @Test
     fun testExcludeFields() {
-        assertGeneratedContent(TestCriteria("generator/standard/field_annotations/exclude")
-                .addAbsoluteSource("generator/standard/TestGsonTypeFactory.java")
-                .addRelativeSource("TestExclude.java")
-                .addRelativeGenerated("TestExclude_GsonTypeAdapter.java"))
+        assertGeneratedContent(TestCriteria("generator/standard/field_annotations/exclude",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestExclude.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestExclude_GsonTypeAdapter.java")
+        ))
     }
 }

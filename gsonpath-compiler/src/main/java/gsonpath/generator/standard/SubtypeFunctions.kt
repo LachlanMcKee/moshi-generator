@@ -72,28 +72,29 @@ private fun validateGsonSubType(processingEnv: ProcessingEnvironment, gsonField:
         throw ProcessingException("subTypeKey cannot be blank for GsonSubType", gsonField.fieldInfo.element)
     }
 
-    var keyType: SubTypeKeyType? = null
-    var keyCount = 0
-    if (gsonSubType.stringValueSubtypes.isNotEmpty()) {
-        keyType = SubTypeKeyType.STRING
-        keyCount++
-    }
-    if (gsonSubType.integerValueSubtypes.isNotEmpty()) {
-        keyType = SubTypeKeyType.INTEGER
-        keyCount++
-    }
-    if (gsonSubType.booleanValueSubtypes.isNotEmpty()) {
-        keyType = SubTypeKeyType.BOOLEAN
-        keyCount++
-    }
+    val keyCount =
+            (if (gsonSubType.stringValueSubtypes.isNotEmpty()) 1 else 0) +
+                    (if (gsonSubType.integerValueSubtypes.isNotEmpty()) 1 else 0) +
+                    (if (gsonSubType.booleanValueSubtypes.isNotEmpty()) 1 else 0)
 
-    if (keyType == null) {
-        throw ProcessingException("Keys must be specified for the GsonSubType", gsonField.fieldInfo.element)
-    }
     if (keyCount > 1) {
         throw ProcessingException("Only one keys array (string, integer or boolean) may be specified for the GsonSubType",
                 gsonField.fieldInfo.element)
     }
+
+    val keyType: SubTypeKeyType =
+            if (gsonSubType.stringValueSubtypes.isNotEmpty()) {
+                SubTypeKeyType.STRING
+
+            } else if (gsonSubType.integerValueSubtypes.isNotEmpty()) {
+                SubTypeKeyType.INTEGER
+
+            } else if (gsonSubType.booleanValueSubtypes.isNotEmpty()) {
+                SubTypeKeyType.BOOLEAN
+
+            } else {
+                throw ProcessingException("Keys must be specified for the GsonSubType", gsonField.fieldInfo.element)
+            }
 
     //
     // Convert the provided keys into a unified type. Unfortunately due to how annotations work, this isn't

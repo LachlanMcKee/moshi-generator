@@ -1,11 +1,17 @@
 package gsonpath.model
 
 import com.google.common.base.Objects
-
 import java.util.LinkedHashMap
 
-class GsonObject {
-    private val fieldMap: LinkedHashMap<String, Any> = LinkedHashMap()
+sealed class GsonModel
+
+data class GsonField(val fieldIndex: Int, val fieldInfo: FieldInfo, val jsonPath: String, val isRequired: Boolean) : GsonModel() {
+    val variableName: String
+        get() = "value_" + jsonPath.replace("[^A-Za-z0-9_]".toRegex(), "_")
+}
+
+class GsonObject : GsonModel() {
+    private val fieldMap: LinkedHashMap<String, GsonModel> = LinkedHashMap()
 
     fun addObject(branchName: String, gsonObject: GsonObject): GsonObject {
         fieldMap[branchName] = gsonObject
@@ -14,22 +20,22 @@ class GsonObject {
 
     @Throws(IllegalArgumentException::class)
     fun addField(branchName: String, field: GsonField): GsonField {
-        if (containsKey(branchName)) {
+        if (fieldMap.containsKey(branchName)) {
             throw IllegalArgumentException("Value already exists")
         }
         fieldMap[branchName] = field
         return field
     }
 
+    fun entries(): Set<Map.Entry<String, GsonModel>> {
+        return fieldMap.entries
+    }
+
     fun size(): Int {
         return fieldMap.size
     }
 
-    fun keySet(): Set<String> {
-        return fieldMap.keys
-    }
-
-    operator fun get(key: String): Any? {
+    operator fun get(key: String): GsonModel? {
         return fieldMap[key]
     }
 

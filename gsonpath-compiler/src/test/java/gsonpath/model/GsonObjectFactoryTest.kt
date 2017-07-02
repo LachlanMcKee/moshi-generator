@@ -73,13 +73,17 @@ class GsonObjectFactoryTest {
         @Throws(ProcessingException::class)
         fun givenPathSubstitution_whenAddGsonType_expectReplacedJsonPath() {
             // given
-            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "{REPLACE_ME}.value")
-            val pathSubstitution = mock(PathSubstitution::class.java)
-            `when`<String>(pathSubstitution.original).thenReturn("REPLACE_ME")
-            `when`<String>(pathSubstitution.replacement).thenReturn("replacement")
+            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "{REPLACE_ME_1}.{REPLACE_ME_2}")
+            val pathSubstitution1 = mock(PathSubstitution::class.java)
+            `when`<String>(pathSubstitution1.original).thenReturn("REPLACE_ME_1")
+            `when`<String>(pathSubstitution1.replacement).thenReturn("replacement")
+
+            val pathSubstitution2 = mock(PathSubstitution::class.java)
+            `when`<String>(pathSubstitution2.original).thenReturn("REPLACE_ME_2")
+            `when`<String>(pathSubstitution2.replacement).thenReturn("value")
 
             // when
-            val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo, pathSubstitutions = arrayOf(pathSubstitution)))
+            val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo, pathSubstitutions = arrayOf(pathSubstitution1, pathSubstitution2)))
 
             // then
             val expectedGsonObject = GsonObject()
@@ -108,7 +112,7 @@ class GsonObjectFactoryTest {
             // given
             val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME)
             `when`(fieldInfo.typeName).thenReturn(TypeName.INT.box())
-            `when`(fieldInfo.annotationNames).thenReturn(arrayOf("NonNull", "Nullable"))
+            `when`(fieldInfo.annotationNames).thenReturn(listOf("NonNull", "Nullable"))
 
             // when / then
             exception.expect(ProcessingException::class.java)
@@ -183,7 +187,7 @@ class GsonObjectFactoryTest {
             `when`(fieldInfo.typeName).thenReturn(fieldTypeName)
 
             if (requiredTypeAnnotation != null) {
-                `when`(fieldInfo.annotationNames).thenReturn(arrayOf(requiredTypeAnnotation))
+                `when`(fieldInfo.annotationNames).thenReturn(listOf(requiredTypeAnnotation))
             }
 
             // when
@@ -232,7 +236,7 @@ class GsonObjectFactoryTest {
         fun givenPrimitiveField_whenAddGsonType_throwProcessingException() {
             // when
             val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME)
-            `when`(fieldInfo.annotationNames).thenReturn(arrayOf(mandatoryAnnotation))
+            `when`(fieldInfo.annotationNames).thenReturn(listOf(mandatoryAnnotation))
 
             // when / then
             exception.expect(ProcessingException::class.java)
@@ -246,7 +250,7 @@ class GsonObjectFactoryTest {
             // when
             val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME)
             `when`(fieldInfo.typeName).thenReturn(ClassName.INT.box())
-            `when`(fieldInfo.annotationNames).thenReturn(arrayOf(mandatoryAnnotation))
+            `when`(fieldInfo.annotationNames).thenReturn(listOf(mandatoryAnnotation))
 
             // when
             val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo, gsonFieldValidationType = GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL))

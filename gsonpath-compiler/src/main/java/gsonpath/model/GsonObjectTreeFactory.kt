@@ -5,7 +5,6 @@ import gsonpath.GsonFieldValidationType
 import gsonpath.PathSubstitution
 import gsonpath.ProcessingException
 
-import java.util.ArrayList
 import java.util.regex.Pattern
 
 class GsonObjectTreeFactory {
@@ -19,16 +18,16 @@ class GsonObjectTreeFactory {
 
         // Obtain the correct mapping structure beforehand.
         val absoluteRootObject = GsonObject()
-        var gsonPathObject = absoluteRootObject
 
         val gsonObjectFactory = GsonObjectFactory()
 
-        if (rootField.isNotEmpty()) {
-            gsonPathObject = createGsonObjectFromRootField(gsonPathObject, rootField, flattenDelimiter)
+        val gsonPathObject =
+                if (rootField.isNotEmpty()) {
+                    createGsonObjectFromRootField(absoluteRootObject, rootField, flattenDelimiter)
 
-        } else {
-            gsonPathObject = absoluteRootObject
-        }
+                } else {
+                    absoluteRootObject
+                }
 
         for (fieldInfoIndex in fieldInfoList.indices) {
             gsonObjectFactory.addGsonType(gsonPathObject, fieldInfoList[fieldInfoIndex], fieldInfoIndex,
@@ -42,46 +41,43 @@ class GsonObjectTreeFactory {
             return rootObject
         }
 
-        var currentRootObject = rootObject
         val regexSafeDelimiter = Pattern.quote(flattenDelimiter.toString())
-        val split = rootField.split(regexSafeDelimiter.toRegex()).dropLastWhile(String::isEmpty).toTypedArray()
+        val split = rootField.split(regexSafeDelimiter.toRegex()).dropLastWhile(String::isEmpty)
 
         if (split.isNotEmpty()) {
             // Keep adding branches to the tree and switching our root to the new branch.
-            for (field in split) {
+            return split.fold(rootObject) { currentRoot, field ->
                 val currentObject = GsonObject()
-                currentRootObject.addObject(field, currentObject)
-                currentRootObject = currentObject
+                currentRoot.addObject(field, currentObject)
+                return@fold currentObject
             }
-
-            return currentRootObject
 
         } else {
             // Add a single branch to the tree and return the new branch.
             val mapWithRoot = GsonObject()
-            currentRootObject.addObject(rootField, mapWithRoot)
+            rootObject.addObject(rootField, mapWithRoot)
             return mapWithRoot
         }
     }
 
     fun getFlattenedFieldsFromGsonObject(gsonObject: GsonObject): List<GsonField> {
-        val flattenedFields = ArrayList<GsonField>()
-        getFlattenedFields(gsonObject, flattenedFields)
-
-        return flattenedFields.sortedBy { it.fieldIndex }
+        return getFlattenedFields(gsonObject)
+                .sortedBy { it.fieldIndex }
     }
 
-    private fun getFlattenedFields(currentGsonObject: GsonObject, flattenedFields: MutableList<GsonField>) {
-        currentGsonObject.keySet()
-                .map { currentGsonObject[it]!! }
-                .forEach {
-                    if (it is GsonField) {
-                        flattenedFields.add(it)
+    private fun getFlattenedFields(currentGsonObject: GsonObject): List<GsonField> {
+        return currentGsonObject.entries()
+                .map { it.value }
+                .flatMap { gsonType ->
+                    when (gsonType) {
+                        is GsonField -> listOf(gsonType)
 
-                    } else {
-                        val nextLevelMap = it as GsonObject
-                        if (nextLevelMap.size() > 0) {
-                            getFlattenedFields(nextLevelMap, flattenedFields)
+                        is GsonObject -> {
+                            if (gsonType.size() > 0) {
+                                getFlattenedFields(gsonType)
+                            } else {
+                                emptyList()
+                            }
                         }
                     }
                 }

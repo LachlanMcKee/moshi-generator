@@ -16,7 +16,7 @@ class InterfaceFieldInfo(val elementInfo: ElementInfo,
 
         fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T?
 
-        val annotationNames: Array<String>
+        val annotationNames: List<String>
     }
 
 }

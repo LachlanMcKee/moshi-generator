@@ -8,8 +8,6 @@ import com.squareup.javapoet.*
 import gsonpath.ProcessingException
 import gsonpath.compiler.addNewLine
 
-import java.util.*
-
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 
@@ -37,18 +35,15 @@ class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Genera
                     "com.google.gson.TypeAdapterFactory and no other interfaces.", factoryElement)
         }
 
-        val packageLocalHandleResults = HashMap<String, MutableList<HandleResult>>()
-        for (generatedGsonAdapter in generatedGsonAdapters) {
-            val packageName = generatedGsonAdapter.generatedClassName.packageName()
+        val packageLocalHandleResults: Map<String, List<HandleResult>> =
+                generatedGsonAdapters.fold(emptyMap()) { map, generatedGsonAdapter ->
+                    val packageName = generatedGsonAdapter.generatedClassName.packageName()
 
-            var localResults = packageLocalHandleResults[packageName]
-            if (localResults == null) {
-                localResults = ArrayList<HandleResult>()
-                packageLocalHandleResults[packageName] = localResults
-            }
+                    val newList: List<HandleResult> =
+                            map[packageName]?.plus(generatedGsonAdapter) ?: listOf(generatedGsonAdapter)
 
-            localResults.add(generatedGsonAdapter)
-        }
+                    return@fold map.plus(Pair(packageName, newList))
+                }
 
         for ((packageName, list) in packageLocalHandleResults) {
             if (!createPackageLocalTypeAdapterLoaders(packageName, list)) {

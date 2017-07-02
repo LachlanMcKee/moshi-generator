@@ -13,8 +13,8 @@ public final class TestGsonTypeFactoryImpl implements TestGsonTypeFactory {
     public GsonTypeAdapterLoader() {
         mPackagePrivateLoaders = new TypeAdapterFactory[3];
         mPackagePrivateLoaders[0] = new generator.factory.PackagePrivateTypeAdapterLoader();
-        mPackagePrivateLoaders[1] = new generator.factory.source3.PackagePrivateTypeAdapterLoader();
-        mPackagePrivateLoaders[2] = new generator.factory.source2.PackagePrivateTypeAdapterLoader();
+        mPackagePrivateLoaders[1] = new generator.factory.source2.PackagePrivateTypeAdapterLoader();
+        mPackagePrivateLoaders[2] = new generator.factory.source3.PackagePrivateTypeAdapterLoader();
     }
 
     @Override
