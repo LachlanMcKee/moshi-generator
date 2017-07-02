@@ -4,17 +4,36 @@
 
 An annotation processor library which generates gson type adapters at compile time which also use basic JsonPath functionality.
 
+## Benefits
 The benefits of this library are as follows:
-- Statically generated Gson Type Adapters can remove the majority of reflection used by the Gson library.
-- JsonPath syntax can reduce the number of POJOs required to parse a JSON file. An example of this is shown in the next section.
-   - This allows for easier integration with other libraries which rely on a flat class structure (such as DBFlow).
-- Add optional client side validation to your json using `@Nullable` and `NonNull` annotations to add mandatory field constraints.
-- Generates immutable POJOs based off annotated interfaces
-   - Similar to AutoValue, however you do not need to reference the concrete implementation as the Type Adapter creates it on your behalf.
-   - See the [interfaces guide](guides/interfaces.md) for further details.
-- Reduce the amount of repetition when creating POJOs using Path Substitutions. 
-   - A more powerful version of the Gson `SerializedName` alternate key by using string replacement functionality within the `AutoGsonAdapter` annotation.
-   - See the [path substitution guide](guides/path_substitution.md) for further details.
+
+#### Statically generated Gson Type Adapters
+By statically generating Gson Type Adapters, the majority of reflection used by the Gson library can be removed. This greatly improves performance and removes code obfuscation issues.
+
+#### JsonPath syntax
+JsonPath syntax can be used to reduce the number of POJOs required to parse a JSON file. See the example section for more details.
+
+This allows for easier integration with other libraries which rely on a flat class structure (such as DBFlow).
+
+#### POJO immutability via interfaces
+You are given the option of using immutable POJOs based off annotated interfaces.
+
+These POJOs are similar to AutoValue, however you do not need to reference the concrete implementation as the Type Adapter creates it on your behalf.
+
+See the [interfaces guide](guides/interfaces.md) for further details.
+
+#### JsonPath - Path Substitutions
+You can reduce the amount of repetition when creating POJOs using Path Substitutions by using straightforward string replacement functionality within the `AutoGsonAdapter` annotation.
+
+See the [path substitution guide](guides/path_substitution.md) for further details.
+
+#### Optional client side validation
+Add optional client side validation to your json using `@Nullable` and `NonNull` annotations to add mandatory field constraints.
+
+The client side valiation can also be enhanced through extensions. These extensions are separate annotation processors that register to be notified whenever a field with a specific annotation is encountered.
+
+##### Notable extensions
+[Android Support Annotation validation](https://github.com/LachlanMcKee/gsonpath-extensions-android)
 
 ## Example
 Given the following JSON:
@@ -56,7 +75,7 @@ public class PersonModel {
 ## Setup
 The following steps are required to use the generated `TypeAdapters` within your project.
 
-### AutoGsonAdapterFactory
+#### AutoGsonAdapterFactory
 Create a type adapter factory by annotating an interface as follows:
 
 ```java
@@ -71,7 +90,7 @@ Gson Path can be used across multiple modules by defining a factory within each.
 
 *Note: Only one `@AutoGsonAdapterFactory` annotation may be used per module/project. If you do this accidentally, the annotation processor will raise a helpful error.*
 
-### AutoGsonAdapter
+#### AutoGsonAdapter
 Create any number of type adapters by annotating a class or interface as follows:
 
 ```java
@@ -94,10 +113,10 @@ public interface ExampleModel {
 }
 ```
 
-### Gson Integration
+#### Gson Integration
 For each type adapter factory interface, register it with your Gson builder as follows:
 
-```
+```java
 return new GsonBuilder()
                 .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(ExampleGsonTypeFactory.class))
                 .create();
