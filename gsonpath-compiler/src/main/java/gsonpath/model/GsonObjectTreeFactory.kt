@@ -68,9 +68,7 @@ class GsonObjectTreeFactory {
         val flattenedFields = ArrayList<GsonField>()
         getFlattenedFields(gsonObject, flattenedFields)
 
-        flattenedFields.sort { o1, o2 -> Integer.compare(o1.fieldIndex, o2.fieldIndex) }
-
-        return flattenedFields
+        return flattenedFields.sortedBy { it.fieldIndex }
     }
 
     private fun getFlattenedFields(currentGsonObject: GsonObject, flattenedFields: MutableList<GsonField>) {
