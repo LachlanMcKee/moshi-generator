@@ -16,7 +16,8 @@ The benefits of this library are as follows:
    - A more powerful version of the Gson `SerializedName` alternate key by using string replacement functionality within the `AutoGsonAdapter` annotation.
    - See the [path substitution guide](guides/path_substitution.md) for further details.
 
-For example, given the following JSON:
+## Example
+Given the following JSON:
 
 ```json
 {
@@ -36,7 +37,7 @@ We can deserialize the content with a single class by using Gson Path. The follo
 public class PersonModel {
    @SerializedName("first")
    String firstName;
-
+   
    @SerializedName("last")
    String lastName;
 }
@@ -52,153 +53,61 @@ public class PersonModel {
 }
 ```
 
-Both POJOs will generate the following Gson TypeAdapter:
+## Setup
+The following steps are required to use the generated `TypeAdapters` within your project.
+
+### AutoGsonAdapterFactory
+Create a type adapter factory by annotating an interface as follows:
 
 ```java
-public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> {
-   private final Gson mGson;
-
-   public PersonModel_GsonTypeAdapter(Gson gson) {
-      this.mGson = gson;
-   }
-
-   @Override
-   public PersonModel read(JsonReader in) throws IOException {
-      // Ensure the object is not null.
-      if (!isValidValue(in)) {
-         return null;
-      }
-      
-      PersonModel result = new PersonModel();
-      int jsonFieldCounter0 = 0;
-      in.beginObject();
-      
-      while (in.hasNext()) {
-         if (jsonFieldCounter0 == 1) {
-            in.skipValue();
-            continue;
-         }
-         
-         switch(in.nextName()) {
-            case "person":
-               jsonFieldCounter0++;
-               
-               // Ensure the object is not null.
-               if (!isValidValue(in)) {
-                  break;
-               }
-               
-               int jsonFieldCounter1 = 0;
-               in.beginObject();
-               
-               while (in.hasNext()) {
-                  if (jsonFieldCounter1 == 1) {
-                     in.skipValue();
-                     continue;
-                  }
-                  
-                  switch(in.nextName()) {
-                     case "names":
-                        jsonFieldCounter1++;
-                        
-                        // Ensure the object is not null.
-                        if (!isValidValue(in)) {
-                           break;
-                        }
-                        
-                        int jsonFieldCounter2 = 0;
-                        in.beginObject();
-                        
-                        while (in.hasNext()) {
-                           if (jsonFieldCounter2 == 2) {
-                              in.skipValue();
-                              continue;
-                           }
-                           
-                           switch(in.nextName()) {
-                              case "first":
-                                 jsonFieldCounter2++;
-                                 
-                                 String safeValue0 = getStringSafely(in);
-                                 if (safeValue0 != null) {
-                                    result.firstName = safeValue0;
-                                 }
-                                 break;
-                                 
-                              case "last":
-                                 jsonFieldCounter2++;
-                                 
-                                 String safeValue1 = getStringSafely(in);
-                                 if (safeValue1 != null) {
-                                    result.lastName = safeValue1;
-                                 }
-                                 break;
-                                 
-                              default:
-                                 in.skipValue();
-                                 break;
-                           }
-                        }
-                        
-                        in.endObject();
-                        break;
-                        
-                     default:
-                        in.skipValue();
-                        break;
-                  }
-               }
-               
-               in.endObject();
-               break;
-               
-            default:
-               in.skipValue();
-               break;
-         }
-      }
-      
-      in.endObject();
-      return result;
-   }
-
-   @Override
-   public void write(JsonWriter out, PersonModel value) throws IOException {
-      if (value == null) {
-         out.nullValue();
-         return;
-      }
-   
-      // Begin
-      out.beginObject();
-   
-      // Begin person
-      out.name("person");
-      out.beginObject();
-   
-      // Begin person.names
-      out.name("names");
-      out.beginObject();
-      String obj0 = value.first;
-      if (obj0 != null) {
-         out.name("first");
-         out.value(obj0);
-      }
-   
-      String obj1 = value.last;
-      if (obj1 != null) {
-         out.name("last");
-         out.value(obj1);
-      }
-   
-      // End person.names
-      out.endObject();
-      // End person
-      out.endObject();
-      // End 
-      out.endObject();
-   }
+package com.example;
+ 
+@AutoGsonAdapterFactory
+public interface ExampleGsonTypeFactory extends TypeAdapterFactory {
 }
+```
+
+Gson Path can be used across multiple modules by defining a factory within each. 
+
+*Note: Only one `@AutoGsonAdapterFactory` annotation may be used per module/project. If you do this accidentally, the annotation processor will raise a helpful error.*
+
+### AutoGsonAdapter
+Create any number of type adapters by annotating a class or interface as follows:
+
+```java
+package com.example;
+ 
+@AutoGsonAdapter
+public class ExampleModel {
+    String value;
+}
+```
+
+or
+
+```java
+package com.example;
+ 
+@AutoGsonAdapter
+public interface ExampleModel {
+    String getValue();
+}
+```
+
+### Gson Integration
+For each type adapter factory interface, register it with your Gson builder as follows:
+
+```
+return new GsonBuilder()
+                .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(ExampleGsonTypeFactory.class))
+                .create();
+```
+
+## Proguard
+To use proguard within your project, you must add the generated type adapter factory. Using the example above, this would be:
+
+```
+-keep public class com.example.ExampleGsonTypeFactoryImpl
 ```
 
 ## Download
