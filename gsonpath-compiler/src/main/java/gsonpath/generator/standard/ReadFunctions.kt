@@ -174,13 +174,77 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
                         addReadCodeForElements(processingEnvironment, codeBlock, value,
                                 requiresConstructorInjection, mandatoryInfoMap, extensions, currentOverallRecursionCount)
                     }
+
+                    is GsonArray -> {
+                        val arrayIndexVariableName = key + "_arrayIndex"
+
+                        codeBlock.add("\n")
+                                .add("// Ensure the array is not null.\n")
+                                .beginControlFlow("if (!isValidValue(in))")
+                                .addStatement("break")
+                                .endControlFlow()
+
+                                .addStatement("in.beginArray()")
+                                .addStatement("int \$L = 0", arrayIndexVariableName)
+                                .add("\n")
+
+                                .add("// Iterate through the array.\n")
+                                .beginControlFlow("while (in.hasNext())")
+                                .beginControlFlow("switch (\$L)", arrayIndexVariableName)
+
+                        val recursionCountForArray: Int =
+                                value.entries().fold(currentOverallRecursionCount) { currentOverallRecursionCount, (arrayIndex, arrayItemValue) ->
+                                    codeBlock.add("case \$L:", arrayIndex)
+                                            .addNewLine()
+                                            .indent()
+
+                                    val recursionCountArrayCurrent =
+                                            when (arrayItemValue) {
+                                                is GsonField -> {
+                                                    writeGsonFieldReader(processingEnvironment, arrayItemValue, codeBlock,
+                                                            requiresConstructorInjection,
+                                                            mandatoryInfoMap[arrayItemValue.fieldInfo.fieldName],
+                                                            extensions)
+
+                                                    // No extra recursion has happened.
+                                                    currentOverallRecursionCount
+                                                }
+
+                                                is GsonObject -> {
+                                                    addReadCodeForElements(processingEnvironment, codeBlock,
+                                                            arrayItemValue, requiresConstructorInjection, mandatoryInfoMap,
+                                                            extensions, currentOverallRecursionCount)
+                                                }
+                                            }
+
+                                    codeBlock.addStatement("break")
+                                            .unindent()
+                                            .add("\n")
+
+                                    recursionCountArrayCurrent
+                                }
+
+                        codeBlock.add("default:\n")
+                                .indent()
+                                .addStatement("in.skipValue()")
+                                .addStatement("break")
+                                .unindent()
+
+                                .endControlFlow()
+                                .addStatement("\$L++", arrayIndexVariableName)
+                                .endControlFlow()
+
+                                .addStatement("in.endArray()")
+
+                        recursionCountForArray
+                    }
                 }
 
         codeBlock.addStatement("break")
                 .addNewLine()
                 .unindent()
 
-        return@fold recursionCountForModel
+        recursionCountForModel
     }
 
     codeBlock.addWithNewLine("default:")

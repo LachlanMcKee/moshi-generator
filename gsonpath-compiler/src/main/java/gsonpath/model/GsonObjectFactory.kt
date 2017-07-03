@@ -119,9 +119,23 @@ class GsonObjectFactory {
         val pathSegments: List<String> = jsonFieldPath.split(regexSafeDelimiter)
 
         val lastPathIndex = pathSegments.size - 1
+        val arrayIndexes = IntArray(pathSegments.size)
 
         (0..lastPathIndex).fold(gsonPathObject as GsonModel) { current: GsonModel, index ->
             val pathSegment = pathSegments[index]
+
+            val isCurrentSegmentArray = pathSegment.contains("[")
+            val pathKey =
+                    if (isCurrentSegmentArray) {
+                        pathSegment.substring(0, pathSegment.indexOf("["))
+                    } else {
+                        pathSegment
+                    }
+
+            if (isCurrentSegmentArray) {
+                val arrayIndexString = pathSegment.substring(pathSegment.indexOf("[") + 1, pathSegment.indexOf("]"))
+                arrayIndexes[index] = Integer.parseInt(arrayIndexString)
+            }
 
             if (index < lastPathIndex) {
 
@@ -138,9 +152,24 @@ class GsonObjectFactory {
                                     "' found. Each tree branch must use a unique value!", fieldInfo.element)
                         }
                     } else {
-                        val newMap = GsonObject()
-                        current.addObject(pathSegment, newMap)
-                        return@fold newMap
+                        if (isCurrentSegmentArray) {
+                            return@fold current.addArray(pathKey)
+
+                        } else {
+                            val newMap = GsonObject()
+                            current.addObject(pathSegment, newMap)
+                            return@fold newMap
+                        }
+                    }
+                } else if (current is GsonArray) {
+                    // Now that it is established that the array contains an object, we add a container object.
+                    val previousArrayIndex = arrayIndexes[index - 1]
+                    val currentGsonType = current[previousArrayIndex]
+                    if (currentGsonType == null) {
+                        val gsonObject = current.getObjectAtIndex(previousArrayIndex)
+                        return@fold gsonObject.addObject(pathKey, GsonObject())
+                    } else {
+                        return@fold (currentGsonType as GsonObject)[pathKey]!!
                     }
                 } else {
                     throw ProcessingException("This should not happen!", fieldInfo.element)
@@ -150,13 +179,27 @@ class GsonObjectFactory {
                 // We have reached the end of this object branch, add the field at the end.
                 try {
                     val field = GsonField(fieldInfoIndex, fieldInfo, jsonFieldPath, isRequired)
-                    return@fold (current as GsonObject).addField(pathSegment, field)
+
+                    val temp =
+                            if (current is GsonArray) {
+                                val previousArrayIndex = arrayIndexes[index - 1]
+                                current.getObjectAtIndex(previousArrayIndex)
+                            } else {
+                                current
+                            }
+
+                    if (isCurrentSegmentArray) {
+                        val gsonArray = (temp as GsonObject).addArray(pathKey)
+                        gsonArray.addField(arrayIndexes[index], field)
+                    } else {
+                        (temp as GsonObject).addField(pathSegment, field)
+                    }
+                    return@fold field
 
                 } catch (e: IllegalArgumentException) {
                     throw ProcessingException("Unexpected duplicate field '" + pathSegment +
                             "' found. Each tree branch must use a unique value!", fieldInfo.element)
                 }
-
             }
         }
     }
@@ -168,7 +211,16 @@ class GsonObjectFactory {
                                 fieldInfoIndex: Int,
                                 isRequired: Boolean) {
 
-        if (!gsonPathObject.containsKey(jsonFieldPath)) {
+        val isArray = jsonFieldPath.contains("[")
+        val arrayIndex: Int
+        if (isArray) {
+            val nonArrayKey = jsonFieldPath.substring(0, jsonFieldPath.indexOf("["))
+            arrayIndex = Integer.parseInt(jsonFieldPath.substring(jsonFieldPath.indexOf("[") + 1, jsonFieldPath.indexOf("]")))
+
+            val gsonArray = gsonPathObject.addArray(nonArrayKey)
+            gsonArray.addField(arrayIndex, GsonField(fieldInfoIndex, fieldInfo, jsonFieldPath, isRequired))
+
+        } else if (!gsonPathObject.containsKey(jsonFieldPath)) {
             gsonPathObject.addField(jsonFieldPath, GsonField(fieldInfoIndex, fieldInfo, jsonFieldPath, isRequired))
 
         } else {

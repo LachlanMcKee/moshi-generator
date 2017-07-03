@@ -95,6 +95,105 @@ class GsonObjectFactoryTest {
 
         @Test
         @Throws(ProcessingException::class)
+        fun givenJsonPathArray_whenAddGsonType_expectRootArray() {
+            // when
+            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "element[5]")
+
+            // when
+            val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo))
+
+            // then
+            val expectedGsonObject = GsonObject()
+            val elementArray = expectedGsonObject.addArray("element")
+            elementArray.addField(5, GsonField(0, fieldInfo, "element[5]", false))
+
+            Assert.assertEquals(expectedGsonObject, outputGsonObject)
+        }
+
+        @Test
+        @Throws(ProcessingException::class)
+        fun givenJsonPathArrayNestedWithinObject_whenAddGsonType_expectArrayNestedWithinObject() {
+            // when
+            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "value.element[5]")
+
+            // when
+            val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo))
+
+            // then
+            val expectedGsonObject = GsonObject()
+            val valueObject = GsonObject()
+            expectedGsonObject.addObject("value", valueObject)
+            val elementArray = valueObject.addArray("element")
+            elementArray.addField(5, GsonField(0, fieldInfo, "value.element[5]", false))
+
+            Assert.assertEquals(expectedGsonObject, outputGsonObject)
+        }
+
+        @Test
+        @Throws(ProcessingException::class)
+        fun givenObjectNestedWithinJsonPathArray_whenAddGsonType_expectObjectNestedWithinArray() {
+            // when
+            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "element[5].value")
+
+            // when
+            val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo))
+
+            // then
+            val expectedGsonObject = GsonObject()
+            val elementArray = expectedGsonObject.addArray("element")
+            val elementItemObject = elementArray.getObjectAtIndex(5)
+            elementItemObject.addField("value", GsonField(0, fieldInfo, "element[5].value", false))
+
+            Assert.assertEquals(expectedGsonObject, outputGsonObject)
+        }
+
+        @Test
+        @Throws(ProcessingException::class)
+        fun givenMultipleJsonPathArrays_whenAddGsonType_expectMultipleArrays() {
+            // when
+            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "element[5].value[0]")
+
+            // when
+            val outputGsonObject = executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo))
+
+            // then
+            val expectedGsonObject = GsonObject()
+            val elementArray = expectedGsonObject.addArray("element")
+            val elementItemObject = elementArray.getObjectAtIndex(5)
+            val valueArray = elementItemObject.addArray("value")
+            valueArray.addField(0, GsonField(0, fieldInfo, "element[5].value[0]", false))
+
+            Assert.assertEquals(expectedGsonObject, outputGsonObject)
+        }
+
+        @Test
+        @Throws(ProcessingException::class)
+        fun givenMultipleJsonPathArrays_whenAddGsonType_expectMultipleArrays2() {
+            // when
+            val outputGsonObject = GsonObject()
+
+            val defGsonFieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "element.value[5].test.def")
+            executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(defGsonFieldInfo), outputGsonObject)
+            val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME, "element.value[5].test.abc")
+
+            // when
+            executeAddGsonType(BaseGsonObjectFactoryTest.GsonTypeArguments(fieldInfo), outputGsonObject)
+
+            // then
+            val expectedGsonObject = GsonObject()
+            val elementObject = expectedGsonObject.addObject("element", GsonObject())
+            val valueArray = elementObject.addArray("value")
+            val testObject = valueArray.getObjectAtIndex(5)
+            val abcObject = testObject.addObject("test", GsonObject())
+
+            abcObject.addField("def", GsonField(0, defGsonFieldInfo, "element.value[5].test.def", false))
+            abcObject.addField("abc", GsonField(0, fieldInfo, "element.value[5].test.abc", false))
+
+            Assert.assertEquals(expectedGsonObject, outputGsonObject)
+        }
+
+        @Test
+        @Throws(ProcessingException::class)
         fun givenObjectType_whenAddGsonType_throwInvalidFieldTypeException() {
             // given
             val fieldInfo = mockFieldInfo(BaseGsonObjectFactoryTest.DEFAULT_VARIABLE_NAME)

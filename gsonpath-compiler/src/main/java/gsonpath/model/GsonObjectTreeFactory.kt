@@ -66,19 +66,26 @@ class GsonObjectTreeFactory {
     }
 
     private fun getFlattenedFields(currentGsonObject: GsonObject): List<GsonField> {
+        if (currentGsonObject.size() == 0) {
+            return emptyList()
+        }
+
         return currentGsonObject.entries()
                 .map { it.value }
                 .flatMap { gsonType ->
                     when (gsonType) {
                         is GsonField -> listOf(gsonType)
-
-                        is GsonObject -> {
-                            if (gsonType.size() > 0) {
-                                getFlattenedFields(gsonType)
-                            } else {
-                                emptyList()
-                            }
+                        is GsonArray -> {
+                            gsonType.entries()
+                                    .map { it.value }
+                                    .flatMap { arrayGsonType ->
+                                        when (arrayGsonType) {
+                                            is GsonField -> listOf(arrayGsonType)
+                                            is GsonObject -> getFlattenedFields(arrayGsonType)
+                                        }
+                                    }
                         }
+                        is GsonObject -> getFlattenedFields(gsonType)
                     }
                 }
     }
