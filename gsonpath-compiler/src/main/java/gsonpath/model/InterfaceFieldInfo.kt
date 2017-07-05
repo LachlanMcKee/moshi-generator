@@ -9,6 +9,7 @@ class InterfaceFieldInfo(val elementInfo: ElementInfo,
                          internal val typeName: TypeName,
                          internal val typeMirror: TypeMirror,
                          val fieldName: String,
+                         val methodName: String,
                          val isDirectAccess: Boolean) {
 
     interface ElementInfo {

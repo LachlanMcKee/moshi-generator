@@ -16,6 +16,8 @@ interface FieldInfo {
 
     val fieldName: String
 
+    val fieldAccessor: String
+
     val annotationNames: List<String>
 
     val element: Element?

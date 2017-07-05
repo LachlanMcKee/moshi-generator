@@ -23,6 +23,7 @@ val CLASS_NAME_JSON_ELEMENT: ClassName = ClassName.get(JsonElement::class.java)
 fun createReadMethod(processingEnvironment: ProcessingEnvironment,
                      baseElement: ClassName,
                      concreteElement: ClassName,
+                     requiresConstructorInjection: Boolean,
                      mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
                      rootElements: GsonObject,
                      extensions: List<GsonPathExtension>): MethodSpec {
@@ -38,7 +39,6 @@ fun createReadMethod(processingEnvironment: ProcessingEnvironment,
             .addException(IOException::class.java)
 
     val codeBlock = CodeBlock.builder()
-    val requiresConstructorInjection = baseElement != concreteElement
 
     // Before any fields are inspected, we verify if the json contains any content.
     addValidValueCheck(codeBlock, true)

@@ -61,6 +61,13 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
             fieldInfoList = fieldInfoFactory.getModelFieldsFromInterface(interfaceInfo)
         }
 
+        val requiresConstructorInjection: Boolean =
+                if (isModelInterface) {
+                    true
+                } else {
+                    findNonEmptyConstructor(processingEnv, modelElement) != null
+                }
+
         val rootGsonObject = GsonObjectTreeFactory().createGsonObject(fieldInfoList, properties.rootField,
                 properties.flattenDelimiter, properties.gsonFieldNamingPolicy, properties.gsonFieldValidationType,
                 properties.pathSubstitutions)
@@ -84,7 +91,7 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         }
 
         adapterTypeBuilder.addMethod(createReadMethod(processingEnv, modelClassName, concreteClassName,
-                mandatoryInfoMap, rootGsonObject, extensions))
+                requiresConstructorInjection, mandatoryInfoMap, rootGsonObject, extensions))
 
         if (!isModelInterface) {
             adapterTypeBuilder.addMethod(createWriteMethod(modelClassName, rootGsonObject, properties.serializeNulls))

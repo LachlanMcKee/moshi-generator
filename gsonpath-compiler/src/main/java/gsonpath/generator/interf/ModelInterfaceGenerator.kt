@@ -86,7 +86,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             override val annotationNames: List<String>
                 get() = listOf("AutoGsonAdapter", "NonNull")
 
-        }, listTypeName, listTypeMirror, "internalList", true))
+        }, listTypeName, listTypeMirror, "internalList", "internalList", true))
 
         return InterfaceInfo(outputClassName, fieldInfo)
     }
@@ -184,7 +184,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             constructorBuilder.addParameter(typeName, fieldName)
                     .addStatement("this.$fieldName = $fieldName")
 
-            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, returnTypeMirror, fieldName, false))
+            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, returnTypeMirror, fieldName, methodName, false))
 
             // Add to the equals method
             if (typeName.isPrimitive) {
