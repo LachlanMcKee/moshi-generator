@@ -110,8 +110,8 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
         public Type read(JsonReader in) throws IOException {
             JsonElement jsonElement = Streams.parse(in);
             JsonElement typeValueJsonElement = jsonElement.getAsJsonObject().remove("type");
-            if (typeValueJsonElement == null) {
-                throw new JsonParseException("cannot deserialize generator.standard.polymorphism.Type because it does not define a field named 'type'");
+            if (typeValueJsonElement == null || typeValueJsonElement.isJsonNull()) {
+                throw new JsonParseException("cannot deserialize generator.standard.polymorphism.Type because the subtype field 'type' is either null or does not exist.");
             }
             java.lang.String value = typeValueJsonElement.getAsString();
             TypeAdapter<? extends generator.standard.polymorphism.Type> delegate = typeAdaptersDelegatedByValueMap.get(value);
