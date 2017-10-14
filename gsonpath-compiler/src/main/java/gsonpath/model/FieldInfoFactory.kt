@@ -60,11 +60,8 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                                 }
                             }
 
-                        override val element: Element?
+                        override val element: Element
                             get() = memberElement
-
-                        override val isDirectAccess: Boolean
-                            get() = false
                     }
                 }
     }
@@ -91,11 +88,8 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 override val annotationNames: List<String>
                     get() = it.elementInfo.annotationNames
 
-                override val element: Element?
+                override val element: Element
                     get() = it.elementInfo.underlyingElement
-
-                override val isDirectAccess: Boolean
-                    get() = it.isDirectAccess
             }
         }
     }

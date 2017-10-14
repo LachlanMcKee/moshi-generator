@@ -2,7 +2,7 @@ package gsonpath;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import gsonpath.generated.PersonModelList;
+import gsonpath.generated.PersonModelGenerated;
 import gsonpath.vanilla.PeopleModelVanilla;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,13 +82,14 @@ public class PeopleModelTest {
 
     private long testGsonPath() {
         long start = System.nanoTime();
-        PersonModelList personModelList = gsonPath.fromJson(new StringReader(JSON_TEST_STRING), PersonModelList.class);
+        PersonModelGenerated personModelGenerated = gsonPath.fromJson(new StringReader(JSON_TEST_STRING), PersonModelGenerated.class);
 
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("gsonPathModel. Time taken: " + duration);
 
-        Assert.assertEquals(PEOPLE_SIZE, personModelList.size());
-        Assert.assertEquals("Lachlan", personModelList.get(0).getFirstName());
+        PersonModelGenerated.PersonModel[] people = personModelGenerated.getPeople();
+        Assert.assertEquals(PEOPLE_SIZE, people.length);
+        Assert.assertEquals("Lachlan", people[0].getFirstName());
 
         return duration;
     }
