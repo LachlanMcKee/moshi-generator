@@ -2,6 +2,7 @@ package gsonpath.polymorphism;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
 import org.junit.Assert;
@@ -13,13 +14,13 @@ import java.io.InputStreamReader;
 public class PolymorphismTest {
 
     @Test
-    public void testPolymorphism() {
+    public void testValidPolymorphism() {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))
                 .create();
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        InputStream resourceAsStream = classLoader.getResourceAsStream("Polymorphism.json");
+        InputStream resourceAsStream = classLoader.getResourceAsStream("Polymorphism_valid.json");
 
         TypesList typesList = gson.fromJson(new InputStreamReader(resourceAsStream), TypesList.class);
         Type[] types = typesList.getItems();
@@ -42,6 +43,28 @@ public class PolymorphismTest {
         Assert.assertEquals(value4.stringTest, "123");
 
         Assert.assertNull(types[4]);
+    }
+
+    @Test
+    public void givenNullTypeField_whenReadingJson_thenExpectException() {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))
+                .create();
+
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        InputStream resourceAsStream = classLoader.getResourceAsStream("Polymorphism_type_is_null.json");
+
+        try {
+            gson.fromJson(new InputStreamReader(resourceAsStream), TypesList.class);
+
+        } catch (JsonParseException e) {
+            // Since the mandatory value is not found, we are expecting an exception.
+            Assert.assertEquals(JsonParseException.class, e.getClass());
+            Assert.assertEquals("cannot deserialize gsonpath.polymorphism.Type because the subtype field 'type' is either null or does not exist.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("Expected JsonParseException was not triggered");
     }
 
 }
