@@ -74,8 +74,8 @@ public class PeopleModelTest {
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("vanillaModel. Time taken: " + duration);
 
-        Assert.assertEquals(vanillaModel.people.length, PEOPLE_SIZE);
-        Assert.assertEquals(vanillaModel.people[0].person.names.first, "Lachlan");
+        Assert.assertEquals(PEOPLE_SIZE, vanillaModel.people.length);
+        Assert.assertEquals("Lachlan", vanillaModel.people[0].person.names.first);
 
         return duration;
     }
@@ -87,8 +87,8 @@ public class PeopleModelTest {
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("gsonPathModel. Time taken: " + duration);
 
-        Assert.assertEquals(personModelList.size(), PEOPLE_SIZE);
-        Assert.assertEquals(personModelList.get(0).getFirstName(), "Lachlan");
+        Assert.assertEquals(PEOPLE_SIZE, personModelList.size());
+        Assert.assertEquals("Lachlan", personModelList.get(0).getFirstName());
 
         return duration;
     }

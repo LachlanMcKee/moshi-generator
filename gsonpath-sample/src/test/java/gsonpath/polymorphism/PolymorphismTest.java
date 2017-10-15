@@ -24,23 +24,23 @@ public class PolymorphismTest {
 
         TypesList typesList = gson.fromJson(new InputStreamReader(resourceAsStream), TypesList.class);
         Type[] types = typesList.getItems();
-        Assert.assertEquals(types.length, 5);
+        Assert.assertEquals(5, types.length);
 
         Type1 value1 = (Type1) types[0];
-        Assert.assertEquals(value1.name, "Type1 Example 1");
-        Assert.assertEquals(value1.intTest, 1);
+        Assert.assertEquals("Type1 Example 1", value1.name);
+        Assert.assertEquals(1, value1.intTest);
 
         Type1 value2 = (Type1) types[1];
-        Assert.assertEquals(value2.name, "Type1 Example 2");
-        Assert.assertEquals(value2.intTest, 2);
+        Assert.assertEquals("Type1 Example 2", value2.name);
+        Assert.assertEquals(2, value2.intTest);
 
         Type2 value3 = (Type2) types[2];
-        Assert.assertEquals(value3.name, "Type2 Example 1");
-        Assert.assertEquals(value3.doubleTest, 1.0, 0);
+        Assert.assertEquals("Type2 Example 1", value3.name);
+        Assert.assertEquals(1.0, value3.doubleTest, 0);
 
         Type3 value4 = (Type3) types[3];
-        Assert.assertEquals(value4.name, "Type3 Example 1");
-        Assert.assertEquals(value4.stringTest, "123");
+        Assert.assertEquals("Type3 Example 1", value4.name);
+        Assert.assertEquals("123", value4.stringTest);
 
         Assert.assertNull(types[4]);
     }
