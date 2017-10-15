@@ -3,10 +3,12 @@ package gsonpath.model
 import com.google.gson.annotations.SerializedName
 import com.squareup.javapoet.TypeName
 import gsonpath.ExcludeField
+import gsonpath.ProcessingException
 
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.TypeMirror
 
 class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
@@ -14,16 +16,22 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
     /**
      * Obtain all possible elements contained within the annotated class, including inherited fields.
      */
-    fun getModelFieldsFromElement(modelElement: TypeElement, fieldsRequireAnnotation: Boolean): List<FieldInfo> {
-        return processingEnv.elementUtils.getAllMembers(modelElement)
+    fun getModelFieldsFromElement(modelElement: TypeElement, fieldsRequireAnnotation: Boolean, useConstructor: Boolean): List<FieldInfo> {
+        val allMembers = processingEnv.elementUtils.getAllMembers(modelElement)
+
+        return allMembers
                 .filter {
                     // Ignore modelElement that are not fields.
                     it.kind == ElementKind.FIELD
                 }
                 .filter {
-                    // Ignore final, static and transient fields.
+                    // Ignore static and transient fields.
                     val modifiers = it.modifiers
-                    !(modifiers.contains(Modifier.FINAL) || modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.TRANSIENT))
+                    !(modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.TRANSIENT))
+                }
+                .filter {
+                    // If a field is final, we only add it if we are using a constructor to assign it.
+                    !it.modifiers.contains(Modifier.FINAL) || useConstructor
                 }
                 .filter {
                     !fieldsRequireAnnotation || it.getAnnotation(SerializedName::class.java) != null
@@ -53,6 +61,15 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                         override val fieldName: String
                             get() = memberElement.simpleName.toString()
 
+                        override val fieldAccessor: String
+                            get() {
+                                return if (!memberElement.modifiers.contains(Modifier.PRIVATE)) {
+                                    memberElement.simpleName.toString()
+                                } else {
+                                    findFieldGetterMethodName(allMembers, memberElement) + "()"
+                                }
+                            }
+
                         override val annotationNames: List<String>
                             get() {
                                 return memberElement.annotationMirrors.map { it ->
@@ -60,13 +77,35 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                                 }
                             }
 
-                        override val element: Element?
+                        override val element: Element
                             get() = memberElement
-
-                        override val isDirectAccess: Boolean
-                            get() = false
                     }
                 }
+    }
+
+    /**
+     * Attempts to find a logical getter method for a variable.
+     *
+     * For example, the following getter method names are valid for a variable named 'foo':
+     * 'foo()', 'isFoo()', 'hasFoo()', 'getFoo()'
+     *
+     * If no getter method is found, an exception will be fired.
+     *
+     * @param allMembers all elements within the class.
+     * @param variableElement the field element we want to find the getter method for.
+     */
+    private fun findFieldGetterMethodName(allMembers: List<Element>, variableElement: Element): String {
+        val method = allMembers
+                .filter { it.kind == ElementKind.METHOD }
+                .filter {
+                    // See if the method name either matches the variable name, or starts with a standard getter prefix.
+                    val remainder = it.simpleName.toString().toLowerCase().replace(variableElement.simpleName.toString().toLowerCase(), "")
+                    arrayOf("", "is", "has", "get").contains(remainder)
+                }
+                .find { (it.asType() as ExecutableType).parameterTypes.size == 0 }
+                ?: throw ProcessingException("Unable to find getter for private variable", variableElement)
+
+        return method.simpleName.toString()
     }
 
     fun getModelFieldsFromInterface(interfaceInfo: InterfaceInfo): List<FieldInfo> {
@@ -88,14 +127,14 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 override val fieldName: String
                     get() = it.fieldName
 
+                override val fieldAccessor: String
+                    get() = it.getterMethodName + "()"
+
                 override val annotationNames: List<String>
                     get() = it.elementInfo.annotationNames
 
-                override val element: Element?
+                override val element: Element
                     get() = it.elementInfo.underlyingElement
-
-                override val isDirectAccess: Boolean
-                    get() = it.isDirectAccess
             }
         }
     }

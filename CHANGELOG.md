@@ -1,6 +1,16 @@
 Change Log
 ==========
 
+Version 2.3.0 *(2017-10-15)*
+----------------------------
+
+* New: Added support for Kotlin data classes.
+     * This has been introduced by guessing the constructor of a Java class. Note, this will have a potential behavioural change if your existing POJOs annotated with `@AutoGsonAdapter` have constructors with parameters.
+     * If you plan on using this feature for regular Java POJOs, you must ensure that the order of the constructor parameters are in the same order as the fields themselves.
+     * Kotlin data classes are generated in a predictable format, hence why this approach works.
+* New: Removed support for annotating interfaces that extend `list` or `collection. Refer to the original feature in version 1.8.0.
+* Fix: Fixed a potential crash with `@GsonSubtype` when the `subTypeKey` field was missing or null.
+
 Version 2.2.0 *(2017-03-12)*
 ----------------------------
 

@@ -9,10 +9,10 @@ class InterfaceFieldInfo(val elementInfo: ElementInfo,
                          internal val typeName: TypeName,
                          internal val typeMirror: TypeMirror,
                          val fieldName: String,
-                         val isDirectAccess: Boolean) {
+                         val getterMethodName: String) {
 
     interface ElementInfo {
-        val underlyingElement: Element?
+        val underlyingElement: Element
 
         fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T?
 

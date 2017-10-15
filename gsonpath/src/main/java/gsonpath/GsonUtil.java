@@ -11,6 +11,9 @@ import java.io.IOException;
  */
 public class GsonUtil {
 
+    private GsonUtil() {
+    }
+
     /**
      * Determines whether the next value within the reader is not null.
      *

@@ -3,10 +3,9 @@ package gsonpath.generated;
 import com.google.gson.annotations.SerializedName;
 import gsonpath.AutoGsonAdapter;
 
-import java.util.List;
-
-@AutoGsonAdapter(rootField = "people")
-public interface PersonModelList extends List<PersonModelList.PersonModel> {
+@AutoGsonAdapter
+public interface PersonModelGenerated {
+    PersonModel[] getPeople();
 
     @AutoGsonAdapter(rootField = "person.names")
     interface PersonModel {

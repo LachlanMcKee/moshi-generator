@@ -1,0 +1,8 @@
+{
+    "parent": {
+        "child": {
+            "value1": "test"
+        }
+    },
+    "isBooleanTest1": false
+}

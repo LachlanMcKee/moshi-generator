@@ -2,7 +2,7 @@ package gsonpath;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import gsonpath.generated.PersonModelList;
+import gsonpath.generated.PersonModelGenerated;
 import gsonpath.vanilla.PeopleModelVanilla;
 import org.junit.Assert;
 import org.junit.Test;
@@ -74,21 +74,22 @@ public class PeopleModelTest {
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("vanillaModel. Time taken: " + duration);
 
-        Assert.assertEquals(vanillaModel.people.length, PEOPLE_SIZE);
-        Assert.assertEquals(vanillaModel.people[0].person.names.first, "Lachlan");
+        Assert.assertEquals(PEOPLE_SIZE, vanillaModel.people.length);
+        Assert.assertEquals("Lachlan", vanillaModel.people[0].person.names.first);
 
         return duration;
     }
 
     private long testGsonPath() {
         long start = System.nanoTime();
-        PersonModelList personModelList = gsonPath.fromJson(new StringReader(JSON_TEST_STRING), PersonModelList.class);
+        PersonModelGenerated personModelGenerated = gsonPath.fromJson(new StringReader(JSON_TEST_STRING), PersonModelGenerated.class);
 
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("gsonPathModel. Time taken: " + duration);
 
-        Assert.assertEquals(personModelList.size(), PEOPLE_SIZE);
-        Assert.assertEquals(personModelList.get(0).getFirstName(), "Lachlan");
+        PersonModelGenerated.PersonModel[] people = personModelGenerated.getPeople();
+        Assert.assertEquals(PEOPLE_SIZE, people.length);
+        Assert.assertEquals("Lachlan", people[0].getFirstName());
 
         return duration;
     }

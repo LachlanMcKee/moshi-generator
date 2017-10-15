@@ -1,4 +1,4 @@
-package gsonpath.generated;
+package gsonpath.kotlin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,20 +10,20 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class StoreModelTest {
+public class DataClassSampleTest {
     @Test
     public void test() {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        InputStream resourceAsStream = classLoader.getResourceAsStream("BookJson.json");
+        InputStream resourceAsStream = classLoader.getResourceAsStream("DataClassJson.json");
 
         Gson gson = builder.create();
-        StoreModel model = gson.fromJson(new InputStreamReader(resourceAsStream), StoreModel.class);
+        DataClassSample model = gson.fromJson(new InputStreamReader(resourceAsStream), DataClassSample.class);
 
-        Assert.assertEquals("red", model.bikeColour);
-        Assert.assertEquals(4, model.bookList.size());
-        Assert.assertEquals("J. R. R. Tolkien", model.bookList.get(3).author);
+        Assert.assertEquals("test", model.getValue1());
+        Assert.assertEquals(false, model.isBooleanTest1());
+        Assert.assertEquals(null, model.isBooleanTest2());
     }
 }

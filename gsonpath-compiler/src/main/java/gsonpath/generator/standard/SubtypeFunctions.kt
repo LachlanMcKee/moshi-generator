@@ -363,8 +363,8 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
     readMethodCodeBuilder.addStatement("\$T jsonElement = \$T.parse(in)", JsonElement::class.java, Streams::class.java)
             .addStatement("\$T typeValueJsonElement = jsonElement.getAsJsonObject().remove(\"${validatedGsonSubType.fieldName}\")", JsonElement::class.java)
 
-            .beginControlFlow("if (typeValueJsonElement == null)")
-            .addStatement("throw new \$T(\"cannot deserialize $rawTypeName because it does not define a field named '${validatedGsonSubType.fieldName}'\")",
+            .beginControlFlow("if (typeValueJsonElement == null || typeValueJsonElement.isJsonNull())")
+            .addStatement("throw new \$T(\"cannot deserialize $rawTypeName because the subtype field '${validatedGsonSubType.fieldName}' is either null or does not exist.\")",
                     JsonParseException::class.java)
 
             .endControlFlow()
