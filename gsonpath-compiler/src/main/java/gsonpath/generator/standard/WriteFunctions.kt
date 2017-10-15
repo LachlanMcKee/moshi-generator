@@ -69,7 +69,7 @@ private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
 
                 val objectName = "obj" + fieldCount
 
-                codeBlock.addStatement("\$T $objectName = value.${fieldInfo.fieldName}", fieldTypeName)
+                codeBlock.addStatement("\$T $objectName = value.${fieldInfo.fieldAccessor}", fieldTypeName)
 
                 // If we aren't serializing nulls, we need to prevent the 'out.name' code being executed.
                 if (!isPrimitive && !serializeNulls) {

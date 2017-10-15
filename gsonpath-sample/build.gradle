@@ -1,4 +1,6 @@
 apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
 
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
@@ -8,20 +10,22 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+        mavenCentral()
     }
     dependencies {
         classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 apply plugin: "net.ltgt.apt"
 
 dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "com.google.code.gson:gson:$gson_version"
 
     compile project(":gsonpath")
-    apt project(":gsonpath-compiler")
+    kapt project(":gsonpath-compiler")
 
     testCompile "junit:junit:$junit_version"
-    testApt project(":gsonpath-compiler")
 }

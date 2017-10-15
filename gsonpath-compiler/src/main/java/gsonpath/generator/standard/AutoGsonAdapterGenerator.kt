@@ -14,8 +14,10 @@ import gsonpath.generator.interf.ModelInterfaceGenerator
 import gsonpath.model.*
 import java.io.IOException
 import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 
@@ -48,11 +50,21 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         val properties = AutoGsonAdapterPropertiesFactory().create(
                 autoGsonAnnotation, getDefaultsAnnotation(autoGsonAnnotation), isModelInterface)
 
+        val requiresConstructorInjection: Boolean =
+                if (isModelInterface) {
+                    true
+                } else {
+                    findNonEmptyConstructor(processingEnv, modelElement) != null
+                }
+
         val fieldInfoFactory = FieldInfoFactory(processingEnv)
         if (!isModelInterface) {
             concreteClassName = modelClassName
 
-            fieldInfoList = fieldInfoFactory.getModelFieldsFromElement(modelElement, properties.fieldsRequireAnnotation)
+            fieldInfoList = fieldInfoFactory.getModelFieldsFromElement(
+                    modelElement,
+                    properties.fieldsRequireAnnotation,
+                    requiresConstructorInjection)
 
         } else {
             val interfaceInfo = ModelInterfaceGenerator(processingEnv).handle(modelElement)
@@ -84,7 +96,7 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         }
 
         adapterTypeBuilder.addMethod(createReadMethod(processingEnv, modelClassName, concreteClassName,
-                mandatoryInfoMap, rootGsonObject, extensions))
+                requiresConstructorInjection, mandatoryInfoMap, rootGsonObject, extensions))
 
         if (!isModelInterface) {
             adapterTypeBuilder.addMethod(createWriteMethod(modelClassName, rootGsonObject, properties.serializeNulls))
@@ -135,5 +147,19 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         }
 
         return null
+    }
+
+
+    /**
+     * Finds a constructor within the input [TypeElement] that has at least one argument.
+     *
+     * @param processingEnv the annotation processor environment.
+     * @param modelElement the model being searched.
+     */
+    fun findNonEmptyConstructor(processingEnv: ProcessingEnvironment, modelElement: TypeElement): ExecutableType? {
+        return processingEnv.elementUtils.getAllMembers(modelElement)
+                .filter { it.kind == ElementKind.CONSTRUCTOR }
+                .map { (it.asType() as ExecutableType) }
+                .find { it.parameterTypes.size > 0 }
     }
 }
