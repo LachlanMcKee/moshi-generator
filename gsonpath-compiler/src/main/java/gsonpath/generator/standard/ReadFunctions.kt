@@ -118,17 +118,6 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
         return recursionCount
     }
 
-    if (jsonMappingSize == 1) {
-        val value = jsonMapping.entries().first().value
-
-        if (value is GsonField && value.fieldInfo.isDirectAccess) {
-            writeGsonFieldReader(processingEnvironment, value, codeBlock, requiresConstructorInjection,
-                    mandatoryInfoMap[value.fieldInfo.fieldName], extensions)
-
-            return recursionCount + 1
-        }
-    }
-
     val counterVariableName = "jsonFieldCounter" + recursionCount
 
     codeBlock.addStatement("int $counterVariableName = 0")
