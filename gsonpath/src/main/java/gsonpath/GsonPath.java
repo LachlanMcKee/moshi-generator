@@ -10,6 +10,9 @@ import com.google.gson.TypeAdapterFactory;
 public class GsonPath {
     private static final String FACTORY_IMPLEMENTATION_SUFFIX = "Impl";
 
+    private GsonPath() {
+    }
+
     /**
      * Creates an instance of an {@link TypeAdapterFactory} implementation class that implements the input interface.
      * <p>
@@ -28,7 +31,7 @@ public class GsonPath {
         try {
             return (TypeAdapterFactory) Class.forName(factoryClassName).newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to instantiate generated TypeAdapterFactory '" + factoryClassName + "'", e);
+            throw new IllegalStateException("Unable to instantiate generated TypeAdapterFactory '" + factoryClassName + "'", e);
         }
     }
 }

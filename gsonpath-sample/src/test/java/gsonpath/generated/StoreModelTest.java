@@ -22,8 +22,8 @@ public class StoreModelTest {
         Gson gson = builder.create();
         StoreModel model = gson.fromJson(new InputStreamReader(resourceAsStream), StoreModel.class);
 
-        Assert.assertEquals(model.bikeColour, "red");
-        Assert.assertEquals(model.bookList.size(), 4);
-        Assert.assertEquals(model.bookList.get(3).author, "J. R. R. Tolkien");
+        Assert.assertEquals("red", model.bikeColour);
+        Assert.assertEquals(4, model.bookList.size());
+        Assert.assertEquals("J. R. R. Tolkien", model.bookList.get(3).author);
     }
 }
