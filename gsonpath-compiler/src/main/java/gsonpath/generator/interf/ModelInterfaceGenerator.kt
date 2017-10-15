@@ -116,7 +116,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             constructorBuilder.addParameter(typeName, fieldName)
                     .addStatement("this.$fieldName = $fieldName")
 
-            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, returnTypeMirror, fieldName))
+            interfaceInfoList.add(InterfaceFieldInfo(StandardElementInfo(enclosedElement), typeName, returnTypeMirror, fieldName, methodName))
 
             // Add to the equals method
             if (typeName.isPrimitive) {
