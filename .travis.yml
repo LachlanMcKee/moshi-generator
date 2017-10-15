@@ -6,9 +6,15 @@ notifications:
 jdk:
   - oraclejdk8
 
+branches:
+  only:
+    - master
+    - develop
+
 script:
   - if [ $TRAVIS_PULL_REQUEST != 'false' ];
-    then ./gradlew sonarqube -Dsonar.analysis.mode=preview -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=lachlanmckee-github -Dsonar.login=$SONAR_TOKEN -Dsonar.github.pullRequest=$TRAVIS_PULL_REQUEST -Dsonar.github.repository=LachlanMcKee/gsonpath -Dsonar.github.oauth=$GITHUB_TOKEN --stacktrace;
+    then ./gradlew sonarqube -Dsonar.analysis.mode=preview -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=lachlanmckee-github -Dsonar.login=$SONAR_TOKEN -Dsonar.github.pullRequest=$TRAVIS_PULL_REQUEST -Dsonar.github.repository=LachlanMcKee/gsonpath -Dsonar.github.oauth=$GITHUB_TOKEN;
+    else ./gradlew sonarqube -Dsonar.analysis.mode=publish -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=lachlanmckee-github -Dsonar.login=$SONAR_TOKEN;
     fi
 
 before_cache:
