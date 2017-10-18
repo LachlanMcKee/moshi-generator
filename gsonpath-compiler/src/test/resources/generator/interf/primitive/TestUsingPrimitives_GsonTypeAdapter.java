@@ -10,6 +10,12 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.Override;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestUsingPrimitives_GsonTypeAdapter extends TypeAdapter<TestUsingPrimitives> {
     private static final int MANDATORY_INDEX_INTEXAMPLE = 0;
     private static final int MANDATORY_INDEX_LONGEXAMPLE = 1;

@@ -11,6 +11,12 @@ import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestDefaultsUseInheritanceModel_GsonTypeAdapter extends TypeAdapter<TestDefaultsUseInheritanceModel> {
     private static final int MANDATORY_INDEX_EXPECTEDVALUE = 0;
 

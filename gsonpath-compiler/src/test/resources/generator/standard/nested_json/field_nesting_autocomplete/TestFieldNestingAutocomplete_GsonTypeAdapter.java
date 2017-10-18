@@ -10,6 +10,12 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.Override;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestFieldNestingAutocomplete_GsonTypeAdapter extends TypeAdapter<TestFieldNestingAutocomplete> {
     private final Gson mGson;
 

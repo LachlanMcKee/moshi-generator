@@ -10,6 +10,12 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.Override;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestExclude_GsonTypeAdapter extends TypeAdapter<TestExclude> {
     private final Gson mGson;
 

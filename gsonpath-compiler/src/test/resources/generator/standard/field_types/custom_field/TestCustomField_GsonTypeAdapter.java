@@ -11,6 +11,12 @@ import java.io.IOException;
 import java.lang.Override;
 import java.util.Currency;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestCustomField_GsonTypeAdapter extends TypeAdapter<TestCustomField> {
     private final Gson mGson;
 

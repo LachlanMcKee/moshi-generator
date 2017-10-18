@@ -18,6 +18,12 @@ import java.lang.String;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
     private final Gson mGson;
 

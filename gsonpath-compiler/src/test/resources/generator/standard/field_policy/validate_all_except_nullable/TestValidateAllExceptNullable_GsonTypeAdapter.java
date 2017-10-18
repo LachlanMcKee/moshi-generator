@@ -11,6 +11,12 @@ import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAdapter<TestValidateAllExceptNullable> {
     private static final int MANDATORY_INDEX_MANDATORY1 = 0;
     private static final int MANDATORY_INDEX_MANDATORY2 = 1;

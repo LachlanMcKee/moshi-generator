@@ -12,6 +12,12 @@ import java.io.IOException;
 import java.lang.Override;
 import java.lang.String;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestFlattenJson_GsonTypeAdapter extends TypeAdapter<TestFlattenJson> {
     private final Gson mGson;
 

@@ -17,6 +17,12 @@ import java.lang.Class;
 import java.lang.Override;
 import java.util.Map;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
     private final Gson mGson;
 
