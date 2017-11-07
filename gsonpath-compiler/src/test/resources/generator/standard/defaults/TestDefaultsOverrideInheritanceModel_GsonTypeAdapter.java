@@ -12,6 +12,12 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestDefaultsOverrideInheritanceModel_GsonTypeAdapter extends TypeAdapter<TestDefaultsOverrideInheritanceModel> {
     private final Gson mGson;
 

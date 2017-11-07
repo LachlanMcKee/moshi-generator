@@ -13,6 +13,12 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.Map;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class GenericsTest_GsonTypeAdapter extends TypeAdapter<GenericsTest> {
     private final Gson mGson;
 

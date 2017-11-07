@@ -18,6 +18,7 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import gsonpath.compiler.generateClassName
 import gsonpath.compiler.addNewLine
+import javax.annotation.Generated
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 
@@ -28,9 +29,15 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
         val modelClassName = ClassName.get(element)
         val outputClassName: ClassName = createOutputClassName(modelClassName)
 
+        val generatedJavaPoetAnnotation = AnnotationSpec.builder(Generated::class.java)
+                .addMember("value", "\"gsonpath.GsonProcessor\"")
+                .addMember("comments", "\"https://github.com/LachlanMcKee/gsonpath\"")
+                .build()
+
         val typeBuilder = TypeSpec.classBuilder(outputClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(modelClassName)
+                .addAnnotation(generatedJavaPoetAnnotation)
 
         val constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)

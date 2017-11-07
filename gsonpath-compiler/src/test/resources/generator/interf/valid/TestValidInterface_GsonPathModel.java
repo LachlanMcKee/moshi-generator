@@ -6,6 +6,12 @@ import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestValidInterface_GsonPathModel implements TestValidInterface {
     private final Integer value1;
 

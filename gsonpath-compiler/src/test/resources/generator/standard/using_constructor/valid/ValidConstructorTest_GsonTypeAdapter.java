@@ -11,6 +11,12 @@ import java.lang.Boolean;
 import java.lang.Override;
 import java.lang.String;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<ValidConstructorTest> {
     private static final int MANDATORY_INDEX_VALUE1 = 0;
 

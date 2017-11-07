@@ -4,6 +4,12 @@ import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 
+import javax.annotation.Generated;
+
+@Generated(
+        value = "gsonpath.GsonProcessor",
+        comments = "https://github.com/LachlanMcKee/gsonpath"
+)
 public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimitives {
     private final int intExample;
     private final long longExample;
