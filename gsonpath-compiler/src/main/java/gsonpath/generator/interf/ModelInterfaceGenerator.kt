@@ -237,10 +237,19 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
     }
 
     private fun getMethodElements(element: TypeElement): List<Element> {
-        val methodElements = processingEnv.elementUtils.getAllMembers(element).filter {
-            // Ignore methods from the base Object class
-            it.kind == ElementKind.METHOD && TypeName.get(it.enclosingElement.asType()) != TypeName.OBJECT
-        }
+        val methodElements = processingEnv.elementUtils.getAllMembers(element)
+                .filter {
+                    // Ignore methods from the base Object class
+                    TypeName.get(it.enclosingElement.asType()) != TypeName.OBJECT
+                }
+                .filter {
+                    it.kind == ElementKind.METHOD
+                }
+                .filter {
+                    // Ignore Java 8 default/static interface methods.
+                    !it.modifiers.contains(Modifier.DEFAULT) &&
+                            !it.modifiers.contains(Modifier.STATIC)
+                }
         return methodElements
     }
 
