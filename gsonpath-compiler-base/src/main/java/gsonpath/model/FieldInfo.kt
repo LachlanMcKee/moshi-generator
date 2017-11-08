@@ -48,4 +48,9 @@ interface FieldInfo {
      * This should mainly be used for reporting errors back to the user.
      */
     val element: Element
+
+    /**
+     * Whether the field has a default value assigned.
+     */
+    val hasDefaultValue: Boolean
 }

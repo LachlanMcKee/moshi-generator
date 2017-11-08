@@ -232,9 +232,7 @@ private fun writeGsonFieldReader(processingEnvironment: ProcessingEnvironment,
         if (mandatoryFieldInfo != null) {
             codeBlock.addStatement("mandatoryFieldsCheckList[${mandatoryFieldInfo.indexVariableName}] = true")
                     .addNewLine()
-        }
 
-        if (gsonField.isRequired) {
             codeBlock.nextControlFlow("else")
                     .addEscapedStatement("""throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '${gsonField.jsonPath}' was null for class '${fieldInfo.parentClassName}'")""")
         }
