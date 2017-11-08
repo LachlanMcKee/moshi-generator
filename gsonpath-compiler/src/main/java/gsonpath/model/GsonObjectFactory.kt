@@ -72,17 +72,17 @@ class GsonObjectFactory {
 
             gsonFieldValidationType == GsonFieldValidationType.VALIDATE_ALL_EXCEPT_NULLABLE ->
                 // Using this policy everything is mandatory except for optionals.
-                true
+                !fieldInfo.hasDefaultValue
 
             gsonFieldValidationType == GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL && isPrimitive ->
                 // Primitives are treated as non-null implicitly.
-                true
+                !fieldInfo.hasDefaultValue
 
             gsonFieldValidationType == GsonFieldValidationType.NO_VALIDATION ->
                 false
 
             else ->
-                isMandatory
+                isMandatory && !fieldInfo.hasDefaultValue
         }
 
         if (jsonFieldPath.contains(flattenDelimiter.toString())) {

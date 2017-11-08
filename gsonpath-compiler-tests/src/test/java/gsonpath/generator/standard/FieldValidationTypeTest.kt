@@ -48,4 +48,19 @@ class FieldValidationTypeTest : BaseGeneratorTest() {
                         "TestNoValidation_GsonTypeAdapter.java")
         ))
     }
+
+    @Test
+    fun testValidateWithDefaultValue() {
+        assertGeneratedContent(TestCriteria("generator/standard/field_policy/default_value",
+
+                absoluteSourceNames = listOf(
+                        "generator/standard/TestGsonTypeFactory.java"),
+
+                relativeSourceNames = listOf(
+                        "TestValidateWithDefaultValue.java"),
+
+                relativeGeneratedNames = listOf(
+                        "TestValidateWithDefaultValue_GsonTypeAdapter.java")
+        ))
+    }
 }
