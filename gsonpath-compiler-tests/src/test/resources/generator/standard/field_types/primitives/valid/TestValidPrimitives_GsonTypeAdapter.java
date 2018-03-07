@@ -9,11 +9,14 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.lang.Boolean;
+import java.lang.Byte;
+import java.lang.Character;
 import java.lang.Double;
+import java.lang.Float;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Override;
-
+import java.lang.Short;
 import javax.annotation.Generated;
 
 @Generated(
@@ -40,7 +43,7 @@ public final class TestValidPrimitives_GsonTypeAdapter extends TypeAdapter<TestV
         in.beginObject();
 
         while (in.hasNext()) {
-            if (jsonFieldCounter0 == 4) {
+            if (jsonFieldCounter0 == 8) {
                 in.skipValue();
                 continue;
             }
@@ -82,6 +85,42 @@ public final class TestValidPrimitives_GsonTypeAdapter extends TypeAdapter<TestV
                     }
                     break;
 
+                case "value5":
+                    jsonFieldCounter0++;
+
+                    Byte value_value5 = mGson.getAdapter(Byte.class).read(in);
+                    if (value_value5 != null) {
+                        result.value5 = value_value5;
+                    }
+                    break;
+
+                case "value6":
+                    jsonFieldCounter0++;
+
+                    Short value_value6 = mGson.getAdapter(Short.class).read(in);
+                    if (value_value6 != null) {
+                        result.value6 = value_value6;
+                    }
+                    break;
+
+                case "value7":
+                    jsonFieldCounter0++;
+
+                    Float value_value7 = mGson.getAdapter(Float.class).read(in);
+                    if (value_value7 != null) {
+                        result.value7 = value_value7;
+                    }
+                    break;
+
+                case "value8":
+                    jsonFieldCounter0++;
+
+                    Character value_value8 = mGson.getAdapter(Character.class).read(in);
+                    if (value_value8 != null) {
+                        result.value8 = value_value8;
+                    }
+                    break;
+
                 default:
                     in.skipValue();
                     break;
@@ -117,6 +156,22 @@ public final class TestValidPrimitives_GsonTypeAdapter extends TypeAdapter<TestV
         long obj3 = value.value4;
         out.name("value4");
         mGson.getAdapter(Long.class).write(out, obj3);
+
+        byte obj4 = value.value5;
+        out.name("value5");
+        mGson.getAdapter(Byte.class).write(out, obj4);
+
+        short obj5 = value.value6;
+        out.name("value6");
+        mGson.getAdapter(Short.class).write(out, obj5);
+
+        float obj6 = value.value7;
+        out.name("value7");
+        mGson.getAdapter(Float.class).write(out, obj6);
+
+        char obj7 = value.value8;
+        out.name("value8");
+        mGson.getAdapter(Character.class).write(out, obj7);
 
         // End
         out.endObject();
