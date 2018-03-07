@@ -9,4 +9,8 @@ public class TestBoxedPrimitives {
     public Integer value3;
     public Double value4;
     public Long value5;
+    public Byte value6;
+    public Short value7;
+    public Float value8;
+    public Character value9;
 }
