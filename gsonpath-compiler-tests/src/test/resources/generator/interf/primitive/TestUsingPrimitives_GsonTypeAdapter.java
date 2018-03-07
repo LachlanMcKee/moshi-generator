@@ -6,10 +6,12 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-
 import java.io.IOException;
+import java.lang.Boolean;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Long;
 import java.lang.Override;
-
 import javax.annotation.Generated;
 
 @Generated(
@@ -61,7 +63,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends TypeAdapter<TestU
                 case "intExample":
                     jsonFieldCounter0++;
 
-                    Integer value_intExample_safe = getIntegerSafely(in);
+                    Integer value_intExample_safe = mGson.getAdapter(Integer.class).read(in);
                     if (value_intExample_safe != null) {
                         value_intExample = value_intExample_safe;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_INTEXAMPLE] = true;
@@ -74,7 +76,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends TypeAdapter<TestU
                 case "longExample":
                     jsonFieldCounter0++;
 
-                    Long value_longExample_safe = getLongSafely(in);
+                    Long value_longExample_safe = mGson.getAdapter(Long.class).read(in);
                     if (value_longExample_safe != null) {
                         value_longExample = value_longExample_safe;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_LONGEXAMPLE] = true;
@@ -87,7 +89,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends TypeAdapter<TestU
                 case "doubleExample":
                     jsonFieldCounter0++;
 
-                    Double value_doubleExample_safe = getDoubleSafely(in);
+                    Double value_doubleExample_safe = mGson.getAdapter(Double.class).read(in);
                     if (value_doubleExample_safe != null) {
                         value_doubleExample = value_doubleExample_safe;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_DOUBLEEXAMPLE] = true;
@@ -100,7 +102,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends TypeAdapter<TestU
                 case "booleanExample":
                     jsonFieldCounter0++;
 
-                    Boolean value_booleanExample_safe = getBooleanSafely(in);
+                    Boolean value_booleanExample_safe = mGson.getAdapter(Boolean.class).read(in);
                     if (value_booleanExample_safe != null) {
                         value_booleanExample = value_booleanExample_safe;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_BOOLEANEXAMPLE] = true;

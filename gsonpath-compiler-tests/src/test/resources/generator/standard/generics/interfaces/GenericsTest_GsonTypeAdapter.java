@@ -6,8 +6,13 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import java.io.IOException;
+import java.lang.Double;
+import java.lang.Integer;
 import java.lang.Override;
+import java.lang.String;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -28,9 +33,9 @@ public final class GenericsTest_GsonTypeAdapter extends TypeAdapter<GenericsTest
         if (!isValidValue(in)) {
             return null;
         }
-        java.lang.String value_value1 = null;
-        java.util.Map<java.lang.String, java.lang.Integer> value_value2 = null;
-        java.lang.Double value_value3 = null;
+        String value_value1 = null;
+        Map<String, Integer> value_value2 = null;
+        Double value_value3 = null;
 
         int jsonFieldCounter0 = 0;
         in.beginObject();
@@ -45,19 +50,19 @@ public final class GenericsTest_GsonTypeAdapter extends TypeAdapter<GenericsTest
                 case "value1":
                     jsonFieldCounter0++;
 
-                    value_value1 = getStringSafely(in);
+                    value_value1 = mGson.getAdapter(String.class).read(in);
                     break;
 
                 case "value2":
                     jsonFieldCounter0++;
 
-                    value_value2 = mGson.getAdapter(new com.google.gson.reflect.TypeToken<java.util.Map<java.lang.String, java.lang.Integer>>(){}).read(in);
+                    value_value2 = mGson.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).read(in);
                     break;
 
                 case "value3":
                     jsonFieldCounter0++;
 
-                    value_value3 = getDoubleSafely(in);
+                    value_value3 = mGson.getAdapter(Double.class).read(in);
                     break;
 
                 default:

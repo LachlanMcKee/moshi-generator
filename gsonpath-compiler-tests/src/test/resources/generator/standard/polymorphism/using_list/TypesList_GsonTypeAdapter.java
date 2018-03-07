@@ -10,6 +10,8 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import generator.standard.polymorphism.Type;
+import generator.standard.polymorphism.Type1;
+import generator.standard.polymorphism.Type2;
 import gsonpath.internal.CollectionTypeAdapter;
 import java.io.IOException;
 import java.lang.Class;
@@ -54,7 +56,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                 case "items":
                     jsonFieldCounter0++;
 
-                    java.util.List<generator.standard.polymorphism.Type> value_items = (java.util.List<generator.standard.polymorphism.Type>) getItemsGsonSubtype().read(in);
+                    List<Type> value_items = (List<Type>) getItemsGsonSubtype().read(in);
                     if (value_items != null) {
                         result.items = value_items;
                     }
@@ -105,11 +107,11 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
             typeAdaptersDelegatedByValueMap = new java.util.HashMap<>();
             typeAdaptersDelegatedByClassMap = new java.util.HashMap<>();
 
-            typeAdaptersDelegatedByValueMap.put("type1", gson.getAdapter(generator.standard.polymorphism.Type1.class));
-            typeAdaptersDelegatedByClassMap.put(generator.standard.polymorphism.Type1.class, gson.getAdapter(generator.standard.polymorphism.Type1.class));
+            typeAdaptersDelegatedByValueMap.put("type1", gson.getAdapter(Type1.class));
+            typeAdaptersDelegatedByClassMap.put(Type1.class, gson.getAdapter(Type1.class));
 
-            typeAdaptersDelegatedByValueMap.put("type2", gson.getAdapter(generator.standard.polymorphism.Type2.class));
-            typeAdaptersDelegatedByClassMap.put(generator.standard.polymorphism.Type2.class, gson.getAdapter(generator.standard.polymorphism.Type2.class));
+            typeAdaptersDelegatedByValueMap.put("type2", gson.getAdapter(Type2.class));
+            typeAdaptersDelegatedByClassMap.put(Type2.class, gson.getAdapter(Type2.class));
         }
 
         @Override
@@ -120,11 +122,11 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                 throw new JsonParseException("cannot deserialize generator.standard.polymorphism.Type because the subtype field 'type' is either null or does not exist.");
             }
             java.lang.String value = typeValueJsonElement.getAsString();
-            TypeAdapter<? extends generator.standard.polymorphism.Type> delegate = typeAdaptersDelegatedByValueMap.get(value);
+            TypeAdapter<? extends Type> delegate = typeAdaptersDelegatedByValueMap.get(value);
             if (delegate == null) {
                 return null;
             }
-            generator.standard.polymorphism.Type result = delegate.fromJsonTree(jsonElement);
+            Type result = delegate.fromJsonTree(jsonElement);
             return result;
         }
 

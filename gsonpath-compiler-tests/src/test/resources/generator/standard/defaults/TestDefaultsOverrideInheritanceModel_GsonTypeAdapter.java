@@ -64,7 +64,7 @@ public final class TestDefaultsOverrideInheritanceModel_GsonTypeAdapter extends 
                             case "expectedValue":
                                 jsonFieldCounter1++;
 
-                                Integer value_path_expectedValue = getIntegerSafely(in);
+                                Integer value_path_expectedValue = mGson.getAdapter(Integer.class).read(in);
                                 if (value_path_expectedValue != null) {
                                     result.expectedValue = value_path_expectedValue;
                                 }
@@ -83,7 +83,7 @@ public final class TestDefaultsOverrideInheritanceModel_GsonTypeAdapter extends 
                 case "notIgnored":
                     jsonFieldCounter0++;
 
-                    String value_notIgnored = getStringSafely(in);
+                    String value_notIgnored = mGson.getAdapter(String.class).read(in);
                     if (value_notIgnored != null) {
                         result.notIgnored = value_notIgnored;
                     }
@@ -116,7 +116,7 @@ public final class TestDefaultsOverrideInheritanceModel_GsonTypeAdapter extends 
         Integer obj0 = value.expectedValue;
         if (obj0 != null) {
             out.name("expectedValue");
-            out.value(obj0);
+            mGson.getAdapter(Integer.class).write(out, obj0);
         }
 
         // End path
@@ -124,7 +124,7 @@ public final class TestDefaultsOverrideInheritanceModel_GsonTypeAdapter extends 
         String obj1 = value.notIgnored;
         if (obj1 != null) {
             out.name("notIgnored");
-            out.value(obj1);
+            mGson.getAdapter(String.class).write(out, obj1);
         }
 
         // End

@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -34,9 +35,9 @@ public final class TestUsingInheritance_GsonTypeAdapter extends TypeAdapter<Test
         if (!isValidValue(in)) {
             return null;
         }
-        java.lang.Integer value_value3 = null;
-        java.lang.Integer value_value1 = null;
-        java.lang.Integer value_Json1_Nest2 = null;
+        Integer value_value3 = null;
+        Integer value_value1 = null;
+        Integer value_Json1_Nest2 = null;
         boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE];
 
         int jsonFieldCounter0 = 0;
@@ -52,13 +53,13 @@ public final class TestUsingInheritance_GsonTypeAdapter extends TypeAdapter<Test
                 case "value3":
                     jsonFieldCounter0++;
 
-                    value_value3 = getIntegerSafely(in);
+                    value_value3 = mGson.getAdapter(Integer.class).read(in);
                     break;
 
                 case "value1":
                     jsonFieldCounter0++;
 
-                    Integer value_value1_safe = getIntegerSafely(in);
+                    Integer value_value1_safe = mGson.getAdapter(Integer.class).read(in);
                     if (value_value1_safe != null) {
                         value_value1 = value_value1_safe;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_VALUE1] = true;
@@ -88,7 +89,7 @@ public final class TestUsingInheritance_GsonTypeAdapter extends TypeAdapter<Test
                             case "Nest2":
                                 jsonFieldCounter1++;
 
-                                value_Json1_Nest2 = getIntegerSafely(in);
+                                value_Json1_Nest2 = mGson.getAdapter(Integer.class).read(in);
                                 break;
 
                             default:

@@ -49,7 +49,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value1":
                     jsonFieldCounter0++;
 
-                    Integer value_value1 = getIntegerSafely(in);
+                    Integer value_value1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -58,7 +58,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value2":
                     jsonFieldCounter0++;
 
-                    Double value_value2 = getDoubleSafely(in);
+                    Double value_value2 = mGson.getAdapter(Double.class).read(in);
                     if (value_value2 != null) {
                         result.value2 = value_value2;
                     }
@@ -67,7 +67,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value3":
                     jsonFieldCounter0++;
 
-                    Boolean value_value3 = getBooleanSafely(in);
+                    Boolean value_value3 = mGson.getAdapter(Boolean.class).read(in);
                     if (value_value3 != null) {
                         result.value3 = value_value3;
                     }
@@ -76,7 +76,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value4":
                     jsonFieldCounter0++;
 
-                    String value_value4 = getStringSafely(in);
+                    String value_value4 = mGson.getAdapter(String.class).read(in);
                     if (value_value4 != null) {
                         result.value4 = value_value4;
                     }
@@ -85,7 +85,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value5":
                     jsonFieldCounter0++;
 
-                    Integer value_value5 = getIntegerSafely(in);
+                    Integer value_value5 = mGson.getAdapter(Integer.class).read(in);
                     if (value_value5 != null) {
                         result.value5 = value_value5;
                     }
@@ -94,7 +94,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value6":
                     jsonFieldCounter0++;
 
-                    Double value_value6 = getDoubleSafely(in);
+                    Double value_value6 = mGson.getAdapter(Double.class).read(in);
                     if (value_value6 != null) {
                         result.value6 = value_value6;
                     }
@@ -103,7 +103,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
                 case "value7":
                     jsonFieldCounter0++;
 
-                    Boolean value_value7 = getBooleanSafely(in);
+                    Boolean value_value7 = mGson.getAdapter(Boolean.class).read(in);
                     if (value_value7 != null) {
                         result.value7 = value_value7;
                     }
@@ -131,20 +131,20 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
         out.beginObject();
         int obj0 = value.value1;
         out.name("value1");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
         double obj1 = value.value2;
         out.name("value2");
-        out.value(obj1);
+        mGson.getAdapter(Double.class).write(out, obj1);
 
         boolean obj2 = value.value3;
         out.name("value3");
-        out.value(obj2);
+        mGson.getAdapter(Boolean.class).write(out, obj2);
 
         String obj3 = value.value4;
         out.name("value4");
         if (obj3 != null) {
-            out.value(obj3);
+            mGson.getAdapter(String.class).write(out, obj3);
         } else {
             out.nullValue();
         }
@@ -152,7 +152,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
         Integer obj4 = value.value5;
         out.name("value5");
         if (obj4 != null) {
-            out.value(obj4);
+            mGson.getAdapter(Integer.class).write(out, obj4);
         } else {
             out.nullValue();
         }
@@ -160,7 +160,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
         Double obj5 = value.value6;
         out.name("value6");
         if (obj5 != null) {
-            out.value(obj5);
+            mGson.getAdapter(Double.class).write(out, obj5);
         } else {
             out.nullValue();
         }
@@ -168,7 +168,7 @@ public final class TestSerializeNulls_GsonTypeAdapter extends TypeAdapter<TestSe
         Boolean obj6 = value.value7;
         out.name("value7");
         if (obj6 != null) {
-            out.value(obj6);
+            mGson.getAdapter(Boolean.class).write(out, obj6);
         } else {
             out.nullValue();
         }

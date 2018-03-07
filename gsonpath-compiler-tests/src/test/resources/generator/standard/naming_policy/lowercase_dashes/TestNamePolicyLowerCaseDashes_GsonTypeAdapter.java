@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -45,7 +46,7 @@ public final class TestNamePolicyLowerCaseDashes_GsonTypeAdapter extends TypeAda
                 case "test-value":
                     jsonFieldCounter0++;
 
-                    Integer value_test_value = getIntegerSafely(in);
+                    Integer value_test_value = mGson.getAdapter(Integer.class).read(in);
                     if (value_test_value != null) {
                         result.testValue = value_test_value;
                     }
@@ -73,7 +74,7 @@ public final class TestNamePolicyLowerCaseDashes_GsonTypeAdapter extends TypeAda
         out.beginObject();
         int obj0 = value.testValue;
         out.name("test-value");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

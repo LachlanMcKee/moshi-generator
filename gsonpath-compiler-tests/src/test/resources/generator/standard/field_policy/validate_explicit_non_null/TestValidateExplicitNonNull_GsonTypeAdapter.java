@@ -52,7 +52,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends TypeAdapt
                 case "mandatory1":
                     jsonFieldCounter0++;
 
-                    Integer value_mandatory1 = getIntegerSafely(in);
+                    Integer value_mandatory1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_mandatory1 != null) {
                         result.mandatory1 = value_mandatory1;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY1] = true;
@@ -64,7 +64,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends TypeAdapt
                 case "mandatory2":
                     jsonFieldCounter0++;
 
-                    Integer value_mandatory2 = getIntegerSafely(in);
+                    Integer value_mandatory2 = mGson.getAdapter(Integer.class).read(in);
                     if (value_mandatory2 != null) {
                         result.mandatory2 = value_mandatory2;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY2] = true;
@@ -76,7 +76,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends TypeAdapt
                 case "mandatory3":
                     jsonFieldCounter0++;
 
-                    Integer value_mandatory3 = getIntegerSafely(in);
+                    Integer value_mandatory3 = mGson.getAdapter(Integer.class).read(in);
                     if (value_mandatory3 != null) {
                         result.mandatory3 = value_mandatory3;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY3] = true;
@@ -88,7 +88,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends TypeAdapt
                 case "optional1":
                     jsonFieldCounter0++;
 
-                    Integer value_optional1 = getIntegerSafely(in);
+                    Integer value_optional1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
@@ -142,23 +142,23 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends TypeAdapt
         Integer obj0 = value.mandatory1;
         if (obj0 != null) {
             out.name("mandatory1");
-            out.value(obj0);
+            mGson.getAdapter(Integer.class).write(out, obj0);
         }
 
         Integer obj1 = value.mandatory2;
         if (obj1 != null) {
             out.name("mandatory2");
-            out.value(obj1);
+            mGson.getAdapter(Integer.class).write(out, obj1);
         }
 
         int obj2 = value.mandatory3;
         out.name("mandatory3");
-        out.value(obj2);
+        mGson.getAdapter(Integer.class).write(out, obj2);
 
         Integer obj3 = value.optional1;
         if (obj3 != null) {
             out.name("optional1");
-            out.value(obj3);
+            mGson.getAdapter(Integer.class).write(out, obj3);
         }
 
         // End

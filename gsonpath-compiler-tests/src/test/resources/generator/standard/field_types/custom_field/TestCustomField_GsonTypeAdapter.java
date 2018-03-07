@@ -46,7 +46,7 @@ public final class TestCustomField_GsonTypeAdapter extends TypeAdapter<TestCusto
                 case "value1":
                     jsonFieldCounter0++;
 
-                    java.util.Currency value_value1 = mGson.getAdapter(java.util.Currency.class).read(in);
+                    Currency value_value1 = mGson.getAdapter(Currency.class).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -75,7 +75,7 @@ public final class TestCustomField_GsonTypeAdapter extends TypeAdapter<TestCusto
         Currency obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            mGson.getAdapter(java.util.Currency.class).write(out, obj0);
+            mGson.getAdapter(Currency.class).write(out, obj0);
         }
 
         // End

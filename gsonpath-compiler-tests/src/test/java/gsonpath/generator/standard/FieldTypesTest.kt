@@ -1,12 +1,7 @@
 package gsonpath.generator.standard
 
-import com.google.testing.compile.JavaFileObjects
-import gsonpath.GsonProcessorImpl
 import gsonpath.generator.BaseGeneratorTest
 import org.junit.Test
-
-import com.google.common.truth.Truth.assertAbout
-import com.google.testing.compile.JavaSourceSubjectFactory.javaSource
 
 class FieldTypesTest : BaseGeneratorTest() {
     @Test
@@ -22,18 +17,6 @@ class FieldTypesTest : BaseGeneratorTest() {
                 relativeGeneratedNames = listOf(
                         "TestValidPrimitives_GsonTypeAdapter.java")
         ))
-    }
-
-    @Test
-    fun testInvalidPrimitives() {
-        val source = JavaFileObjects.forResource("generator/standard/field_types/primitives/invalid/TestInvalidPrimitives.java")
-
-        assertAbout(javaSource()).that(source)
-                .processedWith(GsonProcessorImpl())
-                .failsToCompile()
-                .withErrorContaining("Gson Path: Unsupported primitive type found. Only boolean, int, double and long can be used.")
-                .`in`(source)
-                .onLine(7)
     }
 
     @Test

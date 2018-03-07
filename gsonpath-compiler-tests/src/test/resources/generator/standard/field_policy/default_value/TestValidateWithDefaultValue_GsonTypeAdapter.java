@@ -46,7 +46,7 @@ public final class TestValidateWithDefaultValue_GsonTypeAdapter extends TypeAdap
                 case "mandatoryWithDefault":
                     jsonFieldCounter0++;
 
-                    Integer value_mandatoryWithDefault = getIntegerSafely(in);
+                    Integer value_mandatoryWithDefault = mGson.getAdapter(Integer.class).read(in);
                     if (value_mandatoryWithDefault != null) {
                         result.mandatoryWithDefault = value_mandatoryWithDefault;
                     }
@@ -75,7 +75,7 @@ public final class TestValidateWithDefaultValue_GsonTypeAdapter extends TypeAdap
         Integer obj0 = value.mandatoryWithDefault;
         if (obj0 != null) {
             out.name("mandatoryWithDefault");
-            out.value(obj0);
+            mGson.getAdapter(Integer.class).write(out, obj0);
         }
 
         // End

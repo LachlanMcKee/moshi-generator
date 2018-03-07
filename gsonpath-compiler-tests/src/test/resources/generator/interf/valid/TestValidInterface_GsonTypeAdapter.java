@@ -7,6 +7,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -28,11 +29,11 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
         if (!isValidValue(in)) {
             return null;
         }
-        java.lang.Integer value_Json1_Nest1 = null;
-        java.lang.Integer value_value2 = null;
-        java.lang.Integer value_Json1_Nest3 = null;
-        java.lang.Integer value_result = null;
-        java.lang.Integer value_that = null;
+        Integer value_Json1_Nest1 = null;
+        Integer value_value2 = null;
+        Integer value_Json1_Nest3 = null;
+        Integer value_result = null;
+        Integer value_that = null;
 
         int jsonFieldCounter0 = 0;
         in.beginObject();
@@ -64,13 +65,13 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
                             case "Nest1":
                                 jsonFieldCounter1++;
 
-                                value_Json1_Nest1 = getIntegerSafely(in);
+                                value_Json1_Nest1 = mGson.getAdapter(Integer.class).read(in);
                                 break;
 
                             case "Nest3":
                                 jsonFieldCounter1++;
 
-                                value_Json1_Nest3 = getIntegerSafely(in);
+                                value_Json1_Nest3 = mGson.getAdapter(Integer.class).read(in);
                                 break;
 
                             default:
@@ -85,19 +86,19 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
                 case "value2":
                     jsonFieldCounter0++;
 
-                    value_value2 = getIntegerSafely(in);
+                    value_value2 = mGson.getAdapter(Integer.class).read(in);
                     break;
 
                 case "result":
                     jsonFieldCounter0++;
 
-                    value_result = getIntegerSafely(in);
+                    value_result = mGson.getAdapter(Integer.class).read(in);
                     break;
 
                 case "that":
                     jsonFieldCounter0++;
 
-                    value_that = getIntegerSafely(in);
+                    value_that = mGson.getAdapter(Integer.class).read(in);
                     break;
 
                 default:
