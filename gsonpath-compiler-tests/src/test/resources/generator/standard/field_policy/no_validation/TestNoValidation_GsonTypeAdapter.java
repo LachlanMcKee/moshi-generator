@@ -46,7 +46,7 @@ public final class TestNoValidation_GsonTypeAdapter extends TypeAdapter<TestNoVa
                 case "optional1":
                     jsonFieldCounter0++;
 
-                    Integer value_optional1 = getIntegerSafely(in);
+                    Integer value_optional1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
@@ -55,7 +55,7 @@ public final class TestNoValidation_GsonTypeAdapter extends TypeAdapter<TestNoVa
                 case "optional2":
                     jsonFieldCounter0++;
 
-                    Integer value_optional2 = getIntegerSafely(in);
+                    Integer value_optional2 = mGson.getAdapter(Integer.class).read(in);
                     if (value_optional2 != null) {
                         result.optional2 = value_optional2;
                     }
@@ -64,7 +64,7 @@ public final class TestNoValidation_GsonTypeAdapter extends TypeAdapter<TestNoVa
                 case "optional3":
                     jsonFieldCounter0++;
 
-                    Integer value_optional3 = getIntegerSafely(in);
+                    Integer value_optional3 = mGson.getAdapter(Integer.class).read(in);
                     if (value_optional3 != null) {
                         result.optional3 = value_optional3;
                     }
@@ -93,18 +93,18 @@ public final class TestNoValidation_GsonTypeAdapter extends TypeAdapter<TestNoVa
         Integer obj0 = value.optional1;
         if (obj0 != null) {
             out.name("optional1");
-            out.value(obj0);
+            mGson.getAdapter(Integer.class).write(out, obj0);
         }
 
         Integer obj1 = value.optional2;
         if (obj1 != null) {
             out.name("optional2");
-            out.value(obj1);
+            mGson.getAdapter(Integer.class).write(out, obj1);
         }
 
         int obj2 = value.optional3;
         out.name("optional3");
-        out.value(obj2);
+        mGson.getAdapter(Integer.class).write(out, obj2);
 
         // End
         out.endObject();

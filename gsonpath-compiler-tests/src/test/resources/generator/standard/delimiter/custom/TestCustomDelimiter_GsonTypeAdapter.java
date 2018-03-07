@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -62,7 +63,7 @@ public final class TestCustomDelimiter_GsonTypeAdapter extends TypeAdapter<TestC
                             case "Nest1":
                                 jsonFieldCounter1++;
 
-                                Integer value_Json1_Nest1 = getIntegerSafely(in);
+                                Integer value_Json1_Nest1 = mGson.getAdapter(Integer.class).read(in);
                                 if (value_Json1_Nest1 != null) {
                                     result.value1 = value_Json1_Nest1;
                                 }
@@ -104,7 +105,7 @@ public final class TestCustomDelimiter_GsonTypeAdapter extends TypeAdapter<TestC
         out.beginObject();
         int obj0 = value.value1;
         out.name("Nest1");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
         // End Json1
         out.endObject();

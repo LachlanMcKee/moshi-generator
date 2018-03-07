@@ -51,7 +51,7 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAda
                 case "mandatory1":
                     jsonFieldCounter0++;
 
-                    Integer value_mandatory1 = getIntegerSafely(in);
+                    Integer value_mandatory1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_mandatory1 != null) {
                         result.mandatory1 = value_mandatory1;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY1] = true;
@@ -63,7 +63,7 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAda
                 case "mandatory2":
                     jsonFieldCounter0++;
 
-                    Integer value_mandatory2 = getIntegerSafely(in);
+                    Integer value_mandatory2 = mGson.getAdapter(Integer.class).read(in);
                     if (value_mandatory2 != null) {
                         result.mandatory2 = value_mandatory2;
                         mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY2] = true;
@@ -75,7 +75,7 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAda
                 case "optional1":
                     jsonFieldCounter0++;
 
-                    Integer value_optional1 = getIntegerSafely(in);
+                    Integer value_optional1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
@@ -125,19 +125,19 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAda
         Integer obj0 = value.mandatory1;
         if (obj0 != null) {
             out.name("mandatory1");
-            out.value(obj0);
+            mGson.getAdapter(Integer.class).write(out, obj0);
         }
 
         Integer obj1 = value.mandatory2;
         if (obj1 != null) {
             out.name("mandatory2");
-            out.value(obj1);
+            mGson.getAdapter(Integer.class).write(out, obj1);
         }
 
         Integer obj2 = value.optional1;
         if (obj2 != null) {
             out.name("optional1");
-            out.value(obj2);
+            mGson.getAdapter(Integer.class).write(out, obj2);
         }
 
         // End

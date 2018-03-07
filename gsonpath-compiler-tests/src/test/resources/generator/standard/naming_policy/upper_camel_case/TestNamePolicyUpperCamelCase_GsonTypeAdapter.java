@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -45,7 +46,7 @@ public final class TestNamePolicyUpperCamelCase_GsonTypeAdapter extends TypeAdap
                 case "TestValue":
                     jsonFieldCounter0++;
 
-                    Integer value_TestValue = getIntegerSafely(in);
+                    Integer value_TestValue = mGson.getAdapter(Integer.class).read(in);
                     if (value_TestValue != null) {
                         result.testValue = value_TestValue;
                     }
@@ -73,7 +74,7 @@ public final class TestNamePolicyUpperCamelCase_GsonTypeAdapter extends TypeAdap
         out.beginObject();
         int obj0 = value.testValue;
         out.name("TestValue");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

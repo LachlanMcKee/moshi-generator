@@ -333,12 +333,12 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
         val subtypeElement = processingEnv.typeUtils.asElement(it.clazzTypeMirror)
 
         constructorBuilder.addCode("\n")
-        constructorBuilder.addStatement("typeAdaptersDelegatedByValueMap.put(${it.key}, gson.getAdapter($subtypeElement.class))")
-        constructorBuilder.addStatement("typeAdaptersDelegatedByClassMap.put($subtypeElement.class, gson.getAdapter($subtypeElement.class))")
+        constructorBuilder.addStatement("typeAdaptersDelegatedByValueMap.put(${it.key}, gson.getAdapter(\$T.class))", subtypeElement)
+        constructorBuilder.addStatement("typeAdaptersDelegatedByClassMap.put(\$T.class, gson.getAdapter(\$T.class))", subtypeElement, subtypeElement)
     }
 
     if (validatedGsonSubType.defaultType != null) {
-        constructorBuilder.addStatement("defaultTypeAdapterDelegate = gson.getAdapter(${validatedGsonSubType.defaultType}.class)")
+        constructorBuilder.addStatement("defaultTypeAdapterDelegate = gson.getAdapter(\$T.class)", validatedGsonSubType.defaultType)
     }
 
     subTypeAdapterBuilder.addMethod(constructorBuilder.build())
@@ -376,7 +376,7 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
         SubTypeKeyType.BOOLEAN -> readMethodCodeBuilder.addStatement("boolean value = typeValueJsonElement.getAsBoolean()")
     }
 
-    readMethodCodeBuilder.addStatement("\$T<? extends $rawTypeName> delegate = typeAdaptersDelegatedByValueMap.get(value)", TypeAdapter::class.java)
+    readMethodCodeBuilder.addStatement("\$T<? extends \$T> delegate = typeAdaptersDelegatedByValueMap.get(value)", TypeAdapter::class.java, rawTypeName)
             .beginControlFlow("if (delegate == null)")
 
     if (validatedGsonSubType.defaultType != null) {
@@ -391,7 +391,7 @@ private fun createSubTypeAdapter(processingEnv: ProcessingEnvironment, typeSpecB
     }
 
     readMethodCodeBuilder.endControlFlow()
-            .addStatement("$rawTypeName result = delegate.fromJsonTree(jsonElement)")
+            .addStatement("\$T result = delegate.fromJsonTree(jsonElement)", rawTypeName)
 
     if (validatedGsonSubType.failureOutcome == GsonSubTypeFailureOutcome.FAIL) {
         readMethodCodeBuilder.beginControlFlow("if (result == null)")

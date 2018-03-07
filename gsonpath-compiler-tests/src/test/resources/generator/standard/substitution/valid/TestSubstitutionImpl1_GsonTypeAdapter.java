@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -61,7 +62,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends TypeAdapter<Tes
                             case "Json1":
                                 jsonFieldCounter1++;
 
-                                Integer value_Impl1_A_Json1 = getIntegerSafely(in);
+                                Integer value_Impl1_A_Json1 = mGson.getAdapter(Integer.class).read(in);
                                 if (value_Impl1_A_Json1 != null) {
                                     result.value1 = value_Impl1_A_Json1;
                                 }
@@ -96,7 +97,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends TypeAdapter<Tes
                             case "Json1":
                                 jsonFieldCounter2++;
 
-                                Integer value_Impl1_B_Json1 = getIntegerSafely(in);
+                                Integer value_Impl1_B_Json1 = mGson.getAdapter(Integer.class).read(in);
                                 if (value_Impl1_B_Json1 != null) {
                                     result.value2 = value_Impl1_B_Json1;
                                 }
@@ -137,7 +138,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends TypeAdapter<Tes
         out.beginObject();
         int obj0 = value.value1;
         out.name("Json1");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
         // End Impl1_A
         out.endObject();
@@ -147,7 +148,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends TypeAdapter<Tes
         out.beginObject();
         int obj1 = value.value2;
         out.name("Json1");
-        out.value(obj1);
+        mGson.getAdapter(Integer.class).write(out, obj1);
 
         // End Impl1_B
         out.endObject();

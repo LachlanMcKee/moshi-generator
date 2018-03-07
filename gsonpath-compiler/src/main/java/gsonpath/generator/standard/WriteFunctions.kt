@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
-import gsonpath.compiler.GSON_SUPPORTED_CLASSES
 import gsonpath.compiler.addComment
 import gsonpath.compiler.addNewLine
 import gsonpath.model.GsonField
@@ -82,33 +81,25 @@ private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
                     codeBlock.beginControlFlow("if ($objectName != null)")
                 }
 
-                if (isPrimitive || GSON_SUPPORTED_CLASSES.contains(fieldTypeName)) {
+                val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
+                val writeLine =
+                        if (subTypeAnnotation != null) {
+                            // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
+                            "${getSubTypeGetterName(value)}().write(out, $objectName)"
+                        } else {
+                            val adapterName: String = if (fieldTypeName is ParameterizedTypeName) {
+                                // This is a generic type
+                                "new com.google.gson.reflect.TypeToken<\$T>(){}"
 
-                    codeBlock.addStatement("out.value($objectName)")
-
-                } else {
-                    val adapterName: String
-
-                    if (fieldTypeName is ParameterizedTypeName) {
-                        // This is a generic type
-                        adapterName = "new com.google.gson.reflect.TypeToken<$fieldTypeName>(){}"
-
-                    } else {
-                        adapterName = fieldTypeName.toString() + ".class"
-                    }
-
-                    val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
-                    val writeLine =
-                            if (subTypeAnnotation != null) {
-                                // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
-                                "${getSubTypeGetterName(value)}().write(out, $objectName)"
                             } else {
-                                // Otherwise we request the type adapter from gson.
-                                "mGson.getAdapter($adapterName).write(out, $objectName)"
+                                "\$T.class"
                             }
 
-                    codeBlock.addStatement(writeLine)
-                }
+                            // Otherwise we request the type adapter from gson.
+                            "mGson.getAdapter($adapterName).write(out, $objectName)"
+                        }
+
+                codeBlock.addStatement(writeLine, fieldTypeName.box())
 
                 // If we are serializing nulls, we need to ensure we output it here.
                 if (!isPrimitive) {

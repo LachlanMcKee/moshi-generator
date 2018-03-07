@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -45,7 +46,7 @@ public final class TestExclude_GsonTypeAdapter extends TypeAdapter<TestExclude> 
                 case "element1":
                     jsonFieldCounter0++;
 
-                    Integer value_element1 = getIntegerSafely(in);
+                    Integer value_element1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_element1 != null) {
                         result.element1 = value_element1;
                     }
@@ -73,7 +74,7 @@ public final class TestExclude_GsonTypeAdapter extends TypeAdapter<TestExclude> 
         out.beginObject();
         int obj0 = value.element1;
         out.name("element1");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

@@ -34,9 +34,9 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
         if (!isValidValue(in)) {
             return null;
         }
-        java.lang.String value_parent_child_value1 = null;
+        String value_parent_child_value1 = null;
         boolean value_isBooleanTest1 = false;
-        java.lang.Boolean value_isBooleanTest2 = null;
+        Boolean value_isBooleanTest2 = null;
         boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE];
 
         int jsonFieldCounter0 = 0;
@@ -86,7 +86,7 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
                                         case "value1":
                                             jsonFieldCounter2++;
 
-                                            String value_parent_child_value1_safe = getStringSafely(in);
+                                            String value_parent_child_value1_safe = mGson.getAdapter(String.class).read(in);
                                             if (value_parent_child_value1_safe != null) {
                                                 value_parent_child_value1 = value_parent_child_value1_safe;
                                                 mandatoryFieldsCheckList[MANDATORY_INDEX_VALUE1] = true;
@@ -117,13 +117,13 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
                 case "isBooleanTest1":
                     jsonFieldCounter0++;
 
-                    value_isBooleanTest1 = getBooleanSafely(in);
+                    value_isBooleanTest1 = mGson.getAdapter(Boolean.class).read(in);
                     break;
 
                 case "isBooleanTest2":
                     jsonFieldCounter0++;
 
-                    value_isBooleanTest2 = getBooleanSafely(in);
+                    value_isBooleanTest2 = mGson.getAdapter(Boolean.class).read(in);
                     break;
 
                 default:
@@ -178,7 +178,7 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
         String obj0 = value.getValue1();
         if (obj0 != null) {
             out.name("value1");
-            out.value(obj0);
+            mGson.getAdapter(String.class).write(out, obj0);
         }
 
         // End parentchild
@@ -187,12 +187,12 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
         out.endObject();
         boolean obj1 = value.isBooleanTest1();
         out.name("isBooleanTest1");
-        out.value(obj1);
+        mGson.getAdapter(Boolean.class).write(out, obj1);
 
         Boolean obj2 = value.isBooleanTest2();
         if (obj2 != null) {
             out.name("isBooleanTest2");
-            out.value(obj2);
+            mGson.getAdapter(Boolean.class).write(out, obj2);
         }
 
         // End

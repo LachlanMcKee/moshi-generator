@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.Integer;
 import java.lang.Override;
 
 import javax.annotation.Generated;
@@ -45,7 +46,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
                 case "Json1":
                     jsonFieldCounter0++;
 
-                    Integer value_Json1 = getIntegerSafely(in);
+                    Integer value_Json1 = mGson.getAdapter(Integer.class).read(in);
                     if (value_Json1 != null) {
                         result.value1 = value_Json1;
                     }
@@ -71,7 +72,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
                             case "Nest1":
                                 jsonFieldCounter1++;
 
-                                Integer value_Json2_Nest1 = getIntegerSafely(in);
+                                Integer value_Json2_Nest1 = mGson.getAdapter(Integer.class).read(in);
                                 if (value_Json2_Nest1 != null) {
                                     result.value2 = value_Json2_Nest1;
                                 }
@@ -97,7 +98,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
                                         case "EndPoint1":
                                             jsonFieldCounter2++;
 
-                                            Integer value_Json2_Nest2_EndPoint1 = getIntegerSafely(in);
+                                            Integer value_Json2_Nest2_EndPoint1 = mGson.getAdapter(Integer.class).read(in);
                                             if (value_Json2_Nest2_EndPoint1 != null) {
                                                 result.value3 = value_Json2_Nest2_EndPoint1;
                                             }
@@ -106,7 +107,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
                                         case "EndPoint2":
                                             jsonFieldCounter2++;
 
-                                            Integer value_Json2_Nest2_EndPoint2 = getIntegerSafely(in);
+                                            Integer value_Json2_Nest2_EndPoint2 = mGson.getAdapter(Integer.class).read(in);
                                             if (value_Json2_Nest2_EndPoint2 != null) {
                                                 result.value4 = value_Json2_Nest2_EndPoint2;
                                             }
@@ -154,7 +155,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
         out.beginObject();
         int obj0 = value.value1;
         out.name("Json1");
-        out.value(obj0);
+        mGson.getAdapter(Integer.class).write(out, obj0);
 
 
         // Begin Json2
@@ -162,7 +163,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
         out.beginObject();
         int obj1 = value.value2;
         out.name("Nest1");
-        out.value(obj1);
+        mGson.getAdapter(Integer.class).write(out, obj1);
 
 
         // Begin Json2.Nest2
@@ -170,11 +171,11 @@ public final class TestFieldNesting_GsonTypeAdapter extends TypeAdapter<TestFiel
         out.beginObject();
         int obj2 = value.value3;
         out.name("EndPoint1");
-        out.value(obj2);
+        mGson.getAdapter(Integer.class).write(out, obj2);
 
         int obj3 = value.value4;
         out.name("EndPoint2");
-        out.value(obj3);
+        mGson.getAdapter(Integer.class).write(out, obj3);
 
         // End Json2.Nest2
         out.endObject();

@@ -76,7 +76,7 @@ public final class TestFlattenJson_GsonTypeAdapter extends TypeAdapter<TestFlatt
         String obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            out.value(obj0);
+            mGson.getAdapter(String.class).write(out, obj0);
         }
 
         // End

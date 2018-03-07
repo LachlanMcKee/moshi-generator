@@ -10,6 +10,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.lang.Override;
+import java.lang.String;
 
 import javax.annotation.Generated;
 
@@ -31,7 +32,7 @@ public final class TestFlattenJsonWithInterface_GsonTypeAdapter extends TypeAdap
             return null;
         }
         
-        java.lang.String value_flattenExample = null;
+        String value_flattenExample = null;
 
         int jsonFieldCounter0 = 0;
         in.beginObject();
