@@ -13,6 +13,7 @@ import gsonpath.generator.HandleResult
 import gsonpath.generator.interf.ModelInterfaceGenerator
 import gsonpath.model.*
 import java.io.IOException
+import javax.annotation.Generated
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
@@ -29,9 +30,15 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         val adapterClassName = ClassName.get(modelClassName.packageName(),
                 generateClassName(modelClassName, "GsonTypeAdapter"))
 
+        val generatedJavaPoetAnnotation = AnnotationSpec.builder(Generated::class.java)
+                .addMember("value", "\"gsonpath.GsonProcessor\"")
+                .addMember("comments", "\"https://github.com/LachlanMcKee/gsonpath\"")
+                .build()
+
         val adapterTypeBuilder = TypeSpec.classBuilder(adapterClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(ClassName.get(TypeAdapter::class.java), modelClassName))
+                .addAnnotation(generatedJavaPoetAnnotation)
                 .addField(Gson::class.java, "mGson", Modifier.PRIVATE, Modifier.FINAL)
 
         // Add the constructor which takes a gson instance for future use.

@@ -1,6 +1,23 @@
 Change Log
 ==========
 
+Version 2.3.1 *(2018-03-07)*
+----------------------------
+
+* New: Added a `Generated` annotation to all generated type adapters.
+* New: Allowed annotated interfaces to use default and static methods (Java 8+).
+* New: Support for all primitive types.
+* Fix: Long, Float and Double now respect `longSerializationPolicy` and `serializeSpecialFloatingPointValues` from the gson instance.
+* Fix: Non-null fields with a default value will no longer throw an exception if the value is missing when deserializing. i.e:
+
+     ```java
+     @AutoGsonAdapter(fieldValidationType = GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL)
+     public class TestValidateWithDefaultValue {
+         @NonNull
+         public Integer mandatoryWithDefault = 0;
+     }
+     ```
+
 Version 2.3.0 *(2017-10-15)*
 ----------------------------
 

@@ -8,20 +8,6 @@ import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 
-val GSON_SUPPORTED_CLASSES: Set<TypeName> = HashSet(Arrays.asList(
-        TypeName.get(Boolean::class.java).box(),
-        TypeName.get(Int::class.java).box(),
-        TypeName.get(Long::class.java).box(),
-        TypeName.get(Double::class.java).box(),
-        TypeName.get(String::class.java).box()
-))
-
-val GSON_SUPPORTED_PRIMITIVE = HashSet(Arrays.asList(
-        TypeName.BOOLEAN,
-        TypeName.INT,
-        TypeName.LONG,
-        TypeName.DOUBLE
-))
 val CLASS_NAME_STRING: ClassName = ClassName.get(String::class.java)
 
 fun createDefaultVariableValueForTypeName(typeName: TypeName): String {

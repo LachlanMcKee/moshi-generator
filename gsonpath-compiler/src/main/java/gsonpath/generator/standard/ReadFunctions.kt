@@ -53,7 +53,7 @@ fun createReadMethod(processingEnvironment: ProcessingEnvironment,
             val typeName = gsonField.fieldInfo.typeName
             val defaultValue = createDefaultVariableValueForTypeName(typeName)
 
-            codeBlock.addStatement("$typeName ${gsonField.variableName} = $defaultValue")
+            codeBlock.addStatement("\$T ${gsonField.variableName} = $defaultValue", typeName)
         }
     }
 
@@ -196,24 +196,15 @@ private fun writeGsonFieldReader(processingEnvironment: ProcessingEnvironment,
                                  extensions: List<GsonPathExtension>) {
 
     val fieldInfo = gsonField.fieldInfo
+    val fieldTypeName = fieldInfo.typeName
 
     // Make sure the field's annotations don't have any problems.
     validateFieldAnnotations(fieldInfo)
 
-    // If the field type is primitive, ensure that it is a supported primitive.
-    val fieldTypeName = fieldInfo.typeName
-    if (fieldTypeName.isPrimitive && !GSON_SUPPORTED_PRIMITIVE.contains(fieldTypeName)) {
-        throw ProcessingException("Unsupported primitive type found. Only boolean, int, double and long can be used.", fieldInfo.element)
-    }
-
     // Add a new line to improve readability for the multi-lined mapping.
     codeBlock.addNewLine()
 
-    val result =
-            if (GSON_SUPPORTED_CLASSES.contains(fieldTypeName.box()))
-                writeGsonFieldReaderSupported(codeBlock, gsonField, requiresConstructorInjection)
-            else
-                writeGsonFieldReaderUnsupported(codeBlock, gsonField, requiresConstructorInjection)
+    val result = writeGsonFieldReading(codeBlock, gsonField, requiresConstructorInjection)
 
 
     if (result.checkIfNull) {
@@ -232,9 +223,7 @@ private fun writeGsonFieldReader(processingEnvironment: ProcessingEnvironment,
         if (mandatoryFieldInfo != null) {
             codeBlock.addStatement("mandatoryFieldsCheckList[${mandatoryFieldInfo.indexVariableName}] = true")
                     .addNewLine()
-        }
 
-        if (gsonField.isRequired) {
             codeBlock.nextControlFlow("else")
                     .addEscapedStatement("""throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '${gsonField.jsonPath}' was null for class '${fieldInfo.parentClassName}'")""")
         }
@@ -288,10 +277,11 @@ private fun isCheckIfNullApplicable(gsonField: GsonField, requiresConstructorInj
 }
 
 /**
- * Writes the Java code for field reading that is supported by Gson.
+ * Writes the Java code for field reading that is not supported by Gson.
  */
-private fun writeGsonFieldReaderSupported(codeBlock: CodeBlock.Builder, gsonField: GsonField, requiresConstructorInjection: Boolean): FieldReaderResult {
+private fun writeGsonFieldReading(codeBlock: CodeBlock.Builder, gsonField: GsonField, requiresConstructorInjection: Boolean): FieldReaderResult {
     val fieldInfo = gsonField.fieldInfo
+    val fieldTypeName = fieldInfo.typeName.box()
 
     // Special handling for strings.
     if (fieldInfo.typeName == CLASS_NAME_STRING) {
@@ -315,49 +305,35 @@ private fun writeGsonFieldReaderSupported(codeBlock: CodeBlock.Builder, gsonFiel
     val variableName = getVariableName(gsonField, requiresConstructorInjection)
     val checkIfResultIsNull = isCheckIfNullApplicable(gsonField, requiresConstructorInjection)
 
-    val fieldClassName = fieldInfo.typeName.box() as ClassName
-    val variableAssignment = "$variableName = get${fieldClassName.simpleName()}Safely(in)"
-    if (checkIfResultIsNull) {
-        codeBlock.addStatement("${fieldClassName.simpleName()} $variableAssignment")
+    val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
+    if (subTypeAnnotation != null) {
+        // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
+        val variableAssignment = "$variableName = (\$T) ${getSubTypeGetterName(gsonField)}().read(in)"
+
+
+        if (checkIfResultIsNull) {
+            codeBlock.addStatement("\$T $variableAssignment", fieldTypeName, fieldTypeName)
+
+        } else {
+            codeBlock.addStatement(variableAssignment, fieldTypeName)
+        }
 
     } else {
-        codeBlock.addStatement(variableAssignment)
-    }
+        // Handle every other possible class by falling back onto the gson adapter.
+        val adapterName =
+                if (fieldTypeName is ParameterizedTypeName)
+                    "new com.google.gson.reflect.TypeToken<\$T>(){}" // This is a generic type
+                else
+                    "\$T.class"
 
-    return FieldReaderResult(variableName, checkIfResultIsNull)
-}
+        val variableAssignment = "$variableName = mGson.getAdapter($adapterName).read(in)"
 
-/**
- * Writes the Java code for field reading that is not supported by Gson.
- */
-private fun writeGsonFieldReaderUnsupported(codeBlock: CodeBlock.Builder, gsonField: GsonField, requiresConstructorInjection: Boolean): FieldReaderResult {
-    val fieldTypeName = gsonField.fieldInfo.typeName
+        if (checkIfResultIsNull) {
+            codeBlock.addStatement("\$T $variableAssignment", fieldTypeName, fieldTypeName)
 
-    // Handle every other possible class by falling back onto the gson adapter.
-    val adapterName =
-            if (fieldTypeName is ParameterizedTypeName)
-                "new com.google.gson.reflect.TypeToken<$fieldTypeName>(){}" // This is a generic type
-            else
-                fieldTypeName.toString() + ".class"
-
-    val variableName = getVariableName(gsonField, requiresConstructorInjection)
-    val checkIfResultIsNull = isCheckIfNullApplicable(gsonField, requiresConstructorInjection)
-
-    val subTypeAnnotation = gsonField.fieldInfo.getAnnotation(GsonSubtype::class.java)
-    val variableAssignment =
-            if (subTypeAnnotation != null) {
-                // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
-                "$variableName = ($fieldTypeName) ${getSubTypeGetterName(gsonField)}().read(in)"
-            } else {
-                // Otherwise we request the type adapter from gson.
-                "$variableName = mGson.getAdapter($adapterName).read(in)"
-            }
-
-    if (checkIfResultIsNull) {
-        codeBlock.addStatement("$fieldTypeName $variableAssignment")
-
-    } else {
-        codeBlock.addStatement(variableAssignment)
+        } else {
+            codeBlock.addStatement(variableAssignment, fieldTypeName)
+        }
     }
 
     return FieldReaderResult(variableName, checkIfResultIsNull)

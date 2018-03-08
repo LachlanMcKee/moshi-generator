@@ -2,6 +2,10 @@ package gsonpath.model
 
 import com.google.gson.annotations.SerializedName
 import com.squareup.javapoet.TypeName
+import com.sun.source.tree.*
+import com.sun.source.util.TreePathScanner
+import com.sun.source.util.Trees
+import com.sun.tools.javac.tree.JCTree
 import gsonpath.ExcludeField
 import gsonpath.ProcessingException
 
@@ -79,6 +83,13 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
                         override val element: Element
                             get() = memberElement
+
+                        override val hasDefaultValue: Boolean
+                            get() {
+                                return DefaultValueScanner().scan(
+                                        Trees.instance(processingEnv).getPath(memberElement),
+                                        null) != null
+                            }
                     }
                 }
     }
@@ -135,7 +146,24 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
                 override val element: Element
                     get() = it.elementInfo.underlyingElement
+
+                override val hasDefaultValue: Boolean
+                    get() = false
             }
+        }
+    }
+
+    /**
+     * Scans a field and detects whether a default value has been set.
+     *
+     * If a value has been set, the result will be an empty list, otherwise it will be null.
+     */
+    private class DefaultValueScanner : TreePathScanner<List<String>?, Void>() {
+        override fun visitVariable(node: VariableTree?, p: Void?): List<String>? {
+            if ((node as JCTree.JCVariableDecl).init != null) {
+                return emptyList()
+            }
+            return null
         }
     }
 
