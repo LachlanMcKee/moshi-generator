@@ -18,7 +18,7 @@ class ProcessorErrorsTest : BaseGeneratorTest() {
                 .failsToCompile()
                 .withErrorContaining("Invalid field type: java.lang.Object")
                 .`in`(source)
-                .onLine(8)
+                .onLine(10)
     }
 
     @Test
@@ -43,5 +43,17 @@ class ProcessorErrorsTest : BaseGeneratorTest() {
                 .withErrorContaining("Unexpected duplicate field 'value' found. Each tree branch must use a unique value!")
                 .`in`(source)
                 .onLine(13)
+    }
+
+    @Test
+    fun testUsingSerializedNameAlternate() {
+        val source = JavaFileObjects.forResource("generator/standard/processor_errors/TestSerializedNameAlternateUsedError.java")
+
+        assertAbout(javaSource()).that(source)
+                .processedWith(GsonProcessorImpl())
+                .failsToCompile()
+                .withErrorContaining("SerializedName 'alternate' feature is not supported")
+                .`in`(source)
+                .onLine(10)
     }
 }
