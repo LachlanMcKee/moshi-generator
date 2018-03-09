@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import gsonpath.AutoGsonAdapter;
 
 @AutoGsonAdapter
-public class TestInvalidFieldTypeError {
-    @SerializedName("element1")
-    public java.lang.Object element1;
+public class TestSerializedNameAlternateUsedError {
+    @SerializedName(value = "foo", alternate = "bar")
+    public int element1;
 }

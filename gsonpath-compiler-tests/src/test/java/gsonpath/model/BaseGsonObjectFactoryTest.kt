@@ -27,6 +27,7 @@ open class BaseGsonObjectFactoryTest {
         if (jsonPath != null) {
             val serializedName = mock(SerializedName::class.java)
             `when`<String>(serializedName.value).thenReturn(jsonPath)
+            `when`(serializedName.alternate).thenReturn(emptyArray())
             `when`<SerializedName>(fieldInfo.getAnnotation(SerializedName::class.java)).thenReturn(serializedName)
         }
 

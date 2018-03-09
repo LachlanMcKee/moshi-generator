@@ -29,6 +29,14 @@ class GsonObjectFactory {
         }
 
         val serializedNameAnnotation = fieldInfo.getAnnotation(SerializedName::class.java)
+
+        // SerializedName 'alternate' is not supported and should fail fast.
+        serializedNameAnnotation?.let {
+            if (it.alternate.isNotEmpty()) {
+                throw ProcessingException("SerializedName 'alternate' feature is not supported", fieldInfo.element)
+            }
+        }
+
         val fieldName = fieldInfo.fieldName
         val jsonFieldPath: String =
                 if (serializedNameAnnotation != null && serializedNameAnnotation.value.isNotEmpty()) {
