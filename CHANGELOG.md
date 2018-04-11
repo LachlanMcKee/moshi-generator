@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.3.2 *(2018-04-12)*
+----------------------------
+
+* Fix: Raise a compilation error when using SerializedName.alternate as it is not supported.
+* Fix: Fixed an issue causing 2.3.1 to not find `hasDefaultValue` in certain circumstances.
+
 Version 2.3.1 *(2018-03-07)*
 ----------------------------
 
