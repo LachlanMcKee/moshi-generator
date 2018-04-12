@@ -1,9 +1,9 @@
 package generator.standard.naming_policy.identity;
 
+import com.google.gson.FieldNamingPolicy;
 import gsonpath.AutoGsonAdapter;
-import gsonpath.GsonPathFieldNamingPolicy;
 
-@AutoGsonAdapter(fieldNamingPolicy = GsonPathFieldNamingPolicy.IDENTITY)
+@AutoGsonAdapter(fieldNamingPolicy = FieldNamingPolicy.IDENTITY)
 public class TestNamePolicyIdentity {
     public int testValue;
 }

@@ -6,9 +6,8 @@ import java.lang.Double;
 import java.lang.Boolean;
 
 import gsonpath.AutoGsonAdapter;
-import gsonpath.InheritableBoolean;
 
-@AutoGsonAdapter(serializeNulls = InheritableBoolean.TRUE)
+@AutoGsonAdapter(serializeNulls = true)
 public class TestSerializeNulls {
     public int value1;
     public double value2;

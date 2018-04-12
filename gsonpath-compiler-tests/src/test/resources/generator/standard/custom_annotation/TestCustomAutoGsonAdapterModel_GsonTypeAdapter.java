@@ -1,4 +1,4 @@
-package generator.standard.defaults;
+package generator.standard.custom_annotation;
 
 import static gsonpath.GsonUtil.*;
 
@@ -17,25 +17,25 @@ import javax.annotation.Generated;
         value = "gsonpath.GsonProcessor",
         comments = "https://github.com/LachlanMcKee/gsonpath"
 )
-public final class TestDefaultsUseInheritanceModel_GsonTypeAdapter extends TypeAdapter<TestDefaultsUseInheritanceModel> {
+public final class TestCustomAutoGsonAdapterModel_GsonTypeAdapter extends TypeAdapter<TestCustomAutoGsonAdapterModel> {
     private static final int MANDATORY_INDEX_EXPECTEDVALUE = 0;
 
     private static final int MANDATORY_FIELDS_SIZE = 1;
 
     private final Gson mGson;
 
-    public TestDefaultsUseInheritanceModel_GsonTypeAdapter(Gson gson) {
+    public TestCustomAutoGsonAdapterModel_GsonTypeAdapter(Gson gson) {
         this.mGson = gson;
     }
 
     @Override
-    public TestDefaultsUseInheritanceModel read(JsonReader in) throws IOException {
+    public TestCustomAutoGsonAdapterModel read(JsonReader in) throws IOException {
 
         // Ensure the object is not null.
         if (!isValidValue(in)) {
             return null;
         }
-        TestDefaultsUseInheritanceModel result = new TestDefaultsUseInheritanceModel();
+        TestCustomAutoGsonAdapterModel result = new TestCustomAutoGsonAdapterModel();
         boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE];
 
         int jsonFieldCounter0 = 0;
@@ -74,7 +74,7 @@ public final class TestDefaultsUseInheritanceModel_GsonTypeAdapter extends TypeA
                                     mandatoryFieldsCheckList[MANDATORY_INDEX_EXPECTEDVALUE] = true;
 
                                 } else {
-                                    throw new gsonpath.JsonFieldMissingException("Mandatory JSON element 'path$expectedValue' was null for class 'generator.standard.defaults.TestDefaultsUseInheritanceModel'");
+                                    throw new gsonpath.JsonFieldMissingException("Mandatory JSON element 'path$expectedValue' was null for class 'generator.standard.custom_annotation.TestCustomAutoGsonAdapterModel'");
                                 }
                                 break;
 
@@ -111,14 +111,14 @@ public final class TestDefaultsUseInheritanceModel_GsonTypeAdapter extends TypeA
                         break;
 
                 }
-                throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class 'generator.standard.defaults.TestDefaultsUseInheritanceModel'");
+                throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class 'generator.standard.custom_annotation.TestCustomAutoGsonAdapterModel'");
             }
         }
         return result;
     }
 
     @Override
-    public void write(JsonWriter out, TestDefaultsUseInheritanceModel value) throws IOException {
+    public void write(JsonWriter out, TestCustomAutoGsonAdapterModel value) throws IOException {
         if (value == null) {
             out.nullValue();
             return;

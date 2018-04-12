@@ -1,8 +1,11 @@
 package gsonpath
 
+import com.google.common.collect.Sets
+import com.squareup.javapoet.ClassName
+import gsonpath.compiler.GsonPathExtension
 import gsonpath.generator.HandleResult
-import gsonpath.generator.standard.AutoGsonAdapterGenerator
 import gsonpath.generator.factory.TypeAdapterFactoryGenerator
+import gsonpath.generator.standard.AutoGsonAdapterGenerator
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -10,25 +13,39 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
-import gsonpath.compiler.GsonPathExtension
 
 open class GsonProcessorImpl : AbstractProcessor() {
 
     override fun process(annotations: Set<TypeElement>?, env: RoundEnvironment): Boolean {
-        if (annotations == null || annotations.isEmpty()) {
+        if (annotations == null) {
+            return false
+        }
+
+        val supportedAnnotations = annotations
+            .map { ClassName.get(it) }
+            .filter {
+                it == ClassName.get(AutoGsonAdapter::class.java) ||
+                    it == ClassName.get(AutoGsonAdapterFactory::class.java)
+            }
+
+        val customAnnotations: List<TypeElement> = annotations
+            .filter { it.getAnnotation(AutoGsonAdapter::class.java) != null }
+
+        // Avoid going any further if no supported annotations are found.
+        if (supportedAnnotations.isEmpty() && customAnnotations.isEmpty()) {
             return false
         }
 
         // Load any extensions that are also available at compile time.
         println()
         val extensions: List<GsonPathExtension> =
-                try {
-                    ServiceLoader.load(GsonPathExtension::class.java, javaClass.classLoader).toList()
+            try {
+                ServiceLoader.load(GsonPathExtension::class.java, javaClass.classLoader).toList()
 
-                } catch (t: Throwable) {
-                    printError("Failed to load one or more GsonPath extensions. Cause: ${t.message}")
-                    return false
-                }
+            } catch (t: Throwable) {
+                printError("Failed to load one or more GsonPath extensions. Cause: ${t.message}")
+                return false
+            }
 
         // Print the extensions for auditing purposes.
         extensions.forEach {
@@ -37,19 +54,19 @@ open class GsonProcessorImpl : AbstractProcessor() {
 
         println()
         printMessage("Started annotation processing")
-        val generatedAdapters = env.getElementsAnnotatedWith(AutoGsonAdapter::class.java)
 
         // Handle the standard type adapters.
         val adapterGenerator = AutoGsonAdapterGenerator(processingEnv)
 
         val autoGsonAdapterResults: List<HandleResult> =
-                generatedAdapters.map {
-                    printMessage("Generating TypeAdapter ($it)")
+            getAnnotatedModelElements(env, customAnnotations)
+                .map { (element, autoGsonAdapter) ->
+                    printMessage("Generating TypeAdapter ($element)")
 
                     try {
-                        adapterGenerator.handle(it as TypeElement, extensions)
+                        adapterGenerator.handle(element, autoGsonAdapter, extensions)
                     } catch (e: ProcessingException) {
-                        printError(e.message, e.element ?: it)
+                        printError(e.message, e.element ?: element)
                         return false
                     }
                 }
@@ -59,8 +76,8 @@ open class GsonProcessorImpl : AbstractProcessor() {
 
             if (gsonPathFactories.count() == 0) {
                 printError("An interface annotated with @AutoGsonAdapterFactory (that directly extends " +
-                        "com.google.gson.TypeAdapterFactory) must exist before the annotation processor can succeed. " +
-                        "See the AutoGsonAdapterFactory annotation for further details.")
+                    "com.google.gson.TypeAdapterFactory) must exist before the annotation processor can succeed. " +
+                    "See the AutoGsonAdapterFactory annotation for further details.")
                 return false
             }
 
@@ -100,17 +117,42 @@ open class GsonProcessorImpl : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): Set<String> {
-        return setOf(
-                AutoGsonAdapter::class.java.canonicalName,
-                AutoGsonAdapterFactory::class.java.canonicalName)
+        return Sets.newHashSet("*")
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
         return SourceVersion.latestSupported()
     }
 
+    private fun getAnnotatedModelElements(env: RoundEnvironment,
+                                          customAnnotations: List<TypeElement>): Set<ElementAndAutoGson> {
+        return env
+            .getElementsAnnotatedWith(AutoGsonAdapter::class.java)
+            .map {
+                ElementAndAutoGson(it as TypeElement, it.getAnnotation(AutoGsonAdapter::class.java))
+            }
+            .filter {
+                !customAnnotations.contains(it.element)
+            }
+            .toSet()
+            .plus(
+                customAnnotations.flatMap { customAnnotation ->
+                    env
+                        .getElementsAnnotatedWith(customAnnotation)
+                        .map {
+                            ElementAndAutoGson(it as TypeElement, customAnnotation.getAnnotation(AutoGsonAdapter::class.java))
+                        }
+                }
+            )
+    }
+
+    private data class ElementAndAutoGson(
+        val element: TypeElement,
+        val autoGsonAdapter: AutoGsonAdapter
+    )
+
     companion object {
-        private val LOG_PREFIX = "Gson Path: "
+        private const val LOG_PREFIX = "Gson Path: "
     }
 
 }

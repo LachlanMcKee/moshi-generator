@@ -1,9 +1,8 @@
 package generator.standard.empty.invalid_fields;
 
 import gsonpath.AutoGsonAdapter;
-import gsonpath.InheritableBoolean;
 
-@AutoGsonAdapter(ignoreNonAnnotatedFields = InheritableBoolean.TRUE)
+@AutoGsonAdapter(ignoreNonAnnotatedFields = true)
 public class TestInvalidFields {
     public java.lang.String element1;
 }
