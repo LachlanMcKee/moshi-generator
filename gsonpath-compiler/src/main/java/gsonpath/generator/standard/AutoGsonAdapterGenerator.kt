@@ -4,14 +4,18 @@ import com.google.gson.Gson
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.*
-import gsonpath.*
-import gsonpath.compiler.GsonPathExtension
+import gsonpath.AutoGsonAdapter
+import gsonpath.GsonUtil
 import gsonpath.ProcessingException
+import gsonpath.compiler.GsonPathExtension
 import gsonpath.compiler.generateClassName
 import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
 import gsonpath.generator.interf.ModelInterfaceGenerator
-import gsonpath.model.*
+import gsonpath.model.FieldInfo
+import gsonpath.model.FieldInfoFactory
+import gsonpath.model.GsonObjectTreeFactory
+import gsonpath.model.MandatoryFieldInfoFactory
 import java.io.IOException
 import javax.annotation.Generated
 import javax.annotation.processing.ProcessingEnvironment
@@ -19,13 +23,14 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ExecutableType
-import javax.lang.model.type.MirroredTypeException
-import javax.lang.model.type.TypeMirror
 
 class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
 
     @Throws(ProcessingException::class)
-    fun handle(modelElement: TypeElement, extensions: List<GsonPathExtension>): HandleResult {
+    fun handle(modelElement: TypeElement,
+               autoGsonAnnotation: AutoGsonAdapter,
+               extensions: List<GsonPathExtension>): HandleResult {
+
         val modelClassName = ClassName.get(modelElement)
         val adapterClassName = ClassName.get(modelClassName.packageName(),
                 generateClassName(modelClassName, "GsonTypeAdapter"))
@@ -48,14 +53,11 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                 .addStatement("this.\$N = \$N", "mGson", "gson")
                 .build())
 
-        val autoGsonAnnotation = modelElement.getAnnotation(AutoGsonAdapter::class.java)
-
         val concreteClassName: ClassName
         val fieldInfoList: List<FieldInfo>
         val isModelInterface = modelElement.kind.isInterface
 
-        val properties = AutoGsonAdapterPropertiesFactory().create(
-                autoGsonAnnotation, getDefaultsAnnotation(autoGsonAnnotation), isModelInterface)
+        val properties = AutoGsonAdapterPropertiesFactory().create(autoGsonAnnotation, isModelInterface)
 
         val requiresConstructorInjection: Boolean =
                 if (isModelInterface) {
@@ -133,29 +135,6 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
     public override fun onJavaFileBuilt(builder: JavaFile.Builder) {
         builder.addStaticImport(GsonUtil::class.java, "*")
     }
-
-    @Throws(ProcessingException::class)
-    private fun getDefaultsAnnotation(autoGsonAnnotation: AutoGsonAdapter): GsonPathDefaultConfiguration? {
-        // Annotation processors seem to make obtaining this value difficult!
-        val defaultsTypeMirror: TypeMirror? =
-                try {
-                    autoGsonAnnotation.defaultConfiguration
-                    null
-                } catch (mte: MirroredTypeException) {
-                    mte.typeMirror
-                }
-
-        val defaultsElement = processingEnv.typeUtils.asElement(defaultsTypeMirror)
-
-        if (defaultsElement != null) {
-            // If an inheritable annotation is used, used the default instead.
-            return defaultsElement.getAnnotation(GsonPathDefaultConfiguration::class.java) ?:
-                    throw ProcessingException("Defaults property must point to a class which uses the @GsonPathDefaultConfiguration annotation")
-        }
-
-        return null
-    }
-
 
     /**
      * Finds a constructor within the input [TypeElement] that has at least one argument.

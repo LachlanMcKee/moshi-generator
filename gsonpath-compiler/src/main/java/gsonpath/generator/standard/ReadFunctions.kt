@@ -139,7 +139,7 @@ private fun addReadCodeForElements(processingEnvironment: ProcessingEnvironment,
             .beginControlFlow("switch (in.nextName())")
 
     val overallRecursionCount = jsonMapping.entries().fold(recursionCount + 1) { currentOverallRecursionCount, (key, value) ->
-        codeBlock.add("""case "$key":""")
+        codeBlock.addEscaped("""case "$key":""")
                 .addNewLine()
                 .indent()
 
@@ -388,4 +388,9 @@ private fun addValidValueCheck(codeBlock: CodeBlock.Builder, addReturn: Boolean)
 
             .addStatement(if (addReturn) "return null" else "break")
             .endControlFlow() // if
+}
+
+fun CodeBlock.Builder.addEscaped(format: String): CodeBlock.Builder {
+    this.add(format.replace("$", "$$"))
+    return this
 }
