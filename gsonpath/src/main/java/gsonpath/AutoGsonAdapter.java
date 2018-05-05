@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  * {@link com.google.gson.Gson} configurations. Therefore any Gson specific configurations
  * (such as {@link FieldNamingPolicy}) must be specified within the annotation itself.
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface AutoGsonAdapter {
     /**
