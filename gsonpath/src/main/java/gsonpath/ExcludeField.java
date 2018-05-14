@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * {@link com.google.gson.TypeAdapter} when using the {@link gsonpath.AutoGsonAdapter}
  * annotation.
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Inherited
 public @interface ExcludeField {

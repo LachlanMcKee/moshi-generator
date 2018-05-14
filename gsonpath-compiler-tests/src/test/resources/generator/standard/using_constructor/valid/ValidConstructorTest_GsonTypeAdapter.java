@@ -18,10 +18,6 @@ import javax.annotation.Generated;
         comments = "https://github.com/LachlanMcKee/gsonpath"
 )
 public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<ValidConstructorTest> {
-    private static final int MANDATORY_INDEX_VALUE1 = 0;
-
-    private static final int MANDATORY_FIELDS_SIZE = 1;
-
     private final Gson mGson;
 
     public ValidConstructorTest_GsonTypeAdapter(Gson gson) {
@@ -37,7 +33,6 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
         String value_parent_child_value1 = null;
         boolean value_isBooleanTest1 = false;
         Boolean value_isBooleanTest2 = null;
-        boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE];
 
         int jsonFieldCounter0 = 0;
         in.beginObject();
@@ -86,14 +81,7 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
                                         case "value1":
                                             jsonFieldCounter2++;
 
-                                            String value_parent_child_value1_safe = mGson.getAdapter(String.class).read(in);
-                                            if (value_parent_child_value1_safe != null) {
-                                                value_parent_child_value1 = value_parent_child_value1_safe;
-                                                mandatoryFieldsCheckList[MANDATORY_INDEX_VALUE1] = true;
-
-                                            } else {
-                                                throw new gsonpath.JsonFieldMissingException("Mandatory JSON element 'parent.child.value1' was null for class 'generator.standard.using_constructor.valid.ValidConstructorTest'");
-                                            }
+                                            value_parent_child_value1 = mGson.getAdapter(String.class).read(in);
                                             break;
 
                                         default:
@@ -133,24 +121,6 @@ public final class ValidConstructorTest_GsonTypeAdapter extends TypeAdapter<Vali
         }
 
         in.endObject();
-
-        // Mandatory object validation
-        for (int mandatoryFieldIndex = 0; mandatoryFieldIndex < MANDATORY_FIELDS_SIZE; mandatoryFieldIndex++) {
-
-            // Check if a mandatory value is missing.
-            if (!mandatoryFieldsCheckList[mandatoryFieldIndex]) {
-
-                // Find the field name of the missing json value.
-                String fieldName = null;
-                switch (mandatoryFieldIndex) {
-                    case MANDATORY_INDEX_VALUE1:
-                        fieldName = "parent.child.value1";
-                        break;
-
-                }
-                throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class 'generator.standard.using_constructor.valid.ValidConstructorTest'");
-            }
-        }
         return new ValidConstructorTest(
                 value_parent_child_value1,
                 value_isBooleanTest1,

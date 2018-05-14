@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
 import gsonpath.compiler.addComment
+import gsonpath.compiler.addEscapedStatement
 import gsonpath.compiler.addNewLine
 import gsonpath.model.GsonField
 import gsonpath.model.GsonObject
@@ -74,7 +75,7 @@ private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
                 if (!isPrimitive && !serializeNulls) {
                     codeBlock.beginControlFlow("if ($objectName != null)")
                 }
-                codeBlock.addStatement("""out.name("$key")""")
+                codeBlock.addEscapedStatement("""out.name("$key")""")
 
                 // Since we are serializing nulls, we defer the if-statement until after the name is written.
                 if (!isPrimitive && serializeNulls) {

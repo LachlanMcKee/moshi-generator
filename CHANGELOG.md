@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+Version 2.4.0 *(2018-05-14)*
+----------------------------
+
+* Improvement: Replaced `GsonPathDefaultConfiguration` with a much more useful annotation inheritance. See issue [#124](../../issues/124) for details.
+     * Note that this is a breaking change. If you were previously using `GsonPathDefaultConfiguration`, you will need to change your implementation.
+* Improvement: Passing more metadata to extensions to make their validation more useful.
+* Improvement: Annotations are now retained at runtime.
+     * This fixes an issue with Kotlin classes discarding the annotations.
+
 Version 2.3.2 *(2018-04-12)*
 ----------------------------
 
