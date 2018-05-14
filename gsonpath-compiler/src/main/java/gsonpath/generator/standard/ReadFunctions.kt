@@ -6,10 +6,14 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
-import gsonpath.*
-import gsonpath.compiler.GsonPathExtension
+import gsonpath.FlattenJson
+import gsonpath.GsonSubtype
+import gsonpath.ProcessingException
 import gsonpath.compiler.*
-import gsonpath.model.*
+import gsonpath.model.GsonField
+import gsonpath.model.GsonObject
+import gsonpath.model.GsonObjectTreeFactory
+import gsonpath.model.MandatoryFieldInfo
 import java.io.IOException
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
@@ -234,7 +238,8 @@ private fun writeGsonFieldReader(processingEnvironment: ProcessingEnvironment,
     // Execute any extensions and add the code blocks if they exist.
     val extensionsCodeBlockBuilder = CodeBlock.builder()
     extensions.forEach { extension ->
-        val validationCodeBlock: CodeBlock? = extension.createFieldReadCodeBlock(processingEnvironment, fieldInfo, result.variableName)
+        val validationCodeBlock: CodeBlock? = extension.createFieldReadCodeBlock(processingEnvironment,
+            ExtensionFieldMetadata(fieldInfo, result.variableName, gsonField.jsonPath, gsonField.isRequired))
 
         if (validationCodeBlock != null && !validationCodeBlock.isEmpty) {
             extensionsCodeBlockBuilder.addNewLine()
