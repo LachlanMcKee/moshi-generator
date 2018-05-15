@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2.4.1 *(2018-05-15)*
+----------------------------
+
+* Fix: Resolved a defect causing Kotlin classes to not respect `fieldValidationType`, as it incorrectly reports that the class has a default value. See issue [#132](../../issues/132) for details.
+
 Version 2.4.0 *(2018-05-14)*
 ----------------------------
 
