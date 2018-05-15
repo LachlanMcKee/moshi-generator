@@ -1,16 +1,18 @@
 package gsonpath.model
 
 import com.google.gson.annotations.SerializedName
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
-import com.sun.source.tree.*
+import com.sun.source.tree.VariableTree
 import com.sun.source.util.TreePathScanner
 import com.sun.source.util.Trees
-import com.sun.tools.javac.tree.JCTree
 import gsonpath.ExcludeField
 import gsonpath.ProcessingException
-
 import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.*
+import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.TypeMirror
@@ -86,7 +88,7 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
                         override val hasDefaultValue: Boolean
                             get() {
-                                return DefaultValueScanner().scan(
+                                return DefaultValueScanner(memberElement).scan(
                                         Trees.instance(processingEnv).getPath(memberElement),
                                         null) != null
                             }
@@ -158,12 +160,24 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
      *
      * If a value has been set, the result will be an empty list, otherwise it will be null.
      */
-    private class DefaultValueScanner : TreePathScanner<List<String>?, Void>() {
+    /**
+     * Scans a field and detects whether a default value has been set.
+     *
+     * If a value has been set, the result will be an empty list, otherwise it will be null.
+     */
+    private class DefaultValueScanner(val fieldElement: Element) : TreePathScanner<List<String>?, Void>() {
         override fun visitVariable(node: VariableTree?, p: Void?): List<String>? {
-            if ((node as JCTree.JCVariableDecl).init != null) {
-                return emptyList()
+            // Ignore default values for Kotlin classes (the stubs always set a default, but the real bytecode does not)
+            if (isKotlinClass(fieldElement.enclosingElement)) {
+                return null
             }
-            return null
+            return node?.initializer?.let { emptyList() }
+        }
+
+        private fun isKotlinClass(element: Element): Boolean {
+            return element.annotationMirrors.any {
+                TypeName.get(it.annotationType.asElement().asType()) == ClassName.get("kotlin", "Metadata")
+            }
         }
     }
 
