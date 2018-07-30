@@ -9,12 +9,10 @@ import com.sun.source.util.Trees
 import gsonpath.ExcludeField
 import gsonpath.ProcessingException
 import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
+import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import javax.lang.model.type.NoType
 import javax.lang.model.type.TypeMirror
 
 class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
@@ -23,7 +21,7 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
      * Obtain all possible elements contained within the annotated class, including inherited fields.
      */
     fun getModelFieldsFromElement(modelElement: TypeElement, fieldsRequireAnnotation: Boolean, useConstructor: Boolean): List<FieldInfo> {
-        val allMembers = processingEnv.elementUtils.getAllMembers(modelElement)
+        val allMembers = processingEnv.getAllMembers(modelElement)
 
         return allMembers
                 .filter {
@@ -48,7 +46,7 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 }
                 .map { memberElement ->
                     // Ensure that any generics have been converted into their actual class.
-                    val generifiedElement = processingEnv.typeUtils.asMemberOf(modelElement.asType() as DeclaredType, memberElement)
+                    val generifiedElement = processingEnv.getGenerifiedTypeMirror(modelElement, memberElement)
 
                     object : FieldInfo {
                         override val typeName: TypeName
@@ -61,7 +59,11 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                             get() = memberElement.enclosingElement.toString()
 
                         override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
-                            return memberElement.getAnnotation(annotationClass)
+                            val memberAnnotation = memberElement.getAnnotation(annotationClass)
+                            if (memberAnnotation != null) {
+                                return memberAnnotation
+                            }
+                            return findMethodAnnotation(modelElement, memberElement, annotationClass)
                         }
 
                         override val fieldName: String
@@ -78,9 +80,11 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
                         override val annotationNames: List<String>
                             get() {
-                                return memberElement.annotationMirrors.map { it ->
-                                    it.annotationType.asElement().simpleName.toString()
-                                }
+                                return memberElement.annotationMirrors
+                                        .plus(getMethodAnnotationMirrors(modelElement, memberElement))
+                                        .map { it ->
+                                            it.annotationType.asElement().simpleName.toString()
+                                        }
                             }
 
                         override val element: Element
@@ -96,6 +100,37 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 }
     }
 
+    private fun <T : Annotation> findMethodAnnotation(
+            modelElement: TypeElement?,
+            memberElement: Element,
+            annotationClass: Class<T>): T? {
+
+        if (modelElement != null && modelElement !is NoType) {
+            val annotation = findFieldGetterMethod(processingEnv.getAllMembers(modelElement), memberElement)
+                    ?.getAnnotation(annotationClass)
+
+            if (annotation != null) {
+                return annotation
+            }
+
+            return findMethodAnnotation(processingEnv.asElement(modelElement.superclass) as? TypeElement,
+                    memberElement, annotationClass)
+        }
+        return null
+    }
+
+    private fun getMethodAnnotationMirrors(modelElement: TypeElement?, memberElement: Element): List<AnnotationMirror> {
+        return if (modelElement != null && modelElement !is NoType) {
+            val annotationMirrors = findFieldGetterMethod(processingEnv.getAllMembers(modelElement), memberElement)
+                    ?.annotationMirrors ?: emptyList()
+
+            val superElement = processingEnv.asElement(modelElement.superclass)
+            annotationMirrors.plus(getMethodAnnotationMirrors(superElement as? TypeElement, memberElement))
+        } else {
+            emptyList()
+        }
+    }
+
     /**
      * Attempts to find a logical getter method for a variable.
      *
@@ -107,15 +142,29 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
      * @param allMembers all elements within the class.
      * @param variableElement the field element we want to find the getter method for.
      */
-    private fun findFieldGetterMethodName(allMembers: List<Element>, variableElement: Element): String {
-        val method = allMembers
+    private fun findFieldGetterMethod(allMembers: List<Element>, variableElement: Element): Element? {
+        return allMembers
                 .filter { it.kind == ElementKind.METHOD }
                 .filter {
                     // See if the method name either matches the variable name, or starts with a standard getter prefix.
-                    val remainder = it.simpleName.toString().toLowerCase().replace(variableElement.simpleName.toString().toLowerCase(), "")
+                    val remainder = it.simpleName.toString()
+                            .toLowerCase()
+                            .replace(variableElement.simpleName.toString().toLowerCase(), "")
                     arrayOf("", "is", "has", "get").contains(remainder)
                 }
                 .find { (it.asType() as ExecutableType).parameterTypes.size == 0 }
+    }
+
+    /**
+     * Attempts to find a logical getter method name for a variable.
+     *
+     * @see findFieldGetterMethod
+     *
+     * @param allMembers all elements within the class.
+     * @param variableElement the field element we want to find the getter method for.
+     */
+    private fun findFieldGetterMethodName(allMembers: List<Element>, variableElement: Element): String {
+        val method = findFieldGetterMethod(allMembers, variableElement)
                 ?: throw ProcessingException("Unable to find getter for private variable", variableElement)
 
         return method.simpleName.toString()
@@ -179,6 +228,18 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
                 TypeName.get(it.annotationType.asElement().asType()) == ClassName.get("kotlin", "Metadata")
             }
         }
+    }
+
+    private fun ProcessingEnvironment.getAllMembers(type: TypeElement): List<Element> {
+        return elementUtils.getAllMembers(type)
+    }
+
+    private fun ProcessingEnvironment.asElement(typeMirror: TypeMirror): Element? {
+        return typeUtils.asElement(typeMirror)
+    }
+
+    private fun ProcessingEnvironment.getGenerifiedTypeMirror(containing: TypeElement, element: Element): TypeMirror {
+        return typeUtils.asMemberOf(containing.asType() as DeclaredType, element)
     }
 
 }
