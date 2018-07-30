@@ -80,17 +80,11 @@ class FieldInfoFactory(private val processingEnv: ProcessingEnvironment) {
 
                         override val annotationNames: List<String>
                             get() {
-                                val memberAnnotationNames = memberElement.annotationMirrors
+                                return memberElement.annotationMirrors
+                                        .plus(getMethodAnnotationMirrors(modelElement, memberElement))
                                         .map { it ->
                                             it.annotationType.asElement().simpleName.toString()
                                         }
-
-                                return memberAnnotationNames.plus(
-                                        getMethodAnnotationMirrors(modelElement, memberElement)
-                                                .map { it ->
-                                                    it.annotationType.asElement().simpleName.toString()
-                                                }
-                                )
                             }
 
                         override val element: Element
