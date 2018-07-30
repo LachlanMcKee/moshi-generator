@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 2.4.2 *(2018-07-30)*
+----------------------------
+
+* Improvement/Bug: Annotations are now also read from the POJO's getter method if it does not exist on the property. See issue [#132](../../issues/137) for details.
+     * Inherited method annotations are also used. This is very useful for abstract methods that do not duplicate their annotations when overriding the method.
+     * This behaviour was changed to provide better support for sealed classes within Kotlin.
+
 Version 2.4.1 *(2018-05-15)*
 ----------------------------
 
