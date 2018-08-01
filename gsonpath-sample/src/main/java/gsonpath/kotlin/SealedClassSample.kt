@@ -33,11 +33,15 @@ sealed class Type {
 
 @AutoGsonAdapter
 class SealedClassSample(
+        val value1: String?,
+
         @GsonSubtype(
                 subTypeKey = "type",
                 stringValueSubtypes = [
                     GsonSubtype.StringValueSubtype(value = "type1", subtype = Type.Type1::class),
                     GsonSubtype.StringValueSubtype(value = "type2", subtype = Type.Type2::class),
                     GsonSubtype.StringValueSubtype(value = "type3", subtype = Type.Type3::class)])
-        val items: Array<Type>
+        val items: Array<Type>,
+
+        val value2: String?
 )
