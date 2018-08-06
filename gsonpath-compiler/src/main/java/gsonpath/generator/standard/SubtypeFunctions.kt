@@ -34,25 +34,25 @@ val arrayTypeAdapterClassName: ClassName = ClassName.get(StrictArrayTypeAdapter:
  * Creates the code required for subtype adapters for any fields that use the GsonSubtype annotation.
  */
 fun addSubTypeTypeAdapters(processingEnv: ProcessingEnvironment, typeSpecBuilder: TypeSpec.Builder, rootElements: GsonObject) {
-    val flattenedFields = GsonObjectTreeFactory().getFlattenedFieldsFromGsonObject(rootElements)
+    GsonObjectTreeFactory().getFlattenedFieldsFromGsonObject(rootElements)
+            .mapNotNull { it.fieldInfo.getAnnotation(GsonSubtype::class.java)?.to(it) }
+            .forEach { (subTypeAnnotation, gsonField) ->
+                // Ignore any fields that do not have a GsonSubtype annotation.
+                val validatedGsonSubType = validateGsonSubType(processingEnv, gsonField, subTypeAnnotation)
 
-    flattenedFields.forEach { gsonField ->
-        // Ignore any fields that do not have a GsonSubtype annotation.
-        val subTypeAnnotation = gsonField.fieldInfo.getAnnotation(GsonSubtype::class.java) ?: return
-        val validatedGsonSubType = validateGsonSubType(processingEnv, gsonField, subTypeAnnotation)
+                val typeAdapterWrapperClassName =
+                        if (isArrayType(processingEnv, gsonField)) {
+                            arrayTypeAdapterClassName
+                        } else {
+                            getCollectionTypeAdapterTypeName(gsonField)
+                        }
 
-        val typeAdapterWrapperClassName =
-                if (isArrayType(processingEnv, gsonField)) {
-                    arrayTypeAdapterClassName
-                } else {
-                    getCollectionTypeAdapterTypeName(gsonField)
-                }
+                val subTypeAdapterVariableName = getSubTypeAdapterVariableName(gsonField)
+                typeSpecBuilder.addField(typeAdapterWrapperClassName, subTypeAdapterVariableName, Modifier.PRIVATE)
 
-        typeSpecBuilder.addField(typeAdapterWrapperClassName, getSubTypeAdapterVariableName(gsonField), Modifier.PRIVATE)
-
-        createGetter(processingEnv, typeSpecBuilder, gsonField, validatedGsonSubType)
-        createSubTypeAdapter(processingEnv, typeSpecBuilder, gsonField, validatedGsonSubType)
-    }
+                createGetter(processingEnv, typeSpecBuilder, gsonField, validatedGsonSubType)
+                createSubTypeAdapter(processingEnv, typeSpecBuilder, gsonField, validatedGsonSubType)
+            }
 }
 
 /**
