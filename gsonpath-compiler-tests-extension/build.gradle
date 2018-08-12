@@ -22,5 +22,6 @@ buildscript {
 }
 
 dependencies {
+    compile project(":gsonpath-compiler")
     testCompile project(":gsonpath-compiler-tests-base")
 }
