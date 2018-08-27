@@ -4,10 +4,9 @@ import com.google.gson.FieldNamingPolicy
 import gsonpath.GsonFieldValidationType
 import gsonpath.PathSubstitution
 import gsonpath.ProcessingException
-
 import java.util.regex.Pattern
 
-class GsonObjectTreeFactory {
+class GsonObjectTreeFactory(private val gsonObjectFactory: GsonObjectFactory) {
     @Throws(ProcessingException::class)
     fun createGsonObject(fieldInfoList: List<FieldInfo>,
                          rootField: String,
@@ -18,8 +17,6 @@ class GsonObjectTreeFactory {
 
         // Obtain the correct mapping structure beforehand.
         val absoluteRootObject = GsonObject()
-
-        val gsonObjectFactory = GsonObjectFactory()
 
         val gsonPathObject =
                 if (rootField.isNotEmpty()) {

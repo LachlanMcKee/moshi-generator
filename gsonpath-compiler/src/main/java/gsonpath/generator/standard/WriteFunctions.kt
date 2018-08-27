@@ -5,7 +5,6 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
-import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
 import gsonpath.compiler.addComment
 import gsonpath.compiler.addEscapedStatement
@@ -67,7 +66,7 @@ private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
                 val fieldTypeName = fieldInfo.typeName
                 val isPrimitive = fieldTypeName.isPrimitive
 
-                val objectName = "obj" + fieldCount
+                val objectName = "obj$fieldCount"
 
                 codeBlock.addStatement("\$T $objectName = value.${fieldInfo.fieldAccessor}", fieldTypeName)
 
@@ -82,11 +81,11 @@ private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
                     codeBlock.beginControlFlow("if ($objectName != null)")
                 }
 
-                val subTypeAnnotation = fieldInfo.getAnnotation(GsonSubtype::class.java)
+                val subTypeMetadata = value.subTypeMetadata
                 val writeLine =
-                        if (subTypeAnnotation != null) {
+                        if (subTypeMetadata != null) {
                             // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
-                            "${getSubTypeGetterName(value)}().write(out, $objectName)"
+                            "${subTypeMetadata.getterName}().write(out, $objectName)"
                         } else {
                             val adapterName: String = if (fieldTypeName is ParameterizedTypeName) {
                                 // This is a generic type
@@ -117,11 +116,10 @@ private fun writeGsonFieldWriter(codeBlock: CodeBlock.Builder,
 
             is GsonObject -> {
                 if (value.size() > 0) {
-                    val newPath: String
-                    if (currentPath.isNotEmpty()) {
-                        newPath = currentPath + "" + key
+                    val newPath: String = if (currentPath.isNotEmpty()) {
+                        currentPath + "" + key
                     } else {
-                        newPath = key
+                        key
                     }
 
                     // Add a comment mentioning what nested object we are current pointing at.

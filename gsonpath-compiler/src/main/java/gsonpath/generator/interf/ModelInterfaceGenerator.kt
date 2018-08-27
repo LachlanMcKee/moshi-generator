@@ -1,28 +1,29 @@
 package gsonpath.generator.interf
 
 import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.TypeName
 import gsonpath.ProcessingException
-import gsonpath.generator.Generator
+import gsonpath.compiler.addNewLine
+import gsonpath.compiler.generateClassName
+import gsonpath.generator.writeFile
 import gsonpath.model.InterfaceFieldInfo
 import gsonpath.model.InterfaceInfo
+import gsonpath.util.FileWriter
+import gsonpath.util.Logger
+import gsonpath.util.TypeHandler
 import java.util.*
-import javax.annotation.processing.ProcessingEnvironment
+import javax.annotation.Generated
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ExecutableType
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeSpec
-import gsonpath.compiler.generateClassName
-import gsonpath.compiler.addNewLine
-import javax.annotation.Generated
-import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 
-internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
+internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
+                                       private val fileWriter: FileWriter,
+                                       private val logger: Logger) {
 
     @Throws(ProcessingException::class)
     fun handle(element: TypeElement): InterfaceInfo {
@@ -77,7 +78,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             val methodType = enclosedElement.asType() as ExecutableType
 
             // Ensure that any generics have been converted into their actual return types.
-            val returnTypeMirror: TypeMirror = (processingEnv.typeUtils.asMemberOf(element.asType() as DeclaredType, enclosedElement)
+            val returnTypeMirror: TypeMirror = (typeHandler.getGenerifiedTypeMirror(element, enclosedElement)
                     as ExecutableType).returnType
             val typeName = TypeName.get(returnTypeMirror)
 
@@ -95,13 +96,14 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             // Transform the method name into the field name by removing the first camel-cased portion.
             // e.g. 'getName' becomes 'name'
             //
-            val fieldName: String
-            val indexOfFirst = methodName.indexOfFirst(Char::isUpperCase)
-            if (indexOfFirst != -1) {
-                fieldName = methodName[indexOfFirst].toLowerCase() + methodName.substring(indexOfFirst + 1)
-            } else {
-                fieldName = methodName
-            }
+            val fieldName: String = methodName.indexOfFirst(Char::isUpperCase)
+                    .let { upperCaseIndex ->
+                        if (upperCaseIndex != -1) {
+                            methodName[upperCaseIndex].toLowerCase() + methodName.substring(upperCaseIndex + 1)
+                        } else {
+                            methodName
+                        }
+                    }
 
             typeBuilder.addField(typeName, fieldName, Modifier.PRIVATE, Modifier.FINAL)
 
@@ -138,30 +140,25 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
             }
 
             // Add to the hash code method
-            val hashCodeLine: String
-
-            if (typeName.isPrimitive) {
+            val hashCodeLine: String = if (typeName.isPrimitive) {
                 // The allowed primitive types are: int, long, double, boolean
-                if (typeName == TypeName.INT) {
-                    hashCodeLine = fieldName
+                when (typeName) {
+                    TypeName.INT -> fieldName
+                    TypeName.LONG -> "(int) ($fieldName ^ ($fieldName >>> 32))"
+                    TypeName.DOUBLE -> {
+                        hasCodeCodeBlock.addStatement("temp = java.lang.Double.doubleToLongBits($fieldName)")
+                        "(int) (temp ^ (temp >>> 32))"
 
-                } else if (typeName == TypeName.LONG) {
-                    hashCodeLine = "(int) ($fieldName ^ ($fieldName >>> 32))"
-
-                } else if (typeName == TypeName.DOUBLE) {
-                    hasCodeCodeBlock.addStatement("temp = java.lang.Double.doubleToLongBits($fieldName)")
-                    hashCodeLine = "(int) (temp ^ (temp >>> 32))"
-
-                } else {
-                    // Last possible outcome in a boolean.
-                    hashCodeLine = "($fieldName ? 1 : 0)"
+                    }
+                    else -> // Last possible outcome in a boolean.
+                        "($fieldName ? 1 : 0)"
                 }
             } else {
                 if (typeName is ArrayTypeName) {
-                    hashCodeLine = "java.util.Arrays.hashCode($fieldName)"
+                    "java.util.Arrays.hashCode($fieldName)"
 
                 } else {
-                    hashCodeLine = "$fieldName != null ? $fieldName.hashCode() : 0"
+                    "$fieldName != null ? $fieldName.hashCode() : 0"
                 }
             }
 
@@ -225,7 +222,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                 .addStatement("\t\t'}'", modelClassName.simpleName())
                 .build())
 
-        if (!writeFile(outputClassName.packageName(), typeBuilder)) {
+        if (!typeBuilder.writeFile(fileWriter, logger, outputClassName.packageName())) {
             throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())
         }
 
@@ -237,7 +234,7 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
     }
 
     private fun getMethodElements(element: TypeElement): List<Element> {
-        val methodElements = processingEnv.elementUtils.getAllMembers(element)
+        return typeHandler.getAllMembers(element)
                 .filter {
                     // Ignore methods from the base Object class
                     TypeName.get(it.enclosingElement.asType()) != TypeName.OBJECT
@@ -250,7 +247,6 @@ internal class ModelInterfaceGenerator(processingEnv: ProcessingEnvironment) : G
                     !it.modifiers.contains(Modifier.DEFAULT) &&
                             !it.modifiers.contains(Modifier.STATIC)
                 }
-        return methodElements
     }
 
     private class StandardElementInfo constructor(override val underlyingElement: Element) : InterfaceFieldInfo.ElementInfo {

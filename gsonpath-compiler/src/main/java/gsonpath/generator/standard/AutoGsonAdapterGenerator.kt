@@ -7,29 +7,35 @@ import com.squareup.javapoet.*
 import gsonpath.AutoGsonAdapter
 import gsonpath.GsonUtil
 import gsonpath.ProcessingException
-import gsonpath.compiler.GsonPathExtension
 import gsonpath.compiler.generateClassName
-import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
 import gsonpath.generator.interf.ModelInterfaceGenerator
+import gsonpath.generator.writeFile
 import gsonpath.model.FieldInfo
 import gsonpath.model.FieldInfoFactory
 import gsonpath.model.GsonObjectTreeFactory
 import gsonpath.model.MandatoryFieldInfoFactory
+import gsonpath.util.ExtensionsHandler
+import gsonpath.util.FileWriter
+import gsonpath.util.Logger
+import gsonpath.util.TypeHandler
 import java.io.IOException
 import javax.annotation.Generated
-import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ExecutableType
 
-class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
+class AutoGsonAdapterGenerator(private val fieldInfoFactory: FieldInfoFactory,
+                               private val typeHandler: TypeHandler,
+                               private val fileWriter: FileWriter,
+                               private val gsonObjectTreeFactory: GsonObjectTreeFactory,
+                               private val logger: Logger) {
 
     @Throws(ProcessingException::class)
     fun handle(modelElement: TypeElement,
                autoGsonAnnotation: AutoGsonAdapter,
-               extensions: List<GsonPathExtension>): HandleResult {
+               extensionsHandler: ExtensionsHandler): HandleResult {
 
         val modelClassName = ClassName.get(modelElement)
         val adapterClassName = ClassName.get(modelClassName.packageName(),
@@ -63,10 +69,9 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                 if (isModelInterface) {
                     true
                 } else {
-                    findNonEmptyConstructor(processingEnv, modelElement) != null
+                    findNonEmptyConstructor(modelElement) != null
                 }
 
-        val fieldInfoFactory = FieldInfoFactory(processingEnv)
         if (!isModelInterface) {
             concreteClassName = modelClassName
 
@@ -76,15 +81,16 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                     requiresConstructorInjection)
 
         } else {
-            val interfaceInfo = ModelInterfaceGenerator(processingEnv).handle(modelElement)
+            val interfaceInfo = ModelInterfaceGenerator(typeHandler, fileWriter, logger).handle(modelElement)
             concreteClassName = interfaceInfo.parentClassName
 
             fieldInfoList = fieldInfoFactory.getModelFieldsFromInterface(interfaceInfo)
         }
 
-        val rootGsonObject = GsonObjectTreeFactory().createGsonObject(fieldInfoList, properties.rootField,
-                properties.flattenDelimiter, properties.gsonFieldNamingPolicy, properties.gsonFieldValidationType,
-                properties.pathSubstitutions)
+        val rootGsonObject = gsonObjectTreeFactory
+                .createGsonObject(fieldInfoList, properties.rootField,
+                        properties.flattenDelimiter, properties.gsonFieldNamingPolicy, properties.gsonFieldValidationType,
+                        properties.pathSubstitutions)
 
         // Adds the mandatory field index constants and also populates the mandatoryInfoMap values.
         val mandatoryInfoMap = MandatoryFieldInfoFactory().createMandatoryFieldsFromGsonObject(rootGsonObject)
@@ -104,8 +110,8 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
                     .build())
         }
 
-        adapterTypeBuilder.addMethod(createReadMethod(processingEnv, modelClassName, concreteClassName,
-                requiresConstructorInjection, mandatoryInfoMap, rootGsonObject, extensions))
+        adapterTypeBuilder.addMethod(createReadMethod(gsonObjectTreeFactory, modelClassName, concreteClassName,
+                requiresConstructorInjection, mandatoryInfoMap, rootGsonObject, extensionsHandler))
 
         if (!isModelInterface) {
             adapterTypeBuilder.addMethod(createWriteMethod(modelClassName, rootGsonObject, properties.serializeNulls))
@@ -123,27 +129,26 @@ class AutoGsonAdapterGenerator(processingEnv: ProcessingEnvironment) : Generator
         }
 
         // Adds any required subtype type adapters depending on the usage of the GsonSubtype annotation.
-        addSubTypeTypeAdapters(processingEnv, adapterTypeBuilder, rootGsonObject)
+        addSubTypeTypeAdapters(typeHandler, gsonObjectTreeFactory, adapterTypeBuilder, rootGsonObject)
 
-        if (writeFile(adapterClassName.packageName(), adapterTypeBuilder)) {
+        if (adapterTypeBuilder.writeFile(fileWriter, logger, adapterClassName.packageName(), this::onJavaFileBuilt)) {
             return HandleResult(modelClassName, adapterClassName)
         }
 
         throw ProcessingException("Failed to write generated file: " + adapterClassName.simpleName())
     }
 
-    public override fun onJavaFileBuilt(builder: JavaFile.Builder) {
+    private fun onJavaFileBuilt(builder: JavaFile.Builder) {
         builder.addStaticImport(GsonUtil::class.java, "*")
     }
 
     /**
      * Finds a constructor within the input [TypeElement] that has at least one argument.
      *
-     * @param processingEnv the annotation processor environment.
      * @param modelElement the model being searched.
      */
-    fun findNonEmptyConstructor(processingEnv: ProcessingEnvironment, modelElement: TypeElement): ExecutableType? {
-        return processingEnv.elementUtils.getAllMembers(modelElement)
+    private fun findNonEmptyConstructor(modelElement: TypeElement): ExecutableType? {
+        return typeHandler.getAllMembers(modelElement)
                 .filter { it.kind == ElementKind.CONSTRUCTOR }
                 .map { (it.asType() as ExecutableType) }
                 .find { it.parameterTypes.size > 0 }

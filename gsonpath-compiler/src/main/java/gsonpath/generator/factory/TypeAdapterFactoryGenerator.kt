@@ -7,15 +7,14 @@ import com.google.gson.reflect.TypeToken
 import com.squareup.javapoet.*
 import gsonpath.ProcessingException
 import gsonpath.compiler.addNewLine
-
-import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.Modifier
-
-import gsonpath.generator.Generator
 import gsonpath.generator.HandleResult
+import gsonpath.generator.writeFile
+import gsonpath.util.FileWriter
+import gsonpath.util.Logger
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
-class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Generator(processingEnv) {
+class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter, private val logger: Logger) {
 
     fun generate(factoryElement: TypeElement, generatedGsonAdapters: List<HandleResult>): Boolean {
         if (generatedGsonAdapters.isEmpty()) {
@@ -108,7 +107,7 @@ class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Genera
         createMethod.addCode(codeBlock.build())
         typeBuilder.addMethod(createMethod.build())
 
-        return writeFile(factoryClassName.packageName(), typeBuilder)
+        return typeBuilder.writeFile(fileWriter, logger, factoryClassName.packageName())
     }
 
     private fun createPackageLocalTypeAdapterLoaders(packageName: String, packageLocalGsonAdapters: List<HandleResult>): Boolean {
@@ -146,11 +145,11 @@ class TypeAdapterFactoryGenerator(processingEnv: ProcessingEnvironment) : Genera
         createMethod.addCode(codeBlock.build())
         typeBuilder.addMethod(createMethod.build())
 
-        return writeFile(packageName, typeBuilder)
+        return typeBuilder.writeFile(fileWriter, logger, packageName)
     }
 
     companion object {
-        private val PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME = "PackagePrivateTypeAdapterLoader"
+        private const val PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME = "PackagePrivateTypeAdapterLoader"
     }
 
 }
