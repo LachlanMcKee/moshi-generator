@@ -1,10 +1,10 @@
-package gsonpath.generator.standard
+package gsonpath.generator.standard.properties
 
 import com.google.gson.FieldNamingPolicy
 import gsonpath.GsonFieldValidationType
 import gsonpath.PathSubstitution
 
-internal class AutoGsonAdapterProperties(
+class AutoGsonAdapterProperties(
         val fieldsRequireAnnotation: Boolean,
         val flattenDelimiter: Char,
         val serializeNulls: Boolean,

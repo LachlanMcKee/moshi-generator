@@ -3,6 +3,13 @@ package gsonpath.model
 class MandatoryFieldInfoFactory {
 
     /**
+     * Keeps track of mandatory json field metadata.
+     */
+    class MandatoryFieldInfo(
+            val indexVariableName: String,
+            val gsonField: GsonField)
+
+    /**
      * Add any mandatory field indexes as constants. This is done for code readability.
      * We will obtain the values using a depth-first recursion.
      */
@@ -21,7 +28,10 @@ class MandatoryFieldInfoFactory {
      * For all required fields we add an index field so we can easily check whether the
      * value has been assigned after the json has been parsed.
      */
-    private fun handleField(gsonModel: GsonField, map: Map<String, MandatoryFieldInfo>): Map<String, MandatoryFieldInfo> {
+    private fun handleField(
+            gsonModel: GsonField,
+            map: Map<String, MandatoryFieldInfo>): Map<String, MandatoryFieldInfo> {
+
         return when {
             gsonModel.isRequired -> {
                 val fieldName = gsonModel.fieldInfo.fieldName

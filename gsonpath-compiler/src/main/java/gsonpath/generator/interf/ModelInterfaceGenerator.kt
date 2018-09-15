@@ -4,14 +4,12 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 import gsonpath.ProcessingException
-import gsonpath.compiler.addNewLine
 import gsonpath.compiler.generateClassName
 import gsonpath.generator.writeFile
-import gsonpath.model.InterfaceFieldInfo
-import gsonpath.model.InterfaceInfo
-import gsonpath.util.FileWriter
-import gsonpath.util.Logger
-import gsonpath.util.TypeHandler
+import gsonpath.model.FieldInfoFactory
+import gsonpath.model.FieldInfoFactory.InterfaceFieldInfo
+import gsonpath.model.FieldInfoFactory.InterfaceInfo
+import gsonpath.util.*
 import java.util.*
 import javax.annotation.Generated
 import javax.lang.model.element.Element
@@ -21,9 +19,10 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.TypeMirror
 
-internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
-                                       private val fileWriter: FileWriter,
-                                       private val logger: Logger) {
+class ModelInterfaceGenerator(
+        private val typeHandler: TypeHandler,
+        private val fileWriter: FileWriter,
+        private val logger: Logger) {
 
     @Throws(ProcessingException::class)
     fun handle(element: TypeElement): InterfaceInfo {
@@ -35,8 +34,7 @@ internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
                 .addMember("comments", "\"https://github.com/LachlanMcKee/gsonpath\"")
                 .build()
 
-        val typeBuilder = TypeSpec.classBuilder(outputClassName)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        val typeBuilder = TypeSpecExt.finalClassBuilder(outputClassName)
                 .addSuperinterface(modelClassName)
                 .addAnnotation(generatedJavaPoetAnnotation)
 
@@ -107,9 +105,7 @@ internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
 
             typeBuilder.addField(typeName, fieldName, Modifier.PRIVATE, Modifier.FINAL)
 
-            val accessorMethod = MethodSpec.methodBuilder(methodName)
-                    .addAnnotation(Override::class.java)
-                    .addModifiers(Modifier.PUBLIC)
+            val accessorMethod = MethodSpecExt.interfaceMethodBuilder(methodName)
                     .returns(typeName)
                     .addStatement("return $fieldName")
 
@@ -186,9 +182,7 @@ internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
 
         // Add the equals method
         typeBuilder.addMethod(
-                MethodSpec.methodBuilder("equals")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
+                MethodSpecExt.interfaceMethodBuilder("equals")
                         .returns(TypeName.BOOLEAN)
                         .addParameter(TypeName.OBJECT, "o")
                         .addCode(equalsCodeBlock.addNewLine()
@@ -204,18 +198,14 @@ internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
         }
 
         // Add the hashCode method
-        typeBuilder.addMethod(MethodSpec.methodBuilder("hashCode")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
+        typeBuilder.addMethod(MethodSpecExt.interfaceMethodBuilder("hashCode")
                 .returns(TypeName.INT)
 
                 .addCode(hasCodeCodeBlock.build())
                 .build())
 
         // Add the toString method
-        typeBuilder.addMethod(MethodSpec.methodBuilder("toString")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
+        typeBuilder.addMethod(MethodSpecExt.interfaceMethodBuilder("toString")
                 .returns(TypeName.get(String::class.java))
 
                 .addCode(toStringCodeBlock.build())
@@ -249,7 +239,7 @@ internal class ModelInterfaceGenerator(private val typeHandler: TypeHandler,
                 }
     }
 
-    private class StandardElementInfo constructor(override val underlyingElement: Element) : InterfaceFieldInfo.ElementInfo {
+    private class StandardElementInfo(override val underlyingElement: Element) : FieldInfoFactory.ElementInfo {
 
         override fun <T : Annotation> getAnnotation(annotationClass: Class<T>): T? {
             return underlyingElement.getAnnotation(annotationClass)

@@ -5,44 +5,19 @@ import com.google.gson.TypeAdapter
 import com.google.gson.TypeAdapterFactory
 import com.google.gson.reflect.TypeToken
 import com.squareup.javapoet.*
-import gsonpath.ProcessingException
-import gsonpath.compiler.addNewLine
 import gsonpath.generator.HandleResult
 import gsonpath.generator.writeFile
-import gsonpath.util.FileWriter
-import gsonpath.util.Logger
+import gsonpath.util.*
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
-class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter, private val logger: Logger) {
+class TypeAdapterFactoryGenerator(
+        private val fileWriter: FileWriter,
+        private val logger: Logger) {
 
     fun generate(factoryElement: TypeElement, generatedGsonAdapters: List<HandleResult>): Boolean {
-        if (generatedGsonAdapters.isEmpty()) {
-            return false
-        }
-
-        // Only interfaces are accepted (for simplicity)
-        if (!factoryElement.kind.isInterface) {
-            throw ProcessingException("Types annotated with @AutoGsonAdapterFactory must be an interface " +
-                    "that directly extends com.google.gson.TypeAdapterFactory.", factoryElement)
-        }
-
-        // Ensure that the factory element only extends TypeAdapterFactory
-        val factoryInterfaces = factoryElement.interfaces
-        if (factoryInterfaces.size != 1 || TypeName.get(factoryInterfaces[0]) != TypeName.get(TypeAdapterFactory::class.java)) {
-            throw ProcessingException("Interfaces annotated with @AutoGsonAdapterFactory must extend " +
-                    "com.google.gson.TypeAdapterFactory and no other interfaces.", factoryElement)
-        }
-
-        val packageLocalHandleResults: Map<String, List<HandleResult>> =
-                generatedGsonAdapters.fold(emptyMap()) { map, generatedGsonAdapter ->
-                    val packageName = generatedGsonAdapter.generatedClassName.packageName()
-
-                    val newList: List<HandleResult> =
-                            map[packageName]?.plus(generatedGsonAdapter) ?: listOf(generatedGsonAdapter)
-
-                    return@fold map.plus(Pair(packageName, newList))
-                }
+        val packageLocalHandleResults = TypeAdapterFactoryHandlersFactory
+                .createResults(factoryElement, generatedGsonAdapters)
 
         for ((packageName, list) in packageLocalHandleResults) {
             if (!createPackageLocalTypeAdapterLoaders(packageName, list)) {
@@ -57,11 +32,13 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter, private va
     /**
      * Create the GsonPathLoader which is used by the GsonPathTypeAdapterFactory class.
      */
-    private fun createGsonTypeFactoryImpl(factoryElement: TypeElement, packageLocalHandleResults: Map<String, List<HandleResult>>): Boolean {
+    private fun createGsonTypeFactoryImpl(
+            factoryElement: TypeElement,
+            packageLocalHandleResults: Map<String, List<HandleResult>>): Boolean {
+
         val factoryClassName = ClassName.get(factoryElement)
 
-        val typeBuilder = TypeSpec.classBuilder(factoryClassName.simpleName() + "Impl")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        val typeBuilder = TypeSpecExt.finalClassBuilder(factoryClassName.simpleName() + "Impl")
                 .addSuperinterface(factoryClassName)
 
         typeBuilder.addField(FieldSpec.builder(ArrayTypeName.of(TypeAdapterFactory::class.java), "mPackagePrivateLoaders")
@@ -85,9 +62,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter, private va
         //
         // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);
         //
-        val createMethod = MethodSpec.methodBuilder("create")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
+        val createMethod = MethodSpecExt.interfaceMethodBuilder("create")
                 .returns(TypeAdapter::class.java)
                 .addParameter(Gson::class.java, "gson")
                 .addParameter(TypeToken::class.java, "type")
@@ -110,17 +85,17 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter, private va
         return typeBuilder.writeFile(fileWriter, logger, factoryClassName.packageName())
     }
 
-    private fun createPackageLocalTypeAdapterLoaders(packageName: String, packageLocalGsonAdapters: List<HandleResult>): Boolean {
-        val typeBuilder = TypeSpec.classBuilder(ClassName.get(packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME))
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+    private fun createPackageLocalTypeAdapterLoaders(
+            packageName: String,
+            packageLocalGsonAdapters: List<HandleResult>): Boolean {
+
+        val typeBuilder = TypeSpecExt.finalClassBuilder(ClassName.get(packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME))
                 .addSuperinterface(TypeAdapterFactory::class.java)
 
         //
         // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);
         //
-        val createMethod = MethodSpec.methodBuilder("create")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
+        val createMethod = MethodSpecExt.interfaceMethodBuilder("create")
                 .returns(TypeAdapter::class.java)
                 .addParameter(Gson::class.java, "gson")
                 .addParameter(TypeToken::class.java, "type")
@@ -148,7 +123,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter, private va
         return typeBuilder.writeFile(fileWriter, logger, packageName)
     }
 
-    companion object {
+    private companion object {
         private const val PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME = "PackagePrivateTypeAdapterLoader"
     }
 
