@@ -1,10 +1,7 @@
 package gsonpath.generator.standard.write
 
 import com.google.gson.stream.JsonWriter
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.*
 import gsonpath.ProcessingException
 import gsonpath.generator.standard.SharedFunctions
 import gsonpath.model.GsonField
@@ -22,24 +19,22 @@ class WriteFunctions {
             rootElements: GsonObject,
             serializeNulls: Boolean): MethodSpec {
 
-        return MethodSpecExt.interfaceMethodBuilder("write")
-                .addParameter(JsonWriter::class.java, "out")
-                .addParameter(elementClassName, "value")
-                .addException(IOException::class.java)
-                .code {
-                    // Initial block which prevents nulls being accessed.
-                    beginControlFlow("if (value == null)")
+        return MethodSpecExt.interfaceMethodBuilder("write").applyAndBuild {
+            addParameter(JsonWriter::class.java, "out")
+            addParameter(elementClassName, "value")
+            addException(IOException::class.java)
+            code {
+                // Initial block which prevents nulls being accessed.
+                `if`("value == null") {
                     addStatement("out.nullValue()")
                     addStatement("return")
-                    endControlFlow()
-
-                    addNewLine()
-                    addComment("Begin")
-                    apply {
-                        writeGsonFieldWriter(rootElements, "", serializeNulls, 0)
-                    }
                 }
-                .build()
+
+                newLine()
+                comment("Begin")
+                writeGsonFieldWriter(rootElements, "", serializeNulls, 0)
+            }
+        }
     }
 
     @Throws(ProcessingException::class)
@@ -59,7 +54,7 @@ class WriteFunctions {
                     }
                 }
 
-        addComment("End $currentPath")
+        comment("End $currentPath")
         addStatement("out.endObject()")
 
         return overallFieldCount
@@ -80,8 +75,8 @@ class WriteFunctions {
             }
 
             // Add a comment mentioning what nested object we are current pointing at.
-            addNewLine()
-            addComment("Begin $newPath")
+            newLine()
+            comment("Begin $newPath")
             addStatement("""out.name("$key")""")
 
             writeGsonFieldWriter(value, newPath, serializeNulls, fieldCount)
@@ -108,16 +103,35 @@ class WriteFunctions {
 
         addStatement("\$T $objectName = value.${fieldInfo.fieldAccessor}", fieldTypeName)
 
-        // If we aren't serializing nulls, we need to prevent the 'out.name' code being executed.
-        if (!isPrimitive && !serializeNulls) {
-            beginControlFlow("if ($objectName != null)")
+        if (isPrimitive) {
+            addEscapedStatement("""out.name("$key")""")
+            writeField(value, objectName, fieldTypeName)
+        } else {
+            if (serializeNulls) {
+                // Since we are serializing nulls, we defer the if-statement until after the name is written.
+                addEscapedStatement("""out.name("$key")""")
+                ifWithoutClose("$objectName != null") {
+                    writeField(value, objectName, fieldTypeName)
+                }
+                `else` {
+                    addStatement("out.nullValue()")
+                }
+            } else {
+                `if`("$objectName != null") {
+                    addEscapedStatement("""out.name("$key")""")
+                    writeField(value, objectName, fieldTypeName)
+                }
+            }
         }
-        addEscapedStatement("""out.name("$key")""")
+        newLine()
 
-        // Since we are serializing nulls, we defer the if-statement until after the name is written.
-        if (!isPrimitive && serializeNulls) {
-            beginControlFlow("if ($objectName != null)")
-        }
+        return fieldCount + 1
+    }
+
+    private fun CodeBlock.Builder.writeField(
+            value: GsonField,
+            objectName: String,
+            fieldTypeName: TypeName) {
 
         val subTypeMetadata = value.subTypeMetadata
         val writeLine =
@@ -138,17 +152,5 @@ class WriteFunctions {
                 }
 
         addStatement(writeLine, fieldTypeName.box())
-
-        // If we are serializing nulls, we need to ensure we output it here.
-        if (!isPrimitive) {
-            if (serializeNulls) {
-                nextControlFlow("else")
-                addStatement("out.nullValue()")
-            }
-            endControlFlow()
-        }
-        addNewLine()
-
-        return fieldCount + 1
     }
 }

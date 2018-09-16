@@ -12,55 +12,51 @@ import gsonpath.compiler.CLASS_NAME_STRING
 import gsonpath.compiler.createDefaultVariableValueForTypeName
 import gsonpath.generator.standard.SharedFunctions
 import gsonpath.model.GsonField
+import gsonpath.model.GsonModel
 import gsonpath.model.GsonObject
-import gsonpath.model.GsonObjectTreeFactory
 import gsonpath.model.MandatoryFieldInfoFactory.MandatoryFieldInfo
 import gsonpath.util.*
 import java.io.IOException
 
-class ReadFunctions(private val gsonObjectTreeFactory: GsonObjectTreeFactory) {
+class ReadFunctions {
 
     /**
      * public T read(JsonReader in) throws IOException {
      */
     @Throws(ProcessingException::class)
-    fun createReadMethod(
-            baseElement: ClassName,
-            concreteElement: ClassName,
-            requiresConstructorInjection: Boolean,
-            mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
-            rootElements: GsonObject,
-            extensionsHandler: ExtensionsHandler): MethodSpec {
-
-        return MethodSpecExt.interfaceMethodBuilder("read")
-                .returns(baseElement)
-                .addParameter(JsonReader::class.java, "in")
-                .addException(IOException::class.java)
-                .code {
-                    // Create a flat list of the variables and ensure they are ordered by their original field index within the POJO
-                    val flattenedFields = gsonObjectTreeFactory
-                            .getFlattenedFieldsFromGsonObject(rootElements)
-
-                    addValidValueCheck(true)
-                    addInitialisationBlock(concreteElement, requiresConstructorInjection, flattenedFields, mandatoryInfoMap)
-                    addReadCodeForElements(rootElements, requiresConstructorInjection, mandatoryInfoMap, extensionsHandler)
-                    addMandatoryValuesCheck(mandatoryInfoMap, concreteElement)
-                    addReturnBlock(concreteElement, requiresConstructorInjection, flattenedFields)
+    fun createReadMethod(params: ReadParams, extensionsHandler: ExtensionsHandler): MethodSpec {
+        return MethodSpecExt.interfaceMethodBuilder("read").applyAndBuild {
+            returns(params.baseElement)
+            addParameter(JsonReader::class.java, "in")
+            addException(IOException::class.java)
+            code {
+                comment("Ensure the object is not null.")
+                `if`("!isValidValue(in)") {
+                    addStatement("return null")
                 }
-                .build()
+
+                addInitialisationBlock(params)
+                addReadCodeForElements(params.rootElements, params, extensionsHandler)
+                addMandatoryValuesCheck(params)
+
+                if (!params.requiresConstructorInjection) {
+                    // If the class was already defined, return it now.
+                    addStatement("return result")
+
+                } else {
+                    // Create the class using the constructor.
+                    multiLinedNewObject(params.concreteElement, params.flattenedFields.map { it.variableName })
+                }
+            }
+        }
     }
 
-    private fun CodeBlock.Builder.addInitialisationBlock(
-            concreteElement: ClassName,
-            requiresConstructorInjection: Boolean,
-            flattenedFields: List<GsonField>,
-            mandatoryInfoMap: Map<String, MandatoryFieldInfo>) {
-
-        if (!requiresConstructorInjection) {
-            addStatement("\$T result = new \$T()", concreteElement, concreteElement)
+    private fun CodeBlock.Builder.addInitialisationBlock(params: ReadParams) {
+        if (!params.requiresConstructorInjection) {
+            addStatement("\$T result = new \$T()", params.concreteElement, params.concreteElement)
 
         } else {
-            for (gsonField in flattenedFields) {
+            for (gsonField in params.flattenedFields) {
                 // Don't initialise primitives, we rely on validation to throw an exception if the value does not exist.
                 val typeName = gsonField.fieldInfo.typeName
                 val defaultValue = createDefaultVariableValueForTypeName(typeName)
@@ -70,11 +66,11 @@ class ReadFunctions(private val gsonObjectTreeFactory: GsonObjectTreeFactory) {
         }
 
         // If we have any mandatory fields, we need to keep track of what has been assigned.
-        if (mandatoryInfoMap.isNotEmpty()) {
+        if (params.mandatoryInfoMap.isNotEmpty()) {
             addStatement("boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE]")
         }
 
-        addNewLine()
+        newLine()
     }
 
     /**
@@ -84,8 +80,7 @@ class ReadFunctions(private val gsonObjectTreeFactory: GsonObjectTreeFactory) {
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.addReadCodeForElements(
             jsonMapping: GsonObject,
-            requiresConstructorInjection: Boolean,
-            mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
+            params: ReadParams,
             extensionsHandler: ExtensionsHandler,
             recursionCount: Int = 0): Int {
 
@@ -98,69 +93,76 @@ class ReadFunctions(private val gsonObjectTreeFactory: GsonObjectTreeFactory) {
 
         addStatement("int $counterVariableName = 0")
         addStatement("in.beginObject()")
-        addNewLine()
-        beginControlFlow("while (in.hasNext())")
+        newLine()
 
-        //
-        // Since all the required fields have been mapped, we can avoid calling 'nextName'.
-        // This ends up yielding performance improvements on large datasets depending on
-        // the ordering of the fields within the JSON.
-        //
-        beginControlFlow("if ($counterVariableName == $jsonMappingSize)")
-        addStatement("in.skipValue()")
-        addStatement("continue")
-        endControlFlow() // if
-        addNewLine()
+        val overallRecursionCount = `while`("in.hasNext()") {
 
-        beginControlFlow("switch (in.nextName())")
+            //
+            // Since all the required fields have been mapped, we can avoid calling 'nextName'.
+            // This ends up yielding performance improvements on large datasets depending on
+            // the ordering of the fields within the JSON.
+            //
+            `if`("$counterVariableName == $jsonMappingSize") {
+                addStatement("in.skipValue()")
+                addStatement("continue")
+            }
+            newLine()
 
-        val overallRecursionCount = jsonMapping.entries().fold(recursionCount + 1) { currentOverallRecursionCount, (key, value) ->
-            addEscaped("""case "$key":""")
-            addNewLine()
-            indent()
-
-            // Increment the counter to ensure we track how many fields we have mapped.
-            addStatement("$counterVariableName++")
-
-            val recursionCountForModel: Int =
-                    when (value) {
-                        is GsonField -> {
-                            writeGsonFieldReader(value, requiresConstructorInjection,
-                                    mandatoryInfoMap[value.fieldInfo.fieldName], extensionsHandler)
-
-                            // No extra recursion has happened.
-                            currentOverallRecursionCount
+            switch("in.nextName()") {
+                val recursionTemp = jsonMapping.entries()
+                        .fold(recursionCount + 1) { currentOverallRecursionCount, entry ->
+                            addReadCodeForModel(
+                                    params = params,
+                                    extensionsHandler = extensionsHandler,
+                                    key = entry.key,
+                                    value = entry.value,
+                                    counterVariableName = counterVariableName,
+                                    currentOverallRecursionCount = currentOverallRecursionCount)
                         }
 
-                        is GsonObject -> {
-                            addNewLine()
-                            addValidValueCheck(false)
-
-                            addReadCodeForElements(value, requiresConstructorInjection, mandatoryInfoMap,
-                                    extensionsHandler, currentOverallRecursionCount)
-                        }
-                    }
-
-            addStatement("break")
-            addNewLine()
-            unindent()
-
-            return@fold recursionCountForModel
+                default {
+                    addStatement("in.skipValue()")
+                }
+                return@switch recursionTemp
+            }
         }
-
-        addWithNewLine("default:")
-        indent()
-        addStatement("in.skipValue()")
-        addStatement("break")
-        unindent()
-
-        endControlFlow() // switch
-        endControlFlow() // while
-        addNewLine()
-
+        newLine()
         addStatement("in.endObject()")
 
         return overallRecursionCount
+    }
+
+    private fun CodeBlock.Builder.addReadCodeForModel(
+            params: ReadParams,
+            extensionsHandler: ExtensionsHandler,
+            key: String,
+            value: GsonModel,
+            counterVariableName: String,
+            currentOverallRecursionCount: Int): Int {
+
+        return case("\"$key\"") {
+            // Increment the counter to ensure we track how many fields we have mapped.
+            addStatement("$counterVariableName++")
+
+            when (value) {
+                is GsonField -> {
+                    writeGsonFieldReader(value, params.requiresConstructorInjection,
+                            params.mandatoryInfoMap[value.fieldInfo.fieldName], extensionsHandler)
+
+                    // No extra recursion has happened.
+                    currentOverallRecursionCount
+                }
+
+                is GsonObject -> {
+                    newLine()
+                    comment("Ensure the object is not null.")
+                    `if`("!isValidValue(in)") {
+                        addStatement("break")
+                    }
+                    addReadCodeForElements(value, params, extensionsHandler, currentOverallRecursionCount)
+                }
+            }
+        }
     }
 
     @Throws(ProcessingException::class)
@@ -177,57 +179,59 @@ class ReadFunctions(private val gsonObjectTreeFactory: GsonObjectTreeFactory) {
         SharedFunctions.validateFieldAnnotations(fieldInfo)
 
         // Add a new line to improve readability for the multi-lined mapping.
-        addNewLine()
+        newLine()
 
         val result = writeGsonFieldReading(gsonField, requiresConstructorInjection)
 
         if (result.checkIfNull) {
-            beginControlFlow("if (${result.variableName} != null)")
+            `if`("${result.variableName} != null") {
 
-            val assignmentBlock: String = if (!requiresConstructorInjection) {
-                "result." + fieldInfo.fieldName
-            } else {
-                gsonField.variableName
+                val assignmentBlock: String = if (!requiresConstructorInjection) {
+                    "result." + fieldInfo.fieldName
+                } else {
+                    gsonField.variableName
+                }
+
+                if (result.callToString) {
+                    addStatement("$assignmentBlock = ${result.variableName}.toString()")
+                } else {
+                    addStatement("$assignmentBlock = ${result.variableName}")
+                }
+
+                // When a field has been assigned, if it is a mandatory value, we note this down.
+                if (mandatoryFieldInfo != null) {
+                    addStatement("mandatoryFieldsCheckList[${mandatoryFieldInfo.indexVariableName}] = true")
+                    newLine()
+
+                    nextControlFlow("else")
+                    addEscapedStatement("""throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '${gsonField.jsonPath}' was null for class '${fieldInfo.parentClassName}'")""")
+                }
+
             }
-
-            addStatement("$assignmentBlock = ${result.variableName}${if (result.callToString) ".toString()" else ""}")
-
-            // When a field has been assigned, if it is a mandatory value, we note this down.
-            if (mandatoryFieldInfo != null) {
-                addStatement("mandatoryFieldsCheckList[${mandatoryFieldInfo.indexVariableName}] = true")
-                addNewLine()
-
-                nextControlFlow("else")
-                addEscapedStatement("""throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '${gsonField.jsonPath}' was null for class '${fieldInfo.parentClassName}'")""")
-            }
-
-            endControlFlow() // if
         }
 
         // Execute any extensions and add the code blocks if they exist.
-        val extensionsCodeBlockBuilder = CodeBlock.builder()
-        extensionsHandler.handle(gsonField, result.variableName) { extensionName, validationCodeBlock ->
-            extensionsCodeBlockBuilder.addNewLine()
-                    .addComment("Extension - $extensionName")
-                    .add(validationCodeBlock)
-                    .addNewLine()
+        val extensionsCodeBlock = codeBlock {
+            extensionsHandler.handle(gsonField, result.variableName) { extensionName, validationCodeBlock ->
+                newLine()
+                comment("Extension - $extensionName")
+                add(validationCodeBlock)
+                newLine()
+            }
         }
 
         // Wrap all of the extensions inside a block and potentially wrap it with a null-check.
-        val extensionsCodeBlock = extensionsCodeBlockBuilder.build()
         if (!extensionsCodeBlock.isEmpty) {
-            addNewLine()
-            addComment("Gsonpath Extensions")
+            newLine()
+            comment("Gsonpath Extensions")
 
             // Handle the null-checking for the extensions to avoid repetition inside the extension implementations.
             if (!fieldTypeName.isPrimitive) {
-                beginControlFlow("if (${result.variableName} != null)")
-            }
-
-            add(extensionsCodeBlock)
-
-            if (!fieldTypeName.isPrimitive) {
-                endControlFlow()
+                `if`("${result.variableName} != null") {
+                    add(extensionsCodeBlock)
+                }
+            } else {
+                add(extensionsCodeBlock)
             }
         }
     }
@@ -300,88 +304,35 @@ class ReadFunctions(private val gsonObjectTreeFactory: GsonObjectTreeFactory) {
     /**
      * If there are any mandatory fields, we now check if any values have been missed. If there are, an exception will be raised here.
      */
-    private fun CodeBlock.Builder.addMandatoryValuesCheck(
-            mandatoryInfoMap: Map<String, MandatoryFieldInfo>,
-            concreteElement: ClassName) {
-
-        if (mandatoryInfoMap.isEmpty()) {
+    private fun CodeBlock.Builder.addMandatoryValuesCheck(params: ReadParams) {
+        if (params.mandatoryInfoMap.isEmpty()) {
             return
         }
 
-        addNewLine()
-        addComment("Mandatory object validation")
-        beginControlFlow("for (int mandatoryFieldIndex = 0; mandatoryFieldIndex < MANDATORY_FIELDS_SIZE; mandatoryFieldIndex++)")
+        newLine()
+        comment("Mandatory object validation")
+        `for`("int mandatoryFieldIndex = 0; mandatoryFieldIndex < MANDATORY_FIELDS_SIZE; mandatoryFieldIndex++") {
 
-        addNewLine()
-        addComment("Check if a mandatory value is missing.")
-        beginControlFlow("if (!mandatoryFieldsCheckList[mandatoryFieldIndex])")
+            newLine()
+            comment("Check if a mandatory value is missing.")
+            `if`("!mandatoryFieldsCheckList[mandatoryFieldIndex]") {
 
-        // The code must figure out the correct field name to insert into the error message.
-        addNewLine()
-        addComment("Find the field name of the missing json value.")
-        addStatement("String fieldName = null")
-        beginControlFlow("switch (mandatoryFieldIndex)")
+                // The code must figure out the correct field name to insert into the error message.
+                newLine()
+                comment("Find the field name of the missing json value.")
+                addStatement("String fieldName = null")
+                switch("mandatoryFieldIndex") {
 
-        for ((_, mandatoryFieldInfo) in mandatoryInfoMap) {
-            addWithNewLine("case ${mandatoryFieldInfo.indexVariableName}:")
-            indent()
-            addEscapedStatement("""fieldName = "${mandatoryFieldInfo.gsonField.jsonPath}"""")
-            addStatement("break")
-            unindent()
-            addNewLine()
-        }
+                    for ((_, mandatoryFieldInfo) in params.mandatoryInfoMap) {
+                        case(mandatoryFieldInfo.indexVariableName) {
+                            addEscapedStatement("""fieldName = "${mandatoryFieldInfo.gsonField.jsonPath}"""")
+                        }
+                    }
 
-        endControlFlow() // Switch
-        addStatement("""throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class '$concreteElement'")""")
-        endControlFlow() // If
-        endControlFlow() // For
-    }
-
-    private fun CodeBlock.Builder.addReturnBlock(
-            concreteElement: ClassName,
-            requiresConstructorInjection: Boolean,
-            flattenedFields: List<GsonField>) {
-
-        if (!requiresConstructorInjection) {
-            // If the class was already defined, return it now.
-            addStatement("return result")
-
-        } else {
-            // Create the class using the constructor.
-            val returnCodeBlock = CodeBlock.builder()
-                    .addWithNewLine("return new \$T(", concreteElement)
-                    .indent()
-
-            for (i in flattenedFields.indices) {
-                returnCodeBlock.add(flattenedFields[i].variableName)
-
-                if (i < flattenedFields.size - 1) {
-                    returnCodeBlock.add(",")
                 }
-
-                returnCodeBlock.addNewLine()
+                addStatement("""throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class '${params.concreteElement}'")""")
             }
-
-            add(returnCodeBlock.unindent()
-                    .addStatement(")")
-                    .build())
         }
-    }
-
-    /**
-     * Ensure a Json object exists begin attempting to read it.
-     */
-    private fun CodeBlock.Builder.addValidValueCheck(addReturn: Boolean) {
-        addComment("Ensure the object is not null.")
-                .beginControlFlow("if (!isValidValue(in))")
-
-                .addStatement(if (addReturn) "return null" else "break")
-                .endControlFlow() // if
-    }
-
-    private fun CodeBlock.Builder.addEscaped(format: String): CodeBlock.Builder {
-        this.add(format.replace("$", "$$"))
-        return this
     }
 
     private fun getVariableName(gsonField: GsonField, requiresConstructorInjection: Boolean): String {

@@ -1,8 +1,6 @@
 package gsonpath.generator.interf
 
 import com.squareup.javapoet.*
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeName
 import gsonpath.ProcessingException
 import gsonpath.compiler.generateClassName
 import gsonpath.generator.writeFile
@@ -47,9 +45,9 @@ class ModelInterfaceGenerator(
         val equalsCodeBlock = CodeBlock.builder()
                 .addStatement("if (this == o) return true")
                 .addStatement("if (o == null || getClass() != o.getClass()) return false")
-                .addNewLine()
+                .newLine()
                 .addStatement("\$T equalsOtherType = (\$T) o", outputClassName, outputClassName)
-                .addNewLine()
+                .newLine()
 
         // Hash code method
         val hasCodeCodeBlock = CodeBlock.builder()
@@ -57,7 +55,7 @@ class ModelInterfaceGenerator(
         // ToString method
         val toStringCodeBlock = CodeBlock.builder()
                 .add("""return "${modelClassName.simpleName()}{" +""")
-                .addNewLine()
+                .newLine()
 
         // An optimisation for hash codes which prevents us creating too many temp long variables.
         val hasDoubleField = methodElements
@@ -105,17 +103,17 @@ class ModelInterfaceGenerator(
 
             typeBuilder.addField(typeName, fieldName, Modifier.PRIVATE, Modifier.FINAL)
 
-            val accessorMethod = MethodSpecExt.interfaceMethodBuilder(methodName)
-                    .returns(typeName)
-                    .addStatement("return $fieldName")
+            // Accessor method
+            typeBuilder.interfaceMethod(methodName) {
+                returns(typeName)
+                addStatement("return $fieldName")
 
-            // Copy all annotations from the interface accessor method to the implementing classes accessor.
-            val annotationMirrors = enclosedElement.annotationMirrors
-            for (annotationMirror in annotationMirrors) {
-                accessorMethod.addAnnotation(AnnotationSpec.get(annotationMirror))
+                // Copy all annotations from the interface accessor method to the implementing classes accessor.
+                val annotationMirrors = enclosedElement.annotationMirrors
+                for (annotationMirror in annotationMirrors) {
+                    addAnnotation(AnnotationSpec.get(annotationMirror))
+                }
             }
-
-            typeBuilder.addMethod(accessorMethod.build())
 
             // Add the parameter to the constructor
             constructorBuilder.addParameter(typeName, fieldName)
@@ -175,20 +173,19 @@ class ModelInterfaceGenerator(
             } else {
                 toStringCodeBlock.add("""$fieldName=" + $fieldName +""")
             }
-            toStringCodeBlock.addNewLine()
+            toStringCodeBlock.newLine()
         }
 
         typeBuilder.addMethod(constructorBuilder.build())
 
         // Add the equals method
-        typeBuilder.addMethod(
-                MethodSpecExt.interfaceMethodBuilder("equals")
-                        .returns(TypeName.BOOLEAN)
-                        .addParameter(TypeName.OBJECT, "o")
-                        .addCode(equalsCodeBlock.addNewLine()
-                                .addStatement("return true")
-                                .build())
-                        .build())
+        typeBuilder.interfaceMethod("equals") {
+            returns(TypeName.BOOLEAN)
+            addParameter(TypeName.OBJECT, "o")
+            addCode(equalsCodeBlock.newLine()
+                    .addStatement("return true")
+                    .build())
+        }
 
         // If we have no elements, 'hashCodeReturnValue' won't be initialised!
         if (methodElements.isNotEmpty()) {
@@ -198,19 +195,17 @@ class ModelInterfaceGenerator(
         }
 
         // Add the hashCode method
-        typeBuilder.addMethod(MethodSpecExt.interfaceMethodBuilder("hashCode")
-                .returns(TypeName.INT)
-
-                .addCode(hasCodeCodeBlock.build())
-                .build())
+        typeBuilder.interfaceMethod("hashCode") {
+            returns(TypeName.INT)
+            addCode(hasCodeCodeBlock.build())
+        }
 
         // Add the toString method
-        typeBuilder.addMethod(MethodSpecExt.interfaceMethodBuilder("toString")
-                .returns(TypeName.get(String::class.java))
-
-                .addCode(toStringCodeBlock.build())
-                .addStatement("\t\t'}'", modelClassName.simpleName())
-                .build())
+        typeBuilder.interfaceMethod("toString") {
+            returns(TypeName.get(String::class.java))
+            addCode(toStringCodeBlock.build())
+            addStatement("\t\t'}'", modelClassName.simpleName())
+        }
 
         if (!typeBuilder.writeFile(fileWriter, logger, outputClassName.packageName())) {
             throw ProcessingException("Failed to write generated file: " + outputClassName.simpleName())

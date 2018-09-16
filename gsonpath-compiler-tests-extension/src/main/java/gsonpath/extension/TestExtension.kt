@@ -6,6 +6,8 @@ import gsonpath.ProcessingException
 import gsonpath.compiler.ExtensionFieldMetadata
 import gsonpath.compiler.GsonPathExtension
 import gsonpath.util.addEscapedStatement
+import gsonpath.util.codeBlock
+import gsonpath.util.`if`
 
 import javax.annotation.processing.ProcessingEnvironment
 
@@ -31,17 +33,15 @@ class TestExtension : GsonPathExtension {
                     "string classes may be used.", fieldInfo.element)
         }
 
-        return CodeBlock.builder()
-                .beginControlFlow("if ($variableName.trim().length() == 0)")
-                .apply {
-                    if (isRequired) {
-                        addEscapedStatement("throw new com.google.gson.JsonParseException(" +
-                                "\"JSON element '$jsonPath' cannot be blank\")")
-                    } else {
-                        addStatement("$variableName = null")
-                    }
+        return codeBlock {
+            `if`("$variableName.trim().length() == 0") {
+                if (isRequired) {
+                    addEscapedStatement("throw new com.google.gson.JsonParseException(" +
+                            "\"JSON element '$jsonPath' cannot be blank\")")
+                } else {
+                    addStatement("$variableName = null")
                 }
-                .endControlFlow()
-                .build()
+            }
+        }
     }
 }

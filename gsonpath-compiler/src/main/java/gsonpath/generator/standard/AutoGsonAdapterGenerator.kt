@@ -12,6 +12,7 @@ import gsonpath.generator.HandleResult
 import gsonpath.generator.interf.ModelInterfaceGenerator
 import gsonpath.generator.standard.properties.AutoGsonAdapterPropertiesFactory
 import gsonpath.generator.standard.read.ReadFunctions
+import gsonpath.generator.standard.read.ReadParams
 import gsonpath.generator.standard.subtype.SubtypeFunctions
 import gsonpath.generator.standard.write.WriteFunctions
 import gsonpath.generator.writeFile
@@ -49,17 +50,18 @@ class AutoGsonAdapterGenerator(
                 .addMember("comments", "\"https://github.com/LachlanMcKee/gsonpath\"")
                 .build()
 
-        val adapterTypeBuilder = TypeSpecExt.finalClassBuilder(adapterClassName)
-                .superclass(ParameterizedTypeName.get(ClassName.get(TypeAdapter::class.java), modelClassName))
-                .addAnnotation(generatedJavaPoetAnnotation)
-                .addField(Gson::class.java, "mGson", Modifier.PRIVATE, Modifier.FINAL)
+        val adapterTypeBuilder = TypeSpecExt.finalClassBuilder(adapterClassName).apply {
+            superclass(ParameterizedTypeName.get(ClassName.get(TypeAdapter::class.java), modelClassName))
+            addAnnotation(generatedJavaPoetAnnotation)
+            addField(Gson::class.java, "mGson", Modifier.PRIVATE, Modifier.FINAL)
 
-        // Add the constructor which takes a gson instance for future use.
-        adapterTypeBuilder.addMethod(MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(Gson::class.java, "gson")
-                .addStatement("this.\$N = \$N", "mGson", "gson")
-                .build())
+            // Add the constructor which takes a gson instance for future use.
+            constructor {
+                addModifiers(Modifier.PUBLIC)
+                addParameter(Gson::class.java, "gson")
+                addStatement("this.\$N = \$N", "mGson", "gson")
+            }
+        }
 
         val concreteClassName: ClassName
         val fieldInfoList: List<FieldInfo>
@@ -101,33 +103,39 @@ class AutoGsonAdapterGenerator(
         if (mandatoryInfoMap.isNotEmpty()) {
             mandatoryInfoMap.values
                     .mapIndexed { mandatoryIndex, mandatoryField ->
-                        FieldSpec.builder(TypeName.INT, mandatoryField.indexVariableName)
-                                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                                .initializer("" + mandatoryIndex)
-                                .build()
+                        FieldSpec.builder(TypeName.INT, mandatoryField.indexVariableName).applyAndBuild {
+                            addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                            initializer("" + mandatoryIndex)
+                        }
                     }
                     .forEach { adapterTypeBuilder.addField(it) }
 
-            adapterTypeBuilder.addField(FieldSpec.builder(TypeName.INT, "MANDATORY_FIELDS_SIZE")
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                    .initializer("" + mandatoryInfoMap.size)
-                    .build())
+            adapterTypeBuilder.addField(FieldSpec.builder(TypeName.INT, "MANDATORY_FIELDS_SIZE").applyAndBuild {
+                addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                initializer("" + mandatoryInfoMap.size)
+            })
         }
 
-        adapterTypeBuilder.addMethod(readFunctions.createReadMethod(modelClassName, concreteClassName,
-                requiresConstructorInjection, mandatoryInfoMap, rootGsonObject, extensionsHandler))
+        val readParams = ReadParams(
+                baseElement = modelClassName,
+                concreteElement = concreteClassName,
+                requiresConstructorInjection = requiresConstructorInjection,
+                mandatoryInfoMap = mandatoryInfoMap,
+                rootElements = rootGsonObject,
+                flattenedFields = gsonObjectTreeFactory.getFlattenedFieldsFromGsonObject(rootGsonObject))
+
+        adapterTypeBuilder.addMethod(readFunctions.createReadMethod(readParams, extensionsHandler))
 
         if (!isModelInterface) {
             adapterTypeBuilder.addMethod(writeFunctions.createWriteMethod(modelClassName, rootGsonObject, properties.serializeNulls))
 
         } else {
             // Create an empty method for the write, since we do not support writing for interfaces.
-            val writeMethod = MethodSpecExt.interfaceMethodBuilder("write")
-                    .addParameter(JsonWriter::class.java, "out")
-                    .addParameter(modelClassName, "value")
-                    .addException(IOException::class.java)
-
-            adapterTypeBuilder.addMethod(writeMethod.build())
+            adapterTypeBuilder.interfaceMethod("write") {
+                addParameter(JsonWriter::class.java, "out")
+                addParameter(modelClassName, "value")
+                addException(IOException::class.java)
+            }
         }
 
         // Adds any required subtype type adapters depending on the usage of the GsonSubtype annotation.

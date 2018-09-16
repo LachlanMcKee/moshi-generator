@@ -4,7 +4,9 @@ import com.google.gson.Gson
 import com.google.gson.TypeAdapter
 import com.google.gson.TypeAdapterFactory
 import com.google.gson.reflect.TypeToken
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ArrayTypeName
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.FieldSpec
 import gsonpath.generator.HandleResult
 import gsonpath.generator.writeFile
 import gsonpath.util.*
@@ -45,42 +47,38 @@ class TypeAdapterFactoryGenerator(
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build())
 
-        val constructorBuilder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
+        typeBuilder.constructor {
+            addModifiers(Modifier.PUBLIC)
+            code {
+                addStatement("mPackagePrivateLoaders = new \$T[${packageLocalHandleResults.size}]", TypeAdapterFactory::class.java)
 
-        val constructorCodeBlock = CodeBlock.builder()
-        constructorCodeBlock.addStatement("mPackagePrivateLoaders = new \$T[${packageLocalHandleResults.size}]", TypeAdapterFactory::class.java)
-
-        // Add the package local type adapter loaders to the hash map.
-        for ((index, packageName) in packageLocalHandleResults.keys.withIndex()) {
-            constructorCodeBlock.addStatement("mPackagePrivateLoaders[$index] = new $packageName.$PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME()")
+                // Add the package local type adapter loaders to the hash map.
+                for ((index, packageName) in packageLocalHandleResults.keys.withIndex()) {
+                    addStatement("mPackagePrivateLoaders[$index] = new $packageName.$PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME()")
+                }
+            }
         }
-
-        constructorBuilder.addCode(constructorCodeBlock.build())
-        typeBuilder.addMethod(constructorBuilder.build())
 
         //
         // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);
         //
-        val createMethod = MethodSpecExt.interfaceMethodBuilder("create")
-                .returns(TypeAdapter::class.java)
-                .addParameter(Gson::class.java, "gson")
-                .addParameter(TypeToken::class.java, "type")
+        typeBuilder.interfaceMethod("create") {
+            returns(TypeAdapter::class.java)
+            addParameter(Gson::class.java, "gson")
+            addParameter(TypeToken::class.java, "type")
 
-        val codeBlock = CodeBlock.builder()
-                .beginControlFlow("for (int i = 0; i < mPackagePrivateLoaders.length; i++)")
-                .addStatement("TypeAdapter typeAdapter = mPackagePrivateLoaders[i].create(gson, type)")
-                .addNewLine()
+            code {
+                `for`("int i = 0; i < mPackagePrivateLoaders.length; i++") {
+                    addStatement("TypeAdapter typeAdapter = mPackagePrivateLoaders[i].create(gson, type)")
+                    newLine()
 
-                .beginControlFlow("if (typeAdapter != null)")
-                .addStatement("return typeAdapter")
-                .endControlFlow()
-
-                .endControlFlow()
-                .addStatement("return null")
-
-        createMethod.addCode(codeBlock.build())
-        typeBuilder.addMethod(createMethod.build())
+                    `if`("typeAdapter != null") {
+                        addStatement("return typeAdapter")
+                    }
+                }
+                addStatement("return null")
+            }
+        }
 
         return typeBuilder.writeFile(fileWriter, logger, factoryClassName.packageName())
     }
@@ -95,30 +93,28 @@ class TypeAdapterFactoryGenerator(
         //
         // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);
         //
-        val createMethod = MethodSpecExt.interfaceMethodBuilder("create")
-                .returns(TypeAdapter::class.java)
-                .addParameter(Gson::class.java, "gson")
-                .addParameter(TypeToken::class.java, "type")
+        typeBuilder.interfaceMethod("create") {
+            returns(TypeAdapter::class.java)
+            addParameter(Gson::class.java, "gson")
+            addParameter(TypeToken::class.java, "type")
+            code {
+                addStatement("Class rawType = type.getRawType()")
 
-        val codeBlock = CodeBlock.builder()
-                .addStatement("Class rawType = type.getRawType()")
+                for ((currentAdapterIndex, result) in packageLocalGsonAdapters.withIndex()) {
+                    if (currentAdapterIndex == 0) {
+                        beginControlFlow("if (rawType.equals(\$T.class))", result.originalClassName)
+                    } else {
+                        newLine() // New line for easier readability.
+                        nextControlFlow("else if (rawType.equals(\$T.class))", result.originalClassName)
+                    }
+                    addStatement("return new \$T(gson)", result.generatedClassName)
+                }
 
-        for ((currentAdapterIndex, result) in packageLocalGsonAdapters.withIndex()) {
-            if (currentAdapterIndex == 0) {
-                codeBlock.beginControlFlow("if (rawType.equals(\$T.class))", result.originalClassName)
-            } else {
-                codeBlock.addNewLine() // New line for easier readability.
-                        .nextControlFlow("else if (rawType.equals(\$T.class))", result.originalClassName)
+                endControlFlow()
+                newLine()
+                addStatement("return null")
             }
-            codeBlock.addStatement("return new \$T(gson)", result.generatedClassName)
         }
-
-        codeBlock.endControlFlow()
-                .addNewLine()
-                .addStatement("return null")
-
-        createMethod.addCode(codeBlock.build())
-        typeBuilder.addMethod(createMethod.build())
 
         return typeBuilder.writeFile(fileWriter, logger, packageName)
     }
