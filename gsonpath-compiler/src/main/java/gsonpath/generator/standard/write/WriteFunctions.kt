@@ -19,7 +19,7 @@ class WriteFunctions {
             rootElements: GsonObject,
             serializeNulls: Boolean): MethodSpec {
 
-        return MethodSpecExt.interfaceMethodBuilder("write").applyAndBuild {
+        return MethodSpecExt.overrideMethodBuilder("write").applyAndBuild {
             addParameter(JsonWriter::class.java, "out")
             addParameter(elementClassName, "value")
             addException(IOException::class.java)
@@ -27,9 +27,8 @@ class WriteFunctions {
                 // Initial block which prevents nulls being accessed.
                 `if`("value == null") {
                     addStatement("out.nullValue()")
-                    addStatement("return")
+                    `return`()
                 }
-
                 newLine()
                 comment("Begin")
                 writeGsonFieldWriter(rootElements, "", serializeNulls, 0)
@@ -101,7 +100,7 @@ class WriteFunctions {
 
         val objectName = "obj$fieldCount"
 
-        addStatement("\$T $objectName = value.${fieldInfo.fieldAccessor}", fieldTypeName)
+        createVariable("\$T", objectName, "value.${fieldInfo.fieldAccessor}", fieldTypeName)
 
         if (isPrimitive) {
             addEscapedStatement("""out.name("$key")""")

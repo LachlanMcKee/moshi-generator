@@ -27,6 +27,15 @@ fun CodeBlock.Builder.comment(comment: String): CodeBlock.Builder {
     return this
 }
 
+fun CodeBlock.Builder.`return`(format: String? = null, vararg args: Any): CodeBlock.Builder {
+    if (format != null) {
+        this.addStatement("return $format", *args)
+    } else {
+        this.addStatement("return")
+    }
+    return this
+}
+
 fun CodeBlock.Builder.addEscaped(format: String): CodeBlock.Builder {
     this.add(format.replace("$", "$$"))
     return this
@@ -42,6 +51,26 @@ fun CodeBlock.Builder.multiLinedNewObject(typeName: TypeName, variables: List<St
 
 fun CodeBlock.Builder.addEscapedStatement(format: String): CodeBlock.Builder {
     this.addStatement(format.replace("$", "$$"))
+    return this
+}
+
+fun CodeBlock.Builder.createVariable(type: String, name: String, assignment: String, vararg args: Any): CodeBlock.Builder {
+    addStatement("$type $name = $assignment", *args)
+    return this
+}
+
+fun CodeBlock.Builder.createVariableNew(type: String, name: String, assignment: String, vararg args: Any): CodeBlock.Builder {
+    addStatement("$type $name = new $assignment", *args)
+    return this
+}
+
+fun CodeBlock.Builder.assign(name: String, assignment: String, vararg args: Any): CodeBlock.Builder {
+    addStatement("$name = $assignment", *args)
+    return this
+}
+
+fun CodeBlock.Builder.assignNew(name: String, assignment: String, vararg args: Any): CodeBlock.Builder {
+    addStatement("$name = new $assignment", *args)
     return this
 }
 
@@ -71,6 +100,15 @@ fun <T> CodeBlock.Builder.`else`(func: CodeBlock.Builder.() -> T): T {
     val result = func(this)
     endControlFlow()
     return result
+}
+
+fun <T> CodeBlock.Builder.elseIf(
+        condition: String,
+        vararg args: Any,
+        func: CodeBlock.Builder.() -> T): T {
+
+    nextControlFlow("else if ($condition)", *args)
+    return func(this)
 }
 
 fun <T> CodeBlock.Builder.`while`(

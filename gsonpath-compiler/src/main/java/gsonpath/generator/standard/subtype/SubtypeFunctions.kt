@@ -38,7 +38,9 @@ class SubtypeFunctions(
                 .forEach { (subTypeMetadata, gsonField) ->
                     val typeAdapterDetails = getTypeAdapterDetails(typeHandler, gsonField)
 
-                    typeSpecBuilder.addField(typeAdapterDetails.typeName, subTypeMetadata.variableName, Modifier.PRIVATE)
+                    typeSpecBuilder.field(subTypeMetadata.variableName, typeAdapterDetails.typeName) {
+                        addModifiers(Modifier.PRIVATE)
+                    }
 
                     createGetter(typeHandler, typeSpecBuilder, gsonField, subTypeMetadata)
                     createSubTypeAdapter(typeSpecBuilder, gsonField, subTypeMetadata)
@@ -67,14 +69,14 @@ class SubtypeFunctions(
                     val filterNulls = (subTypeMetadata.failureOutcome == GsonSubTypeFailureOutcome.REMOVE_ELEMENT)
 
                     if (typeAdapterDetails === TypeAdapterDetails.ArrayTypeAdapter) {
-                        addStatement("$variableName = new \$T<>(new ${subTypeMetadata.className}(mGson), \$T.class, $filterNulls)",
+                        assignNew(variableName, "\$T<>(new ${subTypeMetadata.className}(mGson), \$T.class, $filterNulls)",
                                 typeAdapterDetails.typeName, getRawTypeName(gsonField))
                     } else {
-                        addStatement("$variableName = new \$T(new ${subTypeMetadata.className}(mGson), $filterNulls)",
+                        assignNew(variableName, "\$T(new ${subTypeMetadata.className}(mGson), $filterNulls)",
                                 typeAdapterDetails.typeName)
                     }
                 }
-                addStatement("return $variableName")
+                `return`(variableName)
             }
         }
     }
@@ -149,21 +151,23 @@ class SubtypeFunctions(
         addModifiers(Modifier.PRIVATE)
         addParameter(Gson::class.java, "gson")
 
-        addStatement("typeAdaptersDelegatedByValueMap = new java.util.HashMap<>()")
-        addStatement("typeAdaptersDelegatedByClassMap = new java.util.HashMap<>()")
+        code {
+            assignNew("typeAdaptersDelegatedByValueMap", "java.util.HashMap<>()")
+            assignNew("typeAdaptersDelegatedByClassMap", "java.util.HashMap<>()")
 
-        // Instantiate each subtype delegated adapter
-        subTypeMetadata.gsonSubTypeKeys.forEach {
-            val subtypeElement = typeHandler.asElement(it.clazzTypeMirror)
+            // Instantiate each subtype delegated adapter
+            subTypeMetadata.gsonSubTypeKeys.forEach {
+                val subtypeElement = typeHandler.asElement(it.clazzTypeMirror)
 
-            addCode("\n")
-            addStatement("typeAdaptersDelegatedByValueMap.put(${it.key}, gson.getAdapter(\$T.class))", subtypeElement)
-            addStatement("typeAdaptersDelegatedByClassMap.put(\$T.class, gson.getAdapter(\$T.class))",
-                    subtypeElement, subtypeElement)
-        }
+                newLine()
+                addStatement("typeAdaptersDelegatedByValueMap.put(${it.key}, gson.getAdapter(\$T.class))", subtypeElement)
+                addStatement("typeAdaptersDelegatedByClassMap.put(\$T.class, gson.getAdapter(\$T.class))",
+                        subtypeElement, subtypeElement)
+            }
 
-        if (subTypeMetadata.defaultType != null) {
-            addStatement("defaultTypeAdapterDelegate = gson.getAdapter(\$T.class)", subTypeMetadata.defaultType)
+            if (subTypeMetadata.defaultType != null) {
+                assign("defaultTypeAdapterDelegate", "gson.getAdapter(\$T.class)", subTypeMetadata.defaultType)
+            }
         }
     }
 
@@ -177,14 +181,14 @@ class SubtypeFunctions(
      */
     private fun TypeSpec.Builder.addReadMethod(
             subTypeMetadata: SubTypeMetadata,
-            rawTypeName: TypeName) = interfaceMethod("read") {
+            rawTypeName: TypeName) = overrideMethod("read") {
 
         returns(rawTypeName)
         addParameter(JsonReader::class.java, "in")
         addException(IOException::class.java)
         code {
-            addStatement("\$T jsonElement = \$T.parse(in)", JsonElement::class.java, Streams::class.java)
-            addStatement("\$T typeValueJsonElement = jsonElement.getAsJsonObject().remove(\"${subTypeMetadata.fieldName}\")",
+            createVariable("\$T", "jsonElement", "\$T.parse(in)", JsonElement::class.java, Streams::class.java)
+            createVariable("\$T", "typeValueJsonElement", "jsonElement.getAsJsonObject().remove(\"${subTypeMetadata.fieldName}\")",
                     JsonElement::class.java)
 
             `if`("typeValueJsonElement == null || typeValueJsonElement.isJsonNull()") {
@@ -199,23 +203,23 @@ class SubtypeFunctions(
                 SubTypeKeyType.BOOLEAN -> "boolean value = typeValueJsonElement.getAsBoolean()"
             })
 
-            addStatement("\$T<? extends \$T> delegate = typeAdaptersDelegatedByValueMap.get(value)",
+            createVariable("\$T<? extends \$T>", "delegate", "typeAdaptersDelegatedByValueMap.get(value)",
                     TypeAdapter::class.java, rawTypeName)
 
             `if`("delegate == null") {
                 if (subTypeMetadata.defaultType != null) {
                     comment("Use the default type adapter if the type is unknown.")
-                    addStatement("delegate = defaultTypeAdapterDelegate")
+                    assign("delegate", "defaultTypeAdapterDelegate")
                 } else {
                     if (subTypeMetadata.failureOutcome == GsonSubTypeFailureOutcome.FAIL) {
                         addStatement("throw new \$T(\"Failed to find subtype for value: \" + value)",
                                 GsonSubTypeFailureException::class.java)
                     } else {
-                        addStatement("return null")
+                        `return`("null")
                     }
                 }
             }
-            addStatement("\$T result = delegate.fromJsonTree(jsonElement)", rawTypeName)
+            createVariable("\$T", "result", "delegate.fromJsonTree(jsonElement)", rawTypeName)
 
             if (subTypeMetadata.failureOutcome == GsonSubTypeFailureOutcome.FAIL) {
                 `if`("result == null") {
@@ -224,7 +228,7 @@ class SubtypeFunctions(
                 }
             }
 
-            addStatement("return result")
+            `return`("result")
         }
     }
 
@@ -234,7 +238,7 @@ class SubtypeFunctions(
     private fun TypeSpec.Builder.addWriteMethod(
             subTypeMetadata: SubTypeMetadata,
             rawTypeName: TypeName,
-            typeAdapterType: TypeName) = interfaceMethod("write") {
+            typeAdapterType: TypeName) = overrideMethod("write") {
 
         addParameter(JsonWriter::class.java, "out")
         addParameter(rawTypeName, "value")
@@ -242,15 +246,15 @@ class SubtypeFunctions(
         code {
             `if`("value == null") {
                 addStatement("out.nullValue()")
-                addStatement("return")
+                `return`()
             }
-            addStatement("\$T delegate = typeAdaptersDelegatedByClassMap.get(value.getClass())", TypeAdapter::class.java)
+            createVariable("\$T", "delegate", "typeAdaptersDelegatedByClassMap.get(value.getClass())", TypeAdapter::class.java)
         }
 
         if (subTypeMetadata.defaultType != null) {
             code {
                 `if`("delegate == null") {
-                    addStatement("delegate = defaultTypeAdapterDelegate")
+                    assign("delegate", "defaultTypeAdapterDelegate")
                 }
             }
         }
