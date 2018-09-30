@@ -1,4 +1,4 @@
-package gsonpath.generator.standard
+package gsonpath.generator.adapter
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
