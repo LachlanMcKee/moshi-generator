@@ -1,9 +1,10 @@
 package gsonpath.generator.adapter.write
 
 import com.google.gson.stream.JsonWriter
-import com.squareup.javapoet.*
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeName
 import gsonpath.ProcessingException
-import gsonpath.generator.adapter.SharedFunctions
 import gsonpath.model.GsonField
 import gsonpath.model.GsonObject
 import gsonpath.util.*
@@ -14,25 +15,19 @@ class WriteFunctions {
      * public void write(JsonWriter out, ImageSizes value) throws IOException {
      */
     @Throws(ProcessingException::class)
-    fun createWriteMethod(
-            elementClassName: ClassName,
-            rootElements: GsonObject,
-            serializeNulls: Boolean): MethodSpec {
-
-        return MethodSpecExt.overrideMethodBuilder("write").applyAndBuild {
-            addParameter(JsonWriter::class.java, "out")
-            addParameter(elementClassName, "value")
-            addException(IOException::class.java)
-            code {
-                // Initial block which prevents nulls being accessed.
-                `if`("value == null") {
-                    addStatement("out.nullValue()")
-                    `return`()
-                }
-                newLine()
-                comment("Begin")
-                writeGsonFieldWriter(rootElements, "", serializeNulls, 0)
+    fun createWriteMethod(params: WriteParams) = MethodSpecExt.overrideMethodBuilder("write").applyAndBuild {
+        addParameter(JsonWriter::class.java, "out")
+        addParameter(params.elementClassName, "value")
+        addException(IOException::class.java)
+        code {
+            // Initial block which prevents nulls being accessed.
+            `if`("value == null") {
+                addStatement("out.nullValue()")
+                `return`()
             }
+            newLine()
+            comment("Begin")
+            writeGsonFieldWriter(params.rootElements, "", params.serializeNulls, 0)
         }
     }
 
@@ -91,10 +86,6 @@ class WriteFunctions {
             key: String): Int {
 
         val fieldInfo = value.fieldInfo
-
-        // Make sure the field's annotations don't have any problems.
-        SharedFunctions.validateFieldAnnotations(fieldInfo)
-
         val fieldTypeName = fieldInfo.typeName
         val isPrimitive = fieldTypeName.isPrimitive
 
