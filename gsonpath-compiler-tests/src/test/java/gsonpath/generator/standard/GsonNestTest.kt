@@ -4,20 +4,20 @@ import gsonpath.generator.GeneratorTester.assertGeneratedContent
 import gsonpath.generator.TestCriteria
 import org.junit.Test
 
-class CustomAutoGsonAdapterTest {
+class GsonNestTest {
     @Test
     fun testCustomAutoGsonAdapterAnnotation() {
-        assertGeneratedContent(TestCriteria("generator/standard/custom_adapter_annotation",
+        assertGeneratedContent(TestCriteria("generator/standard/custom_serialized_name_annotation",
 
                 absoluteSourceNames = listOf(
                         "generator/standard/TestGsonTypeFactory.java"),
 
                 relativeSourceNames = listOf(
-                        "CustomAutoGsonAdapter.java",
-                        "TestCustomAutoGsonAdapterModel.java"),
+                        "GsonNest.java",
+                        "TestCustomSerializedNameModel.java"),
 
                 relativeGeneratedNames = listOf(
-                        "TestCustomAutoGsonAdapterModel_GsonTypeAdapter.java")
+                        "TestCustomSerializedNameModel_GsonTypeAdapter.java")
         ))
     }
 }
