@@ -42,5 +42,4 @@ class MandatoryFieldInfoFactory {
             else -> map
         }
     }
-
 }

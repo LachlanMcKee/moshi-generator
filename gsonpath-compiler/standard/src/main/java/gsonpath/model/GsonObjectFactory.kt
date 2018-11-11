@@ -42,8 +42,7 @@ class GsonObjectFactory(
 
         val gsonSubTypeMetadata = subTypeMetadataFactory.getGsonSubType(fieldInfo)
 
-        val jsonFieldPath = fieldPathFetcher.getJsonFieldPath(fieldInfo, metadata)
-        when (jsonFieldPath) {
+        when (val jsonFieldPath = fieldPathFetcher.getJsonFieldPath(fieldInfo, metadata)) {
             is FieldPath.Nested -> {
                 addNestedType(gsonPathObject, fieldInfo, jsonFieldPath, metadata.flattenDelimiter,
                         fieldInfoIndex, isRequired, gsonSubTypeMetadata)
@@ -102,7 +101,8 @@ class GsonObjectFactory(
                 // We have reached the end of this object branch, add the field at the end.
                 try {
                     val field = MutableGsonField(fieldInfoIndex, fieldInfo, getVariableName(jsonFieldPath.path), jsonFieldPath.path, isRequired, gsonSubTypeMetadata)
-                    return@fold (current as MutableGsonObject).addField(pathSegment, field)
+                    (current as MutableGsonObject).addField(pathSegment, field)
+                    return@fold field
 
                 } catch (e: IllegalArgumentException) {
                     throw ProcessingException("Unexpected duplicate field '" + pathSegment +
@@ -123,15 +123,17 @@ class GsonObjectFactory(
             gsonSubTypeMetadata: SubTypeMetadata?) {
 
         val path = jsonFieldPath.path
-        if (gsonPathObject[path] == null) {
-            gsonPathObject.addField(path, MutableGsonField(fieldInfoIndex, fieldInfo, getVariableName(path), path, isRequired, gsonSubTypeMetadata))
 
-        } else {
-            throwDuplicateFieldException(fieldInfo.element, path)
+        when {
+            gsonPathObject[path] == null -> {
+                gsonPathObject.addField(path, MutableGsonField(fieldInfoIndex, fieldInfo, getVariableName(path),
+                        path, isRequired, gsonSubTypeMetadata))
+            }
+            else -> throwDuplicateFieldException(fieldInfo.element, path)
         }
     }
 
-    private fun getVariableName(jsonPath: String) : String {
+    private fun getVariableName(jsonPath: String): String {
         return "value_" + jsonPath.replace("[^A-Za-z0-9_]".toRegex(), "_")
     }
 

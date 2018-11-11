@@ -98,7 +98,7 @@ class ReadFunctions {
         addStatement("$IN.beginObject()")
         newLine()
 
-        val overallRecursionCount = `while`("$IN.hasNext()") {
+        return `while`("$IN.hasNext()") {
 
             //
             // Since all the required fields have been mapped, we can avoid calling 'nextName'.
@@ -112,7 +112,7 @@ class ReadFunctions {
             newLine()
 
             switch("$IN.nextName()") {
-                val recursionTemp = jsonMapping.entries()
+                jsonMapping.entries()
                         .fold(recursionCount + 1) { currentOverallRecursionCount, entry ->
                             addReadCodeForModel(
                                     params = params,
@@ -122,17 +122,16 @@ class ReadFunctions {
                                     counterVariableName = counterVariableName,
                                     currentOverallRecursionCount = currentOverallRecursionCount)
                         }
-
-                default {
-                    addStatement("$IN.skipValue()")
-                }
-                return@switch recursionTemp
+                        .also {
+                            default {
+                                addStatement("$IN.skipValue()")
+                            }
+                        }
             }
+        }.also {
+            newLine()
+            addStatement("$IN.endObject()")
         }
-        newLine()
-        addStatement("$IN.endObject()")
-
-        return overallRecursionCount
     }
 
     private fun CodeBlock.Builder.addReadCodeForModel(

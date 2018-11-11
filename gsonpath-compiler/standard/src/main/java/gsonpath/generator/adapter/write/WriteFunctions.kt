@@ -31,7 +31,7 @@ class WriteFunctions {
             }
             newLine()
             comment("Begin")
-            writeGsonFieldWriter(params.rootElements, params.serializeNulls)
+            writeGsonFieldWriter(params.rootElements, params.serializeNulls, true)
         }
     }
 
@@ -39,6 +39,7 @@ class WriteFunctions {
     private fun CodeBlock.Builder.writeGsonFieldWriter(
             jsonMapping: GsonObject,
             serializeNulls: Boolean,
+            writeKeyName: Boolean,
             currentPath: String = "",
             currentFieldCount: Int = 0): Int {
 
@@ -48,10 +49,10 @@ class WriteFunctions {
                 .fold(currentFieldCount) { fieldCount, (key, value) ->
                     when (value) {
                         is GsonObject ->
-                            handleObject(value, currentPath, key, serializeNulls, fieldCount)
+                            handleObject(value, currentPath, key, serializeNulls, fieldCount, writeKeyName)
 
                         is GsonField ->
-                            handleField(value, fieldCount, serializeNulls, key)
+                            handleField(value, fieldCount, serializeNulls, key, writeKeyName)
                     }
                 }
                 .also {
@@ -65,7 +66,8 @@ class WriteFunctions {
             currentPath: String,
             key: String,
             serializeNulls: Boolean,
-            fieldCount: Int): Int {
+            fieldCount: Int,
+            writeKeyName: Boolean): Int {
 
         if (value.size() == 0) {
             return fieldCount
@@ -78,14 +80,15 @@ class WriteFunctions {
         comment("Begin $newPath")
         addStatement("""$OUT.name("$key")""")
 
-        return writeGsonFieldWriter(value, serializeNulls, newPath, fieldCount)
+        return writeGsonFieldWriter(value, serializeNulls, writeKeyName, newPath, fieldCount)
     }
 
     private fun CodeBlock.Builder.handleField(
             value: GsonField,
             fieldCount: Int,
             serializeNulls: Boolean,
-            key: String): Int {
+            key: String,
+            writeKeyName: Boolean): Int {
 
         val fieldInfo = value.fieldInfo
         val fieldTypeName = fieldInfo.typeName
@@ -96,12 +99,16 @@ class WriteFunctions {
         createVariable("\$T", objectName, "$VALUE.$fieldAccessor", fieldTypeName)
 
         if (isPrimitive) {
-            addEscapedStatement("""$OUT.name("$key")""")
+            if (writeKeyName) {
+                addEscapedStatement("""$OUT.name("$key")""")
+            }
             writeField(value, objectName, fieldTypeName)
         } else {
             if (serializeNulls) {
                 // Since we are serializing nulls, we defer the if-statement until after the name is written.
-                addEscapedStatement("""$OUT.name("$key")""")
+                if (writeKeyName) {
+                    addEscapedStatement("""$OUT.name("$key")""")
+                }
                 ifWithoutClose("$objectName != $NULL") {
                     writeField(value, objectName, fieldTypeName)
                 }
@@ -110,7 +117,9 @@ class WriteFunctions {
                 }
             } else {
                 `if`("$objectName != $NULL") {
-                    addEscapedStatement("""$OUT.name("$key")""")
+                    if (writeKeyName) {
+                        addEscapedStatement("""$OUT.name("$key")""")
+                    }
                     writeField(value, objectName, fieldTypeName)
                 }
             }
