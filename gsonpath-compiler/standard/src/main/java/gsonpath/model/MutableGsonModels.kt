@@ -10,7 +10,19 @@ data class MutableGsonField(
         val variableName: String,
         val jsonPath: String,
         val isRequired: Boolean,
-        val subTypeMetadata: SubTypeMetadata?) : MutableGsonModel()
+        val subTypeMetadata: SubTypeMetadata?) : MutableGsonModel() {
+
+    fun toImmutable(): GsonField {
+        return GsonField(
+                fieldIndex = fieldIndex,
+                fieldInfo = fieldInfo,
+                variableName = variableName,
+                jsonPath = jsonPath,
+                isRequired = isRequired,
+                subTypeMetadata = subTypeMetadata
+        )
+    }
+}
 
 data class MutableGsonObject(
         private val fieldMap: LinkedHashMap<String, MutableGsonModel> = LinkedHashMap()) : MutableGsonModel() {
@@ -29,11 +41,19 @@ data class MutableGsonObject(
         return field
     }
 
-    fun entries(): Set<Map.Entry<String, MutableGsonModel>> {
-        return fieldMap.entries
-    }
-
     operator fun get(key: String): MutableGsonModel? {
         return fieldMap[key]
+    }
+
+    fun toImmutable(): GsonObject {
+        return GsonObject(fieldMap.entries
+                .asSequence()
+                .map { (key, value) ->
+                    when (value) {
+                        is MutableGsonField -> key to value.toImmutable()
+                        is MutableGsonObject -> key to value.toImmutable()
+                    }
+                }
+                .toMap())
     }
 }

@@ -49,7 +49,7 @@ class WriteFunctions {
                 .fold(currentFieldCount) { fieldCount, (key, value) ->
                     when (value) {
                         is GsonObject ->
-                            handleObject(value, currentPath, key, serializeNulls, fieldCount, writeKeyName)
+                            handleObject(value, fieldCount, serializeNulls, currentPath, key, writeKeyName)
 
                         is GsonField ->
                             handleField(value, fieldCount, serializeNulls, key, writeKeyName)
@@ -63,10 +63,10 @@ class WriteFunctions {
 
     private fun CodeBlock.Builder.handleObject(
             value: GsonObject,
+            fieldCount: Int,
+            serializeNulls: Boolean,
             currentPath: String,
             key: String,
-            serializeNulls: Boolean,
-            fieldCount: Int,
             writeKeyName: Boolean): Int {
 
         if (value.size() == 0) {

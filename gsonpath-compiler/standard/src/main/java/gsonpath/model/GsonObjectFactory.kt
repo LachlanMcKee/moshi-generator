@@ -71,46 +71,77 @@ class GsonObjectFactory(
 
         val lastPathIndex = pathSegments.size - 1
 
-        (0..lastPathIndex).fold(gsonPathObject as MutableGsonModel) { current: MutableGsonModel, index ->
-            val pathSegment = pathSegments[index]
+        (0..lastPathIndex).fold(gsonPathObject as MutableGsonModel) { currentModel: MutableGsonModel, index ->
+            val pathType = getPathType(pathSegments[index])
 
+            val content = CommonSegmentContent(currentModel, index, fieldInfo, pathType)
             if (index < lastPathIndex) {
-
-                if (current is MutableGsonObject) {
-                    val gsonType = current[pathSegment]
-
-                    if (gsonType != null) {
-                        if (gsonType is MutableGsonObject) {
-                            return@fold gsonType
-
-                        } else {
-                            // If this value already exists, and it is not a tree branch, that means we have an invalid duplicate.
-                            throw ProcessingException("Unexpected duplicate field '" + pathSegment +
-                                    "' found. Each tree branch must use a unique value!", fieldInfo.element)
-                        }
-                    } else {
-                        val newMap = MutableGsonObject()
-                        current.addObject(pathSegment, newMap)
-                        return@fold newMap
-                    }
-                } else {
-                    throw ProcessingException("This should not happen!", fieldInfo.element)
-                }
+                handleNestedSegment(content)
 
             } else {
                 // We have reached the end of this object branch, add the field at the end.
-                try {
-                    val field = MutableGsonField(fieldInfoIndex, fieldInfo, getVariableName(jsonFieldPath.path), jsonFieldPath.path, isRequired, gsonSubTypeMetadata)
-                    (current as MutableGsonObject).addField(pathSegment, field)
-                    return@fold field
-
-                } catch (e: IllegalArgumentException) {
-                    throw ProcessingException("Unexpected duplicate field '" + pathSegment +
-                            "' found. Each tree branch must use a unique value!", fieldInfo.element)
-                }
-
+                handleLastNestedSegment(content, fieldInfoIndex, jsonFieldPath, isRequired, gsonSubTypeMetadata)
             }
         }
+    }
+
+    private fun handleNestedSegment(content: CommonSegmentContent): MutableGsonModel {
+        val currentModel = content.currentModel
+        val pathType = content.pathType
+
+        return when (currentModel) {
+            is MutableGsonObject -> {
+                when (val existingGsonModel = currentModel[pathType.path]) {
+                    null -> {
+                        when (pathType) {
+                            is PathType.Standard -> {
+                                MutableGsonObject().also { newMap ->
+                                    currentModel.addObject(pathType.path, newMap)
+                                }
+                            }
+                        }
+                    }
+                    is MutableGsonObject -> {
+                        existingGsonModel
+                    }
+                    is MutableGsonField -> {
+                        // If this value already exists, and it is not a tree branch,
+                        // that means we have an invalid duplicate.
+                        throw ProcessingException("Unexpected duplicate field '" + pathType.path +
+                                "' found. Each tree branch must use a unique value!", content.fieldInfo.element)
+                    }
+                }
+            }
+            else -> {
+                throw ProcessingException("This should not happen!", content.fieldInfo.element)
+            }
+        }
+    }
+
+    private fun handleLastNestedSegment(
+            content: CommonSegmentContent,
+            fieldIndex: Int,
+            jsonFieldPath: FieldPath.Nested,
+            isRequired: Boolean,
+            gsonSubTypeMetadata: SubTypeMetadata?): MutableGsonField = try {
+
+        val parentModel = content.currentModel
+        val pathType = content.pathType
+
+        val finalModel = parentModel as MutableGsonObject
+
+        createField(fieldIndex, content.fieldInfo, jsonFieldPath.path, isRequired, gsonSubTypeMetadata)
+                .also { field ->
+                    when (pathType) {
+                        is PathType.Standard -> {
+                            finalModel.addField(pathType.path, field)
+                        }
+                    }
+                }
+
+    } catch (e: IllegalArgumentException) {
+        throw ProcessingException("Unexpected duplicate field '" + content.pathType.path +
+                "' found. Each tree branch must use a unique value!", content.fieldInfo.element)
     }
 
     @Throws(ProcessingException::class)
@@ -122,24 +153,48 @@ class GsonObjectFactory(
             isRequired: Boolean,
             gsonSubTypeMetadata: SubTypeMetadata?) {
 
-        val path = jsonFieldPath.path
+        val pathType = getPathType(jsonFieldPath.path)
+        val field = createField(fieldInfoIndex, fieldInfo, pathType.path, isRequired, gsonSubTypeMetadata)
 
-        when {
-            gsonPathObject[path] == null -> {
-                gsonPathObject.addField(path, MutableGsonField(fieldInfoIndex, fieldInfo, getVariableName(path),
-                        path, isRequired, gsonSubTypeMetadata))
+        when (pathType) {
+            is PathType.Standard -> {
+                if (gsonPathObject[pathType.path] == null) {
+                    gsonPathObject.addField(pathType.path, field)
+                } else {
+                    throwDuplicateFieldException(fieldInfo.element, pathType.path)
+                }
             }
-            else -> throwDuplicateFieldException(fieldInfo.element, path)
         }
     }
 
-    private fun getVariableName(jsonPath: String): String {
-        return "value_" + jsonPath.replace("[^A-Za-z0-9_]".toRegex(), "_")
+    private fun createField(
+            fieldIndex: Int,
+            fieldInfo: FieldInfo,
+            jsonPath: String,
+            isRequired: Boolean,
+            gsonSubTypeMetadata: SubTypeMetadata?): MutableGsonField {
+
+        val variableName = "value_" + jsonPath.replace("[^A-Za-z0-9_]".toRegex(), "_")
+        return MutableGsonField(fieldIndex, fieldInfo, variableName, jsonPath, isRequired, gsonSubTypeMetadata)
     }
 
     @Throws(ProcessingException::class)
     private fun throwDuplicateFieldException(field: Element?, jsonKey: String) {
         throw ProcessingException("Unexpected duplicate field '" + jsonKey +
                 "' found. Each tree branch must use a unique value!", field)
+    }
+
+    private fun getPathType(path: String): PathType {
+        return PathType.Standard(path)
+    }
+
+    private data class CommonSegmentContent(
+            val currentModel: MutableGsonModel,
+            val index: Int,
+            val fieldInfo: FieldInfo,
+            val pathType: PathType)
+
+    private sealed class PathType(open val path: String) {
+        data class Standard(override val path: String) : PathType(path)
     }
 }
