@@ -75,11 +75,37 @@ public final class GenericsTest_GsonTypeAdapter extends TypeAdapter<GenericsTest
         return new GenericsTest_GsonPathModel(
                 value_value1,
                 value_value2,
-                value_value3
-        );
+                value_value3);
     }
 
     @Override
     public void write(JsonWriter out, GenericsTest value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+
+        // Begin
+        out.beginObject();
+        String obj0 = value.getValue1();
+        if (obj0 != null) {
+            out.name("value1");
+            mGson.getAdapter(String.class).write(out, obj0);
+        }
+
+        Map<String, Integer> obj1 = value.getValue2();
+        if (obj1 != null) {
+            out.name("value2");
+            mGson.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).write(out, obj1);
+        }
+
+        Double obj2 = value.getValue3();
+        if (obj2 != null) {
+            out.name("value3");
+            mGson.getAdapter(Double.class).write(out, obj2);
+        }
+
+        // End
+        out.endObject();
     }
 }

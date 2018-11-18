@@ -9,7 +9,6 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
-
 import javax.annotation.Generated;
 
 @Generated(
@@ -119,5 +118,50 @@ public final class TestValidInterface_GsonTypeAdapter extends TypeAdapter<TestVa
 
     @Override
     public void write(JsonWriter out, TestValidInterface value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+
+        // Begin
+        out.beginObject();
+
+        // Begin Json1
+        out.name("Json1");
+        out.beginObject();
+        Integer obj0 = value.getValue1();
+        if (obj0 != null) {
+            out.name("Nest1");
+            mGson.getAdapter(Integer.class).write(out, obj0);
+        }
+
+        Integer obj1 = value.getValue3();
+        if (obj1 != null) {
+            out.name("Nest3");
+            mGson.getAdapter(Integer.class).write(out, obj1);
+        }
+
+        // End Json1
+        out.endObject();
+        Integer obj2 = value.getValue2();
+        if (obj2 != null) {
+            out.name("value2");
+            mGson.getAdapter(Integer.class).write(out, obj2);
+        }
+
+        Integer obj3 = value.getResult();
+        if (obj3 != null) {
+            out.name("result");
+            mGson.getAdapter(Integer.class).write(out, obj3);
+        }
+
+        Integer obj4 = value.getThat();
+        if (obj4 != null) {
+            out.name("that");
+            mGson.getAdapter(Integer.class).write(out, obj4);
+        }
+
+        // End
+        out.endObject();
     }
 }

@@ -2,7 +2,6 @@ package gsonpath.generator.adapter
 
 import com.google.gson.Gson
 import com.google.gson.TypeAdapter
-import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.*
 import gsonpath.AutoGsonAdapter
 import gsonpath.GsonUtil
@@ -14,7 +13,6 @@ import gsonpath.generator.adapter.subtype.SubtypeFunctions
 import gsonpath.generator.adapter.write.WriteFunctions
 import gsonpath.generator.writeFile
 import gsonpath.util.*
-import java.io.IOException
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
@@ -38,7 +36,7 @@ class AutoGsonAdapterGenerator(
                 .addDetails(metadata, extensionsHandler)
                 .let {
                     if (it.writeFile(fileWriter, logger, adapterClassName.packageName(), this::onJavaFileBuilt)) {
-                        HandleResult(metadata.modelClassName, adapterClassName)
+                        HandleResult(metadata.adapterGenericTypeClassNames.toTypedArray(), adapterClassName)
                     } else {
                         throw ProcessingException("Failed to write generated file: " + adapterClassName.simpleName())
                     }
@@ -83,18 +81,7 @@ class AutoGsonAdapterGenerator(
         }
 
         addMethod(readFunctions.createReadMethod(metadata.readParams, extensionsHandler))
-
-        if (!metadata.isModelInterface) {
-            addMethod(writeFunctions.createWriteMethod(metadata.writeParams))
-
-        } else {
-            // Create an empty method for the write, since we do not support writing for interfaces.
-            overrideMethod("write") {
-                addParameter(JsonWriter::class.java, "out")
-                addParameter(metadata.modelClassName, "value")
-                addException(IOException::class.java)
-            }
-        }
+        addMethod(writeFunctions.createWriteMethod(metadata.writeParams))
 
         // Adds any required subtype type adapters depending on the usage of the GsonSubtype annotation.
         subtypeFunctions.addSubTypeTypeAdapters(this, metadata.subtypeParams)

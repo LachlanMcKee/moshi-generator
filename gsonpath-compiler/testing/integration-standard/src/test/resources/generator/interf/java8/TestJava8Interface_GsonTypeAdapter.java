@@ -9,7 +9,6 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
-
 import javax.annotation.Generated;
 
 @Generated(
@@ -61,5 +60,20 @@ public final class TestJava8Interface_GsonTypeAdapter extends TypeAdapter<TestJa
 
     @Override
     public void write(JsonWriter out, TestJava8Interface value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+
+        // Begin
+        out.beginObject();
+        Integer obj0 = value.getValue1();
+        if (obj0 != null) {
+            out.name("value1");
+            mGson.getAdapter(Integer.class).write(out, obj0);
+        }
+
+        // End
+        out.endObject();
     }
 }

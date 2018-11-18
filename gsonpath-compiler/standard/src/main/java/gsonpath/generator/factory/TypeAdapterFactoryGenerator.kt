@@ -118,14 +118,17 @@ class TypeAdapterFactoryGenerator(
                 createVariable("Class", RAW_TYPE, "type.getRawType()")
 
                 for ((currentAdapterIndex, result) in packageLocalGsonAdapters.withIndex()) {
+                    val condition = result.adapterGenericTypeClassNames
+                            .joinToString(separator = " || ") { "rawType.equals(\$T.class)" }
+
                     if (currentAdapterIndex == 0) {
-                        ifWithoutClose("$RAW_TYPE.equals(\$T.class)", result.originalClassName) {
-                            `return`("new \$T($GSON)", result.generatedClassName)
+                        ifWithoutClose(condition, *result.adapterGenericTypeClassNames) {
+                            `return`("new \$T($GSON)", result.adapterClassName)
                         }
                     } else {
                         newLine() // New line for easier readability.
-                        elseIf("$RAW_TYPE.equals(\$T.class)", result.originalClassName) {
-                            `return`("new \$T($GSON)", result.generatedClassName)
+                        elseIf(condition, *result.adapterGenericTypeClassNames) {
+                            `return`("new \$T($GSON)", result.adapterClassName)
                         }
                     }
                 }

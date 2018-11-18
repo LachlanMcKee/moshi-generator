@@ -183,5 +183,54 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends TypeAdapter<TestU
 
     @Override
     public void write(JsonWriter out, TestUsingPrimitives value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+
+        // Begin
+        out.beginObject();
+        int obj0 = value.getIntExample();
+        out.name("intExample");
+        mGson.getAdapter(Integer.class).write(out, obj0);
+
+        long obj1 = value.getLongExample();
+        out.name("longExample");
+        mGson.getAdapter(Long.class).write(out, obj1);
+
+        double obj2 = value.getDoubleExample();
+        out.name("doubleExample");
+        mGson.getAdapter(Double.class).write(out, obj2);
+
+        boolean obj3 = value.getBooleanExample();
+        out.name("booleanExample");
+        mGson.getAdapter(Boolean.class).write(out, obj3);
+
+        int[] obj4 = value.getIntArrayExample();
+        if (obj4 != null) {
+            out.name("intArrayExample");
+            mGson.getAdapter(int[].class).write(out, obj4);
+        }
+
+        long[] obj5 = value.getLongArrayExample();
+        if (obj5 != null) {
+            out.name("longArrayExample");
+            mGson.getAdapter(long[].class).write(out, obj5);
+        }
+
+        double[] obj6 = value.getDoubleArrayExample();
+        if (obj6 != null) {
+            out.name("doubleArrayExample");
+            mGson.getAdapter(double[].class).write(out, obj6);
+        }
+
+        boolean[] obj7 = value.getBooleanArrayExample();
+        if (obj7 != null) {
+            out.name("booleanArrayExample");
+            mGson.getAdapter(boolean[].class).write(out, obj7);
+        }
+
+        // End
+        out.endObject();
     }
 }

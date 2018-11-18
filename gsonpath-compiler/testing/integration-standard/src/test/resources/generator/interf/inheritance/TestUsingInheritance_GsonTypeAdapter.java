@@ -136,5 +136,38 @@ public final class TestUsingInheritance_GsonTypeAdapter extends TypeAdapter<Test
 
     @Override
     public void write(JsonWriter out, TestUsingInheritance value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+
+        // Begin
+        out.beginObject();
+        Integer obj0 = value.getValue3();
+        if (obj0 != null) {
+            out.name("value3");
+            mGson.getAdapter(Integer.class).write(out, obj0);
+        }
+
+        Integer obj1 = value.getValue1();
+        if (obj1 != null) {
+            out.name("value1");
+            mGson.getAdapter(Integer.class).write(out, obj1);
+        }
+
+
+        // Begin Json1
+        out.name("Json1");
+        out.beginObject();
+        Integer obj2 = value.getValue2();
+        if (obj2 != null) {
+            out.name("Nest2");
+            mGson.getAdapter(Integer.class).write(out, obj2);
+        }
+
+        // End Json1
+        out.endObject();
+        // End
+        out.endObject();
     }
 }

@@ -31,7 +31,7 @@ object TypeAdapterFactoryHandlersFactory {
         }
 
         return generatedGsonAdapters.fold(emptyMap()) { map, generatedGsonAdapter ->
-            val packageName = generatedGsonAdapter.generatedClassName.packageName()
+            val packageName = generatedGsonAdapter.adapterClassName.packageName()
 
             val newList: List<HandleResult> =
                     map[packageName]?.plus(generatedGsonAdapter) ?: listOf(generatedGsonAdapter)

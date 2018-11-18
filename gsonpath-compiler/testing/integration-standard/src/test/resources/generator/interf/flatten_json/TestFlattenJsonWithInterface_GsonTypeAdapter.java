@@ -67,5 +67,20 @@ public final class TestFlattenJsonWithInterface_GsonTypeAdapter extends TypeAdap
 
     @Override
     public void write(JsonWriter out, TestFlattenJsonWithInterface value) throws IOException {
+        if (value == null) {
+            out.nullValue();
+            return;
+        }
+
+        // Begin
+        out.beginObject();
+        String obj0 = value.getFlattenExample();
+        if (obj0 != null) {
+            out.name("flattenExample");
+            mGson.getAdapter(String.class).write(out, obj0);
+        }
+
+        // End
+        out.endObject();
     }
 }
