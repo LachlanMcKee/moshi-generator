@@ -43,6 +43,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                     authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
 
+                pom.artifactId = 'gsonpath'
                 pom.project {
                     name 'gsonpath'
                     packaging 'jar'
