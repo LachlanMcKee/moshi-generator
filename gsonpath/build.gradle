@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'net.lachlanmckee'
-version = '2.4.2'
+version = '3.0.0'
 
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
@@ -43,6 +43,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                     authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
 
+                pom.artifactId = 'gsonpath'
                 pom.project {
                     name 'gsonpath'
                     packaging 'jar'

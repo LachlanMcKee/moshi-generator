@@ -1,6 +1,35 @@
 Change Log
 ===========
 
+Version 2.4.3 *(2018-11-18)*
+----------------------------
+
+* Improvement: Added array support. Examples of this are as follows:
+
+     ```java
+     @AutoGsonAdapter
+     class ArrayExample {
+         @SerializedName("test1[1]")
+         int plainArray;
+     
+         @SerializedName("test2[2].child")
+         int arrayWithNestedObject;
+     
+         @SerializedName("test2[2].child2")
+         int arrayWithNestedObject2;
+     
+         @SerializedName("test3[3].child[1]")
+         int arrayWithNestedArray;
+     
+         @SerializedName("test4.child[1]")
+         int objectWithNestedArray;
+     }
+     ```
+
+* Improvement: Annotated interfaces are now able to also write as well as read. Previously only reading was possible.
+* Fix: GsonSubType no longer fails if any other fields are defined before in the class. ([#132](../../pull/142))
+* Fix: Annotation inheritance now works correctly with interfaces. ([#132](../../issues/153))
+
 Version 2.4.2 *(2018-07-30)*
 ----------------------------
 
