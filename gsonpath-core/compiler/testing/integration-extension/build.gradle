@@ -22,5 +22,6 @@ buildscript {
 }
 
 dependencies {
-    testCompile project(":gsonpath:compiler:testing:integration-base")
+    compile project(":gsonpath-core:compiler:standard")
+    testCompile project(":gsonpath-core:compiler:testing:integration-base")
 }
