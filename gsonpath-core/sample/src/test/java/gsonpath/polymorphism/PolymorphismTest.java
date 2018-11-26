@@ -27,18 +27,22 @@ public class PolymorphismTest {
         Assert.assertEquals(5, types.length);
 
         Type1 value1 = (Type1) types[0];
+        Assert.assertEquals("type1", value1.type);
         Assert.assertEquals("Type1 Example 1", value1.name);
         Assert.assertEquals(1, value1.intTest);
 
         Type1 value2 = (Type1) types[1];
+        Assert.assertEquals("type1", value2.type);
         Assert.assertEquals("Type1 Example 2", value2.name);
         Assert.assertEquals(2, value2.intTest);
 
         Type2 value3 = (Type2) types[2];
+        Assert.assertEquals("type2", value3.type);
         Assert.assertEquals("Type2 Example 1", value3.name);
         Assert.assertEquals(1.0, value3.doubleTest, 0);
 
         Type3 value4 = (Type3) types[3];
+        Assert.assertEquals("type3", value4.type);
         Assert.assertEquals("Type3 Example 1", value4.name);
         Assert.assertEquals("123", value4.stringTest);
 

@@ -184,7 +184,7 @@ class SubtypeFunctions {
 
             createVariable("\$T",
                     TYPE_VALUE_JSON_ELEMENT,
-                    "$JSON_ELEMENT.getAsJsonObject().remove(\"$fieldName\")",
+                    "$JSON_ELEMENT.getAsJsonObject().get(\"$fieldName\")",
                     JsonElement::class.java)
 
             `if`("$TYPE_VALUE_JSON_ELEMENT == $NULL || $TYPE_VALUE_JSON_ELEMENT.isJsonNull()") {
