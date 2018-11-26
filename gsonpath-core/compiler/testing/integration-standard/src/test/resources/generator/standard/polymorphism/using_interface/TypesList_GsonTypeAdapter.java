@@ -115,7 +115,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
         @Override
         public Type read(JsonReader in) throws IOException {
             JsonElement jsonElement = Streams.parse(in);
-            JsonElement typeValueJsonElement = jsonElement.getAsJsonObject().remove("type");
+            JsonElement typeValueJsonElement = jsonElement.getAsJsonObject().get("type");
             if (typeValueJsonElement == null || typeValueJsonElement.isJsonNull()) {
                 throw new JsonParseException("cannot deserialize generator.standard.polymorphism.Type because the subtype field 'type' is either null or does not exist.");
             }
