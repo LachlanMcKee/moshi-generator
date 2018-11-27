@@ -1,7 +1,12 @@
 Change Log
 ===========
 
-Version 2.4.3 *(2018-11-18)*
+Version 3.0.1 *(2018-11-27)*
+----------------------------
+
+* Fix: GsonSubType will no longer remove the `subTypeKey` property. This made it impossible serialize the POJO. ([#132](../../issues/174)) 
+
+Version 3.0.0 *(2018-11-18)*
 ----------------------------
 
 * Improvement: Added array support. Examples of this are as follows:
