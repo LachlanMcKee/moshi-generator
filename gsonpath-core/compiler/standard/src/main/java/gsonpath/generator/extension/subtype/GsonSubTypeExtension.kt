@@ -1,4 +1,4 @@
-package gsonpath.generator.adapter.subtype
+package gsonpath.generator.extension.subtype
 
 import com.google.gson.Gson
 import com.google.gson.JsonElement
@@ -10,63 +10,119 @@ import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.*
 import gsonpath.GsonSubTypeFailureException
 import gsonpath.GsonSubTypeFailureOutcome
+import gsonpath.GsonSubtype
+import gsonpath.ProcessingException
+import gsonpath.compiler.ExtensionFieldMetadata
+import gsonpath.compiler.GsonPathExtension
 import gsonpath.generator.Constants.GSON
 import gsonpath.generator.Constants.IN
 import gsonpath.generator.Constants.NULL
 import gsonpath.generator.Constants.OUT
 import gsonpath.generator.Constants.VALUE
-import gsonpath.generator.adapter.SharedFunctions.getRawType
 import gsonpath.internal.CollectionTypeAdapter
 import gsonpath.internal.StrictArrayTypeAdapter
-import gsonpath.model.GsonField
-import gsonpath.model.SubTypeKeyType
-import gsonpath.model.SubTypeMetadata
+import gsonpath.model.FieldInfo
+import gsonpath.model.FieldType
 import gsonpath.util.*
 import java.io.IOException
+import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 
-class SubtypeFunctions {
-    /**
-     * Creates the code required for subtype adapters for any fields that use the GsonSubtype annotation.
-     */
-    fun addSubTypeTypeAdapters(typeSpecBuilder: TypeSpec.Builder, subtypeParams: SubtypeParams) {
-        subtypeParams.subTypedFields.forEach {
-            val gsonField = it.gsonField
-            val subTypeMetadata = it.subTypeMetadata
-            typeSpecBuilder.apply {
-                val typeAdapterDetails = if (it.isFieldArrayType) {
-                    TypeAdapterDetails.ArrayTypeAdapter
-                } else {
-                    TypeAdapterDetails.CollectionTypeAdapter(ParameterizedTypeName.get(
-                            ClassName.get(CollectionTypeAdapter::class.java), TypeName.get(getRawType(gsonField))))
-                }
+class GsonSubTypeExtension(
+        private val typeHandler: TypeHandler,
+        private val subTypeMetadataFactory: SubTypeMetadataFactory) : GsonPathExtension {
 
-                field(subTypeMetadata.variableName, typeAdapterDetails.typeName) {
-                    addModifiers(Modifier.PRIVATE)
-                }
+    override val extensionName: String
+        get() = "'GsonSubtype' Annotation"
 
-                createGetter(typeAdapterDetails, gsonField, subTypeMetadata)
-                addType(createSubTypeAdapter(gsonField, subTypeMetadata))
+    private fun verifyMultipleValuesFieldType(fieldInfo: FieldInfo): FieldType.MultipleValues {
+        return when (val fieldType = fieldInfo.fieldType) {
+            is FieldType.MultipleValues -> fieldType
+            else -> throw ProcessingException("@GsonSubtype can only be used with arrays and collections",
+                    fieldInfo.element)
+        }
+    }
+
+    override fun canHandleFieldRead(
+            processingEnvironment: ProcessingEnvironment,
+            extensionFieldMetadata: ExtensionFieldMetadata): Boolean {
+
+        val (fieldInfo) = extensionFieldMetadata
+        if (fieldInfo.getAnnotation(GsonSubtype::class.java) == null) {
+            return false
+        }
+
+        verifyMultipleValuesFieldType(fieldInfo)
+
+        return true
+    }
+
+    override fun canHandleFieldWrite(processingEnvironment: ProcessingEnvironment, extensionFieldMetadata: ExtensionFieldMetadata): Boolean {
+        return canHandleFieldRead(processingEnvironment, extensionFieldMetadata)
+    }
+
+    override fun createCodeReadResult(
+            processingEnvironment: ProcessingEnvironment,
+            extensionFieldMetadata: ExtensionFieldMetadata,
+            checkIfResultIsNull: Boolean): GsonPathExtension.ExtensionResult {
+
+        val (fieldInfo, variableName) = extensionFieldMetadata
+        val fieldTypeName = fieldInfo.fieldType.typeName
+
+        val subTypeMetadata = subTypeMetadataFactory.getGsonSubType(
+                fieldInfo.getAnnotation(GsonSubtype::class.java)!!, fieldInfo)
+
+        val typeAdapterDetails = when (verifyMultipleValuesFieldType(fieldInfo)) {
+            is FieldType.MultipleValues.Array -> TypeAdapterDetails.ArrayTypeAdapter
+            is FieldType.MultipleValues.Collection -> {
+                TypeAdapterDetails.CollectionTypeAdapter(ParameterizedTypeName.get(
+                        ClassName.get(CollectionTypeAdapter::class.java), TypeName.get(typeHandler.getRawType(fieldInfo))))
             }
         }
+
+        return GsonPathExtension.ExtensionResult(
+                fieldSpecs = listOf(FieldSpec.builder(typeAdapterDetails.typeName, subTypeMetadata.variableName, Modifier.PRIVATE).build()),
+                methodSpecs = listOf(createGetter(typeAdapterDetails, fieldInfo, subTypeMetadata)),
+                typeSpecs = listOf(createSubTypeAdapter(fieldInfo, subTypeMetadata)),
+                codeBlock = codeBlock {
+                    if (checkIfResultIsNull) {
+                        createVariable("\$T", variableName, "(\$T) ${subTypeMetadata.getterName}().read(in)", fieldTypeName, fieldTypeName)
+                    } else {
+                        assign(variableName, "(\$T) ${subTypeMetadata.getterName}().read(in)", fieldTypeName)
+                    }
+                })
+    }
+
+    override fun createCodeWriteResult(
+            processingEnvironment: ProcessingEnvironment,
+            extensionFieldMetadata: ExtensionFieldMetadata): GsonPathExtension.ExtensionResult {
+
+        val (fieldInfo, variableName) = extensionFieldMetadata
+
+        val subTypeMetadata = subTypeMetadataFactory.getGsonSubType(
+                fieldInfo.getAnnotation(GsonSubtype::class.java)!!, fieldInfo)
+
+        return GsonPathExtension.ExtensionResult(
+                codeBlock = codeBlock {
+                    addStatement("${subTypeMetadata.getterName}().write(out, $variableName)")
+                })
     }
 
     /**
      * Creates the getter for the type adapter.
      * This implementration lazily loads, and then cached the result for subsequent usages.
      */
-    private fun TypeSpec.Builder.createGetter(
+    private fun createGetter(
             typeAdapterDetails: TypeAdapterDetails,
-            gsonField: GsonField,
-            subTypeMetadata: SubTypeMetadata) {
+            fieldInfo: FieldInfo,
+            subTypeMetadata: SubTypeMetadata): MethodSpec {
 
-        val variableName = subTypeMetadata.variableName
-
-        method(subTypeMetadata.getterName) {
+        return MethodSpec.methodBuilder(subTypeMetadata.getterName).applyAndBuild {
             addModifiers(Modifier.PRIVATE)
             returns(typeAdapterDetails.typeName)
 
             code {
+                val variableName = subTypeMetadata.variableName
                 `if`("$variableName == $NULL") {
                     val filterNulls = (subTypeMetadata.failureOutcome == GsonSubTypeFailureOutcome.REMOVE_ELEMENT)
 
@@ -74,7 +130,7 @@ class SubtypeFunctions {
                         is TypeAdapterDetails.ArrayTypeAdapter -> {
                             assignNew(variableName,
                                     "\$T<>(new ${subTypeMetadata.className}(mGson), \$T.class, $filterNulls)",
-                                    typeAdapterDetails.typeName, getRawTypeName(gsonField))
+                                    typeAdapterDetails.typeName, getRawTypeName(fieldInfo))
                         }
                         is TypeAdapterDetails.CollectionTypeAdapter -> {
                             assignNew(variableName,
@@ -88,8 +144,8 @@ class SubtypeFunctions {
         }
     }
 
-    private fun getRawTypeName(gsonField: GsonField): TypeName {
-        return TypeName.get(getRawType(gsonField))
+    private fun getRawTypeName(fieldInfo: FieldInfo): TypeName {
+        return TypeName.get(typeHandler.getRawType(fieldInfo))
     }
 
     /**
@@ -97,9 +153,9 @@ class SubtypeFunctions {
      * <p>
      * Only gson fields that are annotated with 'GsonSubtype' should invoke this method
      */
-    private fun createSubTypeAdapter(gsonField: GsonField, subTypeMetadata: SubTypeMetadata): TypeSpec {
+    private fun createSubTypeAdapter(fieldInfo: FieldInfo, subTypeMetadata: SubTypeMetadata): TypeSpec {
         return TypeSpec.classBuilder(subTypeMetadata.className).applyAndBuild {
-            val rawTypeName = getRawTypeName(gsonField)
+            val rawTypeName = getRawTypeName(fieldInfo)
 
             addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             superclass(ParameterizedTypeName.get(ClassName.get(TypeAdapter::class.java), rawTypeName))

@@ -2,14 +2,18 @@ package gsonpath.util
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
+import gsonpath.ProcessingException
+import gsonpath.model.FieldInfo
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.TypeMirror
+import kotlin.reflect.KClass
 
 interface TypeHandler {
     fun getTypeName(typeMirror: TypeMirror): TypeName?
@@ -19,7 +23,15 @@ interface TypeHandler {
     fun getAllMembers(typeElement: TypeElement): List<Element>
     fun getFields(typeElement: TypeElement, filterFunc: ((Element) -> Boolean)): List<FieldElementContent>
     fun getMethods(typeElement: TypeElement): List<MethodElementContent>
-    fun isMirrorOfCollectionType(typeMirror: TypeMirror): Boolean
+
+    /**
+     * Obtains the actual type name that is either contained within the array or the list.
+     * e.g. for 'String[]' or 'List<String>' the returned type name is 'String'
+     */
+    fun getRawType(fieldInfo: FieldInfo): TypeMirror
+
+    fun getDeclaredType(clazz: KClass<*>, vararg typeMirrors: TypeMirror): TypeMirror
+    fun getWildcardType(extendsBound: TypeMirror?, superBound: TypeMirror?): TypeMirror
 }
 
 data class FieldElementContent(
@@ -80,17 +92,24 @@ class ProcessorTypeHandler(private val processingEnv: ProcessingEnvironment) : T
                 .toList()
     }
 
-    override fun isMirrorOfCollectionType(typeMirror: TypeMirror): Boolean {
-        val rawType: TypeMirror = when (typeMirror) {
+    override fun getDeclaredType(clazz: KClass<*>, vararg typeMirrors: TypeMirror): TypeMirror {
+        val typeElement = processingEnv.elementUtils.getTypeElement(clazz.java.name)
+        return processingEnv.typeUtils.getDeclaredType(typeElement, *typeMirrors)
+    }
+
+    override fun getWildcardType(extendsBound: TypeMirror?, superBound: TypeMirror?): TypeMirror {
+        return processingEnv.typeUtils.getWildcardType(extendsBound, superBound)
+    }
+
+    override fun getRawType(fieldInfo: FieldInfo): TypeMirror {
+        return when (val typeMirror = fieldInfo.typeMirror) {
+            is ArrayType -> typeMirror.componentType
+
             is DeclaredType -> typeMirror.typeArguments.first()
 
-            else -> return false
+            else -> throw ProcessingException("Unexpected type found for field, ensure you either use " +
+                    "an array, or a List class.", fieldInfo.element)
         }
-
-        val collectionTypeElement = processingEnv.elementUtils.getTypeElement(Collection::class.java.name)
-        val collectionType = processingEnv.typeUtils.getDeclaredType(collectionTypeElement, rawType)
-
-        return processingEnv.typeUtils.isSubtype(typeMirror, collectionType)
     }
 
     private fun getGenerifiedTypeMirror(containing: TypeElement, element: Element): TypeMirror {

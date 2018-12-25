@@ -2,8 +2,8 @@ package gsonpath.generator.adapter.read
 
 import com.google.gson.stream.JsonReader
 import com.squareup.javapoet.CodeBlock
-import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeSpec
 import gsonpath.ProcessingException
 import gsonpath.compiler.createDefaultVariableValueForTypeName
 import gsonpath.generator.Constants.BREAK
@@ -19,11 +19,11 @@ import java.io.IOException
 /**
  * public T read(JsonReader in) throws IOException {
  */
-class ReadFunctions {
+class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     @Throws(ProcessingException::class)
-    fun createReadMethod(params: ReadParams, extensionsHandler: ExtensionsHandler): MethodSpec {
-        return MethodSpecExt.overrideMethodBuilder("read").applyAndBuild {
+    fun handleRead(typeSpecBuilder: TypeSpec.Builder, params: ReadParams) {
+        typeSpecBuilder.overrideMethod("read") {
             returns(params.baseElement)
             addParameter(JsonReader::class.java, IN)
             addException(IOException::class.java)
@@ -34,7 +34,7 @@ class ReadFunctions {
                 }
 
                 addInitialisationBlock(params)
-                addReadCodeForElements(params.rootElements, params, extensionsHandler)
+                addReadCodeForElements(typeSpecBuilder, params.rootElements, params)
                 addMandatoryValuesCheck(params)
 
                 if (!params.requiresConstructorInjection) {
@@ -57,8 +57,8 @@ class ReadFunctions {
             params.flattenedFields.forEach {
                 createVariable("\$T",
                         it.variableName,
-                        createDefaultVariableValueForTypeName(it.fieldInfo.typeName),
-                        it.fieldInfo.typeName)
+                        createDefaultVariableValueForTypeName(it.fieldInfo.fieldType.typeName),
+                        it.fieldInfo.fieldType.typeName)
             }
         }
 
@@ -76,9 +76,9 @@ class ReadFunctions {
      */
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.addReadCodeForElements(
+            typeSpecBuilder: TypeSpec.Builder,
             jsonMapping: GsonObject,
             params: ReadParams,
-            extensionsHandler: ExtensionsHandler,
             recursionCount: Int = 0): Int {
 
         val jsonMappingSize = jsonMapping.size()
@@ -109,8 +109,8 @@ class ReadFunctions {
                 jsonMapping.entries()
                         .fold(recursionCount + 1) { currentOverallRecursionCount, entry ->
                             addReadCodeForModel(
+                                    typeSpecBuilder = typeSpecBuilder,
                                     params = params,
-                                    extensionsHandler = extensionsHandler,
                                     key = entry.key,
                                     value = entry.value,
                                     counterVariableName = counterVariableName,
@@ -129,8 +129,8 @@ class ReadFunctions {
     }
 
     private fun CodeBlock.Builder.addReadCodeForModel(
+            typeSpecBuilder: TypeSpec.Builder,
             params: ReadParams,
-            extensionsHandler: ExtensionsHandler,
             key: String,
             value: GsonModel,
             counterVariableName: String,
@@ -142,8 +142,8 @@ class ReadFunctions {
 
             when (value) {
                 is GsonField -> {
-                    writeGsonFieldReader(value, params.requiresConstructorInjection,
-                            params.mandatoryInfoMap[value.fieldInfo.fieldName], extensionsHandler)
+                    writeGsonFieldReader(typeSpecBuilder, value, params.requiresConstructorInjection,
+                            params.mandatoryInfoMap[value.fieldInfo.fieldName])
 
                     // No extra recursion has happened.
                     currentOverallRecursionCount
@@ -155,11 +155,11 @@ class ReadFunctions {
                     `if`("!isValidValue($IN)") {
                         addStatement(BREAK)
                     }
-                    addReadCodeForElements(value, params, extensionsHandler, currentOverallRecursionCount)
+                    addReadCodeForElements(typeSpecBuilder, value, params, currentOverallRecursionCount)
                 }
 
                 is GsonArray -> {
-                    writeGsonArrayReader(value, params, key, extensionsHandler, currentOverallRecursionCount)
+                    writeGsonArrayReader(typeSpecBuilder, value, params, key, currentOverallRecursionCount)
                 }
             }
         }
@@ -167,18 +167,17 @@ class ReadFunctions {
 
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.writeGsonFieldReader(
+            typeSpecBuilder: TypeSpec.Builder,
             gsonField: GsonField,
             requiresConstructorInjection: Boolean,
-            mandatoryFieldInfo: MandatoryFieldInfo?,
-            extensionsHandler: ExtensionsHandler) {
+            mandatoryFieldInfo: MandatoryFieldInfo?) {
 
         val fieldInfo = gsonField.fieldInfo
-        val fieldTypeName = fieldInfo.typeName
 
         // Add a new line to improve readability for the multi-lined mapping.
         newLine()
 
-        val result = writeGsonFieldReading(gsonField, requiresConstructorInjection, extensionsHandler)
+        val result = writeGsonFieldReading(typeSpecBuilder, gsonField, requiresConstructorInjection)
 
         val assignedVariable =
                 if (!requiresConstructorInjection) {
@@ -204,10 +203,10 @@ class ReadFunctions {
 
         // Execute any extensions and add the code blocks if they exist.
         val extensionsCodeBlock = codeBlock {
-            extensionsHandler.executePostRead(gsonField, assignedVariable) { extensionName, validationCodeBlock ->
+            extensionsHandler.executePostRead(gsonField, assignedVariable) { extensionName, validationResult ->
                 newLine()
                 comment("Extension - $extensionName")
-                add(validationCodeBlock)
+                add(validationResult.codeBlock)
                 newLine()
             }
         }
@@ -218,7 +217,7 @@ class ReadFunctions {
             comment("Gsonpath Extensions")
 
             // Handle the null-checking for the extensions to avoid repetition inside the extension implementations.
-            if (!fieldTypeName.isPrimitive) {
+            if (fieldInfo.fieldType !is FieldType.Primitive) {
                 `if`("$assignedVariable != $NULL") {
                     add(extensionsCodeBlock)
                 }
@@ -232,47 +231,26 @@ class ReadFunctions {
      * Writes the Java code for field reading that is not supported by Gson.
      */
     private fun CodeBlock.Builder.writeGsonFieldReading(
+            typeSpecBuilder: TypeSpec.Builder,
             gsonField: GsonField,
-            requiresConstructorInjection: Boolean,
-            extensionsHandler: ExtensionsHandler): FieldReaderResult {
+            requiresConstructorInjection: Boolean): FieldReaderResult {
 
         val variableName = getVariableName(gsonField, requiresConstructorInjection)
         val checkIfResultIsNull = isCheckIfNullApplicable(gsonField, requiresConstructorInjection)
 
-        val subTypeMetadata = gsonField.subTypeMetadata
-        if (subTypeMetadata != null) {
-            writeGsonFieldReadingSubType(
-                    gsonField, variableName, checkIfResultIsNull, subTypeMetadata, extensionsHandler)
-
-        } else {
-            writeGsonFieldReadingStandard(
-                    gsonField, variableName, checkIfResultIsNull, extensionsHandler)
-
-        }
-
-        return FieldReaderResult(variableName, checkIfResultIsNull)
-    }
-
-    private fun CodeBlock.Builder.writeGsonFieldReadingStandard(
-            gsonField: GsonField,
-            variableName: String,
-            checkIfResultIsNull: Boolean,
-            extensionsHandler: ExtensionsHandler) {
-
-        val fieldInfo = gsonField.fieldInfo
-        val fieldTypeName = fieldInfo.typeName.box()
-
-        val useExtensionForRead = extensionsHandler.canHandleFieldRead(gsonField, variableName)
-
-        // Handle every other possible class by falling back onto the gson adapter.
-        if (useExtensionForRead) {
-            extensionsHandler.executeFieldRead(gsonField, variableName, checkIfResultIsNull) { extensionName, readCodeBlock ->
+        if (extensionsHandler.canHandleFieldRead(gsonField, variableName)) {
+            extensionsHandler.executeFieldRead(gsonField, variableName, checkIfResultIsNull) { extensionName, readResult ->
                 comment("Extension (Read) - $extensionName")
-                add(readCodeBlock)
+                add(readResult.codeBlock)
                 newLine()
+
+                typeSpecBuilder.addFields(readResult.fieldSpecs)
+                typeSpecBuilder.addMethods(readResult.methodSpecs)
+                typeSpecBuilder.addTypes(readResult.typeSpecs)
             }
 
         } else {
+            val fieldTypeName = gsonField.fieldInfo.fieldType.typeName.box()
             val adapterName =
                     if (fieldTypeName is ParameterizedTypeName)
                         "new com.google.gson.reflect.TypeToken<\$T>(){}" // This is a generic type
@@ -286,37 +264,15 @@ class ReadFunctions {
                 assign(variableName, "$GET_ADAPTER($adapterName).read($IN)", fieldTypeName)
             }
         }
-    }
 
-    private fun CodeBlock.Builder.writeGsonFieldReadingSubType(
-            gsonField: GsonField,
-            variableName: String,
-            checkIfResultIsNull: Boolean,
-            subTypeMetadata: SubTypeMetadata,
-            extensionsHandler: ExtensionsHandler) {
-
-        val fieldInfo = gsonField.fieldInfo
-        val fieldTypeName = fieldInfo.typeName.box()
-
-        val useExtensionForRead = extensionsHandler.canHandleFieldRead(gsonField, variableName)
-        if (useExtensionForRead) {
-            throw ProcessingException("It is not possible to use extension functions with GsonSubtype", fieldInfo.element)
-        }
-
-        // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
-        if (checkIfResultIsNull) {
-            createVariable("\$T", variableName, "(\$T) ${subTypeMetadata.getterName}().read($IN)", fieldTypeName, fieldTypeName)
-
-        } else {
-            assign(variableName, "(\$T) ${subTypeMetadata.getterName}().read($IN)", fieldTypeName)
-        }
+        return FieldReaderResult(variableName, checkIfResultIsNull)
     }
 
     private fun CodeBlock.Builder.writeGsonArrayReader(
+            typeSpecBuilder: TypeSpec.Builder,
             value: GsonArray,
             params: ReadParams,
             key: String,
-            extensionsHandler: ExtensionsHandler,
             currentOverallRecursionCount: Int): Int {
 
         val arrayIndexVariableName = "${key}_arrayIndex"
@@ -332,7 +288,7 @@ class ReadFunctions {
 
         return `while`("in.hasNext()") {
             switch(arrayIndexVariableName) {
-                writeGsonArrayReaderCases(value, params, currentOverallRecursionCount, extensionsHandler)
+                writeGsonArrayReaderCases(typeSpecBuilder, value, params, currentOverallRecursionCount)
                         .also {
                             default {
                                 addStatement("in.skipValue()")
@@ -347,23 +303,23 @@ class ReadFunctions {
     }
 
     private fun CodeBlock.Builder.writeGsonArrayReaderCases(
+            typeSpecBuilder: TypeSpec.Builder,
             value: GsonArray,
             params: ReadParams,
-            seedValue: Int,
-            extensionsHandler: ExtensionsHandler): Int {
+            seedValue: Int): Int {
 
         return value.entries().fold(seedValue) { previousRecursionCount, (arrayIndex, arrayItemValue) ->
             case("$arrayIndex") {
                 when (arrayItemValue) {
                     is GsonField -> {
-                        writeGsonFieldReader(arrayItemValue, params.requiresConstructorInjection,
-                                params.mandatoryInfoMap[arrayItemValue.fieldInfo.fieldName], extensionsHandler)
+                        writeGsonFieldReader(typeSpecBuilder, arrayItemValue, params.requiresConstructorInjection,
+                                params.mandatoryInfoMap[arrayItemValue.fieldInfo.fieldName])
 
                         // No extra recursion has happened.
                         previousRecursionCount
                     }
                     is GsonObject -> {
-                        addReadCodeForElements(arrayItemValue, params, extensionsHandler, previousRecursionCount)
+                        addReadCodeForElements(typeSpecBuilder, arrayItemValue, params, previousRecursionCount)
                     }
                 }
             }

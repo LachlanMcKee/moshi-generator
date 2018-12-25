@@ -4,11 +4,13 @@ import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
 import gsonpath.ProcessingException
 import gsonpath.generator.Constants.GET_ADAPTER
 import gsonpath.generator.Constants.NULL
 import gsonpath.generator.Constants.OUT
 import gsonpath.generator.Constants.VALUE
+import gsonpath.model.FieldType
 import gsonpath.model.GsonArray
 import gsonpath.model.GsonField
 import gsonpath.model.GsonObject
@@ -18,21 +20,23 @@ import java.io.IOException
 /**
  * public void write(JsonWriter out, ImageSizes value) throws IOException {
  */
-class WriteFunctions {
+class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
     @Throws(ProcessingException::class)
-    fun createWriteMethod(params: WriteParams) = MethodSpecExt.overrideMethodBuilder("write").applyAndBuild {
-        addParameter(JsonWriter::class.java, OUT)
-        addParameter(params.elementClassName, VALUE)
-        addException(IOException::class.java)
-        code {
-            // Initial block which prevents nulls being accessed.
-            `if`("$VALUE == $NULL") {
-                addStatement("$OUT.nullValue()")
-                `return`()
+    fun handleWrite(typeSpecBuilder: TypeSpec.Builder, params: WriteParams) {
+        typeSpecBuilder.overrideMethod("write") {
+            addParameter(JsonWriter::class.java, OUT)
+            addParameter(params.elementClassName, VALUE)
+            addException(IOException::class.java)
+            code {
+                // Initial block which prevents nulls being accessed.
+                `if`("$VALUE == $NULL") {
+                    addStatement("$OUT.nullValue()")
+                    `return`()
+                }
+                newLine()
+                comment("Begin")
+                writeGsonFieldWriter(params.rootElements, params.serializeNulls, true)
             }
-            newLine()
-            comment("Begin")
-            writeGsonFieldWriter(params.rootElements, params.serializeNulls, true)
         }
     }
 
@@ -95,8 +99,8 @@ class WriteFunctions {
             writeKeyName: Boolean): Int {
 
         val fieldInfo = value.fieldInfo
-        val fieldTypeName = fieldInfo.typeName
-        val isPrimitive = fieldTypeName.isPrimitive
+        val fieldTypeName = fieldInfo.fieldType.typeName
+        val isPrimitive = fieldInfo.fieldType is FieldType.Primitive
         val fieldAccessor = fieldInfo.fieldAccessor
         val objectName = "obj$fieldCount"
 
@@ -181,20 +185,19 @@ class WriteFunctions {
     }
 
     private fun CodeBlock.Builder.writeField(value: GsonField, objectName: String, fieldTypeName: TypeName) {
-        val subTypeMetadata = value.subTypeMetadata
-        val writeLine = when {
-            subTypeMetadata != null -> {
-                // If this field uses a subtype annotation, we use the type adapter subclasses instead of gson.
-                "${subTypeMetadata.getterName}().write($OUT, $objectName)"
+        when {
+            extensionsHandler.canHandleFieldWrite(value, objectName) -> {
+                extensionsHandler.executeFieldWrite(value, objectName) { extensionName, writeResult ->
+                    comment("Extension (Write) - $extensionName")
+                    add(writeResult.codeBlock)
+                }
             }
             fieldTypeName is ParameterizedTypeName -> {
-                "$GET_ADAPTER(new com.google.gson.reflect.TypeToken<\$T>(){}).write($OUT, $objectName)"
+                addStatement("$GET_ADAPTER(new com.google.gson.reflect.TypeToken<\$T>(){}).write($OUT, $objectName)", fieldTypeName.box())
             }
             else -> {
-                "$GET_ADAPTER(\$T.class).write($OUT, $objectName)"
+                addStatement("$GET_ADAPTER(\$T.class).write($OUT, $objectName)", fieldTypeName.box())
             }
         }
-
-        addStatement(writeLine, fieldTypeName.box())
     }
 }

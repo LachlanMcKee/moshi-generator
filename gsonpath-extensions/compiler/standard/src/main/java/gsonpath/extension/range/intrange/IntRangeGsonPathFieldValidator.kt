@@ -8,6 +8,7 @@ import gsonpath.compiler.GsonPathExtension
 import gsonpath.extension.getAnnotationMirror
 import gsonpath.extension.getAnnotationValueObject
 import gsonpath.extension.range.handleRangeValue
+import gsonpath.model.FieldType
 import gsonpath.util.codeBlock
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.AnnotationMirror
@@ -22,9 +23,9 @@ class IntRangeGsonPathFieldValidator : GsonPathExtension {
     override val extensionName: String
         get() = "'IntRange' Annotation"
 
-    override fun createCodePostReadCodeBlock(
+    override fun createCodePostReadResult(
             processingEnvironment: ProcessingEnvironment,
-            extensionFieldMetadata: ExtensionFieldMetadata): CodeBlock? {
+            extensionFieldMetadata: ExtensionFieldMetadata): GsonPathExtension.ExtensionResult? {
 
         val (fieldInfo, variableName, jsonPath) = extensionFieldMetadata
 
@@ -34,12 +35,13 @@ class IntRangeGsonPathFieldValidator : GsonPathExtension {
                         ?: return null
 
         // Ensure that the field is either a integer, or a long.
-        val typeName =
-                if (fieldInfo.typeName.isPrimitive) {
-                    fieldInfo.typeName.box()
-                } else {
-                    fieldInfo.typeName
-                }
+        val typeName = fieldInfo.fieldType.typeName.let {
+            if (fieldInfo.fieldType is FieldType.Primitive) {
+                it.box()
+            } else {
+                it
+            }
+        }
 
         if (typeName != BOXED_INT && typeName != BOXED_LONG) {
             throw ProcessingException("Unexpected type found for field annotated with 'IntRange', only " +
@@ -51,7 +53,7 @@ class IntRangeGsonPathFieldValidator : GsonPathExtension {
             handleTo(intRangeAnnotation, jsonPath, variableName)
         }
         if (!validationCodeBlock.isEmpty) {
-            return validationCodeBlock
+            return GsonPathExtension.ExtensionResult(validationCodeBlock)
         }
         return null
     }

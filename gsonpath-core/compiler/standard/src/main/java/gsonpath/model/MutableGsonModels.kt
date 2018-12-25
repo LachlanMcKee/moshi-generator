@@ -11,8 +11,7 @@ data class MutableGsonField(
         val fieldInfo: FieldInfo,
         val variableName: String,
         val jsonPath: String,
-        val isRequired: Boolean,
-        val subTypeMetadata: SubTypeMetadata?) : MutableGsonArrayElement() {
+        val isRequired: Boolean) : MutableGsonArrayElement() {
 
     fun toImmutable(): GsonField {
         return GsonField(
@@ -20,8 +19,7 @@ data class MutableGsonField(
                 fieldInfo = fieldInfo,
                 variableName = variableName,
                 jsonPath = jsonPath,
-                isRequired = isRequired,
-                subTypeMetadata = subTypeMetadata
+                isRequired = isRequired
         )
     }
 }

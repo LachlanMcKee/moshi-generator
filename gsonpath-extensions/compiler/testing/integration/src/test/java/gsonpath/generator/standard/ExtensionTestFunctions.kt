@@ -40,12 +40,12 @@ fun validateCodeRead(
         codeReadExpectationFunc: () -> CodeReadExpectation) {
 
     val triggerFunc = {
-        extension.createCodeReadCodeBlock(mock(), metadata, checkResultIsNull)
+        extension.createCodeReadResult(mock(), metadata, checkResultIsNull)
     }
 
     when (val expectation = codeReadExpectationFunc()) {
         is CodeReadExpectation.Valid -> {
-            Assert.assertEquals(codeBlock { add(expectation.codeString) }, triggerFunc())
+            Assert.assertEquals(codeBlock { add(expectation.codeString) }, triggerFunc().codeBlock)
         }
         is CodeReadExpectation.Exception -> {
             handleException(expectation.message, triggerFunc)
@@ -59,7 +59,7 @@ fun validatePostRead(
         postReadExpectationFunc: () -> PostReadExpectation) {
 
     val triggerFunc = {
-        extension.createCodePostReadCodeBlock(mock(), metadata)
+        extension.createCodePostReadResult(mock(), metadata)
     }
 
     when (val expectation = postReadExpectationFunc()) {
@@ -88,7 +88,7 @@ private fun handleException(expectedMessage: String, triggerFunc: () -> Any?) {
 }
 
 fun String.toCodeReadExpectation() = CodeReadExpectation.Valid(trimIndent())
-fun String.toPostReadExpectation()= PostReadExpectation.Valid(trimIndent())
+fun String.toPostReadExpectation() = PostReadExpectation.Valid(trimIndent())
 
 sealed class CanHandleFieldReadExpectation {
     data class Valid(val result: Boolean) : CanHandleFieldReadExpectation()

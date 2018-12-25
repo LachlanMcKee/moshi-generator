@@ -7,8 +7,9 @@ import gsonpath.generator.HandleResult
 import gsonpath.generator.adapter.AdapterModelMetadataFactory
 import gsonpath.generator.adapter.AutoGsonAdapterGenerator
 import gsonpath.generator.adapter.read.ReadFunctions
-import gsonpath.generator.adapter.subtype.SubtypeFunctions
 import gsonpath.generator.adapter.write.WriteFunctions
+import gsonpath.generator.extension.subtype.GsonSubTypeExtension
+import gsonpath.generator.extension.subtype.SubTypeMetadataFactoryImpl
 import gsonpath.generator.factory.TypeAdapterFactoryGenerator
 import gsonpath.generator.interf.InterfaceModelMetadataFactory
 import gsonpath.generator.interf.ModelInterfaceGenerator
@@ -46,29 +47,29 @@ open class GsonProcessorImpl : AbstractProcessor() {
             return false
         }
 
-        val extensions = loadExtensions() ?: return false
+        val typeHandler = ProcessorTypeHandler(processingEnv)
+        val extensions = loadExtensions(typeHandler) ?: return false
 
         println()
         printMessage("Started annotation processing")
 
         val fileWriter = FileWriter(processingEnv)
         val logger = LoggerImpl(processingEnv)
-        val typeHandler = ProcessorTypeHandler(processingEnv)
         val defaultValueDetector = DefaultValueDetectorImpl(processingEnv)
         val fieldGetterFinder = FieldGetterFinder(typeHandler)
         val annotationFetcher = AnnotationFetcher(typeHandler, fieldGetterFinder)
         val gsonObjectFactory = GsonObjectFactory(
                 GsonObjectValidator(),
-                FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()),
-                SubTypeMetadataFactoryImpl(typeHandler))
+                FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()))
         val gsonObjectTreeFactory = GsonObjectTreeFactory(gsonObjectFactory)
-        val readFunctions = ReadFunctions()
-        val writeFunctions = WriteFunctions()
-        val subtypeFunctions = SubtypeFunctions()
+        val extensionsHandler = ExtensionsHandler(processingEnv, extensions)
+        val readFunctions = ReadFunctions(extensionsHandler)
+        val writeFunctions = WriteFunctions(extensionsHandler)
         val modelInterfaceGenerator = ModelInterfaceGenerator(InterfaceModelMetadataFactory(typeHandler), fileWriter, logger)
         val adapterModelMetadataFactory = AdapterModelMetadataFactory(
                 FieldInfoFactory(
                         typeHandler,
+                        FieldTypeFactory(typeHandler),
                         fieldGetterFinder,
                         annotationFetcher,
                         defaultValueDetector),
@@ -83,7 +84,6 @@ open class GsonProcessorImpl : AbstractProcessor() {
                 fileWriter,
                 readFunctions,
                 writeFunctions,
-                subtypeFunctions,
                 logger)
 
         val autoGsonAdapterResults: List<HandleResult> =
@@ -92,7 +92,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
                             printMessage("Generating TypeAdapter ($element)")
 
                             try {
-                                adapterGenerator.handle(element, autoGsonAdapter, ExtensionsHandler(processingEnv, extensions))
+                                adapterGenerator.handle(element, autoGsonAdapter)
                             } catch (e: ProcessingException) {
                                 printError(e.message, e.element ?: element)
                                 return false
@@ -132,7 +132,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
         return false
     }
 
-    private fun loadExtensions(): List<GsonPathExtension>? {
+    private fun loadExtensions(typeHandler: TypeHandler): List<GsonPathExtension>? {
         // Load any extensions that are also available at compile time.
         println()
         val extensions: List<GsonPathExtension> =
@@ -149,7 +149,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
             printMessage("Extension found: " + it.extensionName)
         }
 
-        return extensions
+        return extensions.plus(GsonSubTypeExtension(typeHandler, SubTypeMetadataFactoryImpl(typeHandler)))
     }
 
     private fun printMessage(message: String) {

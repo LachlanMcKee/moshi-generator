@@ -20,7 +20,7 @@ open class BaseGsonObjectFactoryTest {
 
     @Throws(ProcessingException::class)
     fun executeAddGsonType(arguments: GsonTypeArguments, metadata: GsonObjectMetadata, outputGsonObject: MutableGsonObject = MutableGsonObject()): MutableGsonObject {
-        GsonObjectFactory(gsonObjectValidator, fieldPathFetcher, mock(SubTypeMetadataFactory::class.java)).addGsonType(
+        GsonObjectFactory(gsonObjectValidator, fieldPathFetcher).addGsonType(
                 outputGsonObject,
                 arguments.fieldInfo,
                 arguments.fieldInfoIndex,

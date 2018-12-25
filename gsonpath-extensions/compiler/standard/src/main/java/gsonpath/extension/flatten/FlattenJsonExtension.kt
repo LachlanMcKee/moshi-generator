@@ -2,7 +2,6 @@ package gsonpath.extension.flatten
 
 import com.google.gson.JsonElement
 import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
 import gsonpath.ProcessingException
 import gsonpath.compiler.CLASS_NAME_STRING
 import gsonpath.compiler.ExtensionFieldMetadata
@@ -24,21 +23,21 @@ class FlattenJsonExtension : GsonPathExtension {
             return false
         }
 
-        if (fieldInfo.typeName != CLASS_NAME_STRING) {
+        if (fieldInfo.fieldType.typeName != CLASS_NAME_STRING) {
             throw ProcessingException("FlattenObject can only be used on String variables", fieldInfo.element)
         }
 
         return true
     }
 
-    override fun createCodeReadCodeBlock(
+    override fun createCodeReadResult(
             processingEnvironment: ProcessingEnvironment,
             extensionFieldMetadata: ExtensionFieldMetadata,
-            checkIfResultIsNull: Boolean): CodeBlock {
+            checkIfResultIsNull: Boolean): GsonPathExtension.ExtensionResult {
 
         val (_, variableName) = extensionFieldMetadata
 
-        return codeBlock {
+        return GsonPathExtension.ExtensionResult(codeBlock {
             val jsonElementVariableName = "${variableName}_jsonElement"
             createVariable("\$T", jsonElementVariableName, "mGson.getAdapter(\$T.class).read(in)",
                     CLASS_NAME_JSON_ELEMENT, CLASS_NAME_JSON_ELEMENT)
@@ -57,7 +56,7 @@ class FlattenJsonExtension : GsonPathExtension {
                     assign(variableName, "$jsonElementVariableName.toString()")
                 }
             }
-        }
+        })
     }
 
     private companion object {
