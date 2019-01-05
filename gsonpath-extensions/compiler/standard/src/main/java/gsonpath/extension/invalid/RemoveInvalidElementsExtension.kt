@@ -1,7 +1,6 @@
 package gsonpath.extension.invalid
 
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.*
 import gsonpath.ProcessingException
 import gsonpath.compiler.ExtensionFieldMetadata
 import gsonpath.compiler.GsonPathExtension
@@ -13,6 +12,7 @@ import gsonpath.util.assign
 import gsonpath.util.codeBlock
 import gsonpath.util.createVariable
 import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.Modifier
 
 class RemoveInvalidElementsExtension : GsonPathExtension {
     override val extensionName: String
@@ -50,22 +50,48 @@ class RemoveInvalidElementsExtension : GsonPathExtension {
         val multipleValuesFieldType = verifyMultipleValuesFieldType(fieldInfo)
         val rawTypeName = TypeName.get(multipleValuesFieldType.elementTypeMirror)
 
-        val methodName = when (multipleValuesFieldType) {
-            is FieldType.MultipleValues.Array -> "removeInvalidElementsArray"
-            is FieldType.MultipleValues.Collection -> "removeInvalidElementsList"
-        }
-        val assignment = "\$T.$methodName(\$T.class, mGson, in)"
-
         return GsonPathExtension.ExtensionResult(codeBlock {
-            if (checkIfResultIsNull) {
-                createVariable("\$T", variableName, assignment, fieldInfo.fieldType.typeName, CLASS_NAME_UTIL, rawTypeName)
-            } else {
-                assign(variableName, assignment, CLASS_NAME_UTIL, rawTypeName)
+            val typeName = fieldInfo.fieldType.typeName
+            when (multipleValuesFieldType) {
+                is FieldType.MultipleValues.Array -> {
+                    val assignment = "\$T.removeInvalidElementsArray(\$T.class, mGson, in, \$L)"
+                    val arrayFuncType = createCreateArrayFuncTypeSpec(rawTypeName)
+                    if (checkIfResultIsNull) {
+                        createVariable(typeName, variableName, assignment, UTIL_CLASS_NAME, rawTypeName, arrayFuncType)
+                    } else {
+                        assign(variableName, assignment, UTIL_CLASS_NAME, rawTypeName, arrayFuncType)
+                    }
+                }
+                is FieldType.MultipleValues.Collection -> {
+                    val assignment = "\$T.removeInvalidElementsList(\$T.class, mGson, in)"
+                    if (checkIfResultIsNull) {
+                        createVariable(typeName, variableName, assignment, UTIL_CLASS_NAME, rawTypeName)
+                    } else {
+                        assign(variableName, assignment, UTIL_CLASS_NAME, rawTypeName)
+                    }
+                }
             }
         })
     }
 
+    /**
+     * Required to allow converting the list into an array.
+     * Type erasure is fun!
+     */
+    private fun createCreateArrayFuncTypeSpec(arrayType: TypeName): TypeSpec {
+        val functionClassName = ClassName.get(RemoveInvalidElementsUtil.CreateArrayFunction::class.java)
+        return TypeSpec.anonymousClassBuilder("")
+                .addSuperinterface(ParameterizedTypeName.get(functionClassName, arrayType))
+                .addMethod(MethodSpec.methodBuilder("createArray")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ArrayTypeName.of(arrayType))
+                        .addStatement("return new \$T[0]", arrayType)
+                        .build())
+                .build()
+    }
+
     private companion object {
-        private val CLASS_NAME_UTIL = ClassName.get(RemoveInvalidElementsUtil::class.java)
+        private val UTIL_CLASS_NAME = ClassName.get(RemoveInvalidElementsUtil::class.java)
     }
 }
