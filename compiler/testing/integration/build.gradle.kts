@@ -1,11 +1,11 @@
 plugins {
     java
-    kotlin("jvm") version Dependencies.KOTLIN_VERSION
+    kotlin("jvm") version ProjectProperties.Versions.KOTLIN_VERSION
     jacoco
 }
 
 jacoco {
-    toolVersion = Dependencies.JACOCO_VERSION
+    toolVersion = ProjectProperties.Versions.JACOCO_VERSION
 }
 
 java {

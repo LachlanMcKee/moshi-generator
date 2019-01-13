@@ -31,7 +31,7 @@ plugins {
 }
 
 jacoco {
-    toolVersion = Dependencies.JACOCO_VERSION
+    toolVersion = ProjectProperties.Versions.JACOCO_VERSION
 }
 
 allprojects {

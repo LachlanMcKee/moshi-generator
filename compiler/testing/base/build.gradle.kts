@@ -1,6 +1,6 @@
 plugins {
     java
-    kotlin("jvm") version Dependencies.KOTLIN_VERSION
+    kotlin("jvm") version ProjectProperties.Versions.KOTLIN_VERSION
 }
 
 java {
@@ -9,7 +9,9 @@ java {
 }
 
 dependencies {
-    api("org.jetbrains.kotlin:kotlin-stdlib:${Dependencies.KOTLIN_VERSION}")
+    api(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
+    api(project(":library"))
+    api(project(":compiler:base"))
     api(project(":compiler:standard"))
-    api("junit:junit:${Dependencies.JUNIT_VERSION}")
+    api(ProjectProperties.Dependencies.JUNIT)
 }

@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version Dependencies.KOTLIN_VERSION
+    kotlin("jvm") version ProjectProperties.Versions.KOTLIN_VERSION
     id("com.vanniktech.maven.publish") version "0.7.0"
 }
 
@@ -20,12 +20,14 @@ java {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Dependencies.KOTLIN_VERSION}")
+    implementation(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
 
     implementation(project(":library"))
     implementation(project(":compiler:base"))
 
+    implementation(ProjectProperties.Dependencies.JAVAPOET)
+    implementation("com.google.auto.service:auto-service:1.0-rc2")
     implementation("com.squareup:javapoet:${Dependencies.JAVAPOET_VERSION}")
     implementation("com.google.auto:auto-common:0.6")
-    implementation("com.google.code.gson:gson:${Dependencies.GSON_VERSION}")
+    implementation(ProjectProperties.Dependencies.GSON)
 }

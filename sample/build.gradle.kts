@@ -1,7 +1,7 @@
 plugins {
     java
-    kotlin("jvm") version Dependencies.KOTLIN_VERSION
-    kotlin("kapt") version Dependencies.KOTLIN_VERSION
+    kotlin("jvm") version ProjectProperties.Versions.KOTLIN_VERSION
+    kotlin("kapt") version ProjectProperties.Versions.KOTLIN_VERSION
 }
 
 java {
@@ -10,11 +10,11 @@ java {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Dependencies.KOTLIN_VERSION}")
-    implementation("com.google.code.gson:gson:${Dependencies.GSON_VERSION}")
+    implementation(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
+    implementation(ProjectProperties.Dependencies.GSON)
 
     implementation(project(":library"))
     kapt(project(":compiler:standard"))
 
-    testImplementation("junit:junit:${Dependencies.JUNIT_VERSION}")
+    testImplementation(ProjectProperties.Dependencies.JUNIT)
 }

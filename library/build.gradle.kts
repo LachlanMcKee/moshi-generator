@@ -20,5 +20,5 @@ java {
 
 dependencies {
     implementation(fileTree("libs").include("*.jar"))
-    implementation("com.google.code.gson:gson:${Dependencies.GSON_VERSION}")
+    implementation(ProjectProperties.Dependencies.GSON)
 }

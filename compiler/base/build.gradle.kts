@@ -12,7 +12,7 @@ buildscript {
 
 plugins {
     java
-    kotlin("jvm") version Dependencies.KOTLIN_VERSION
+    kotlin("jvm") version ProjectProperties.Versions.KOTLIN_VERSION
     id("com.vanniktech.maven.publish") version "0.7.0"
 }
 
@@ -22,9 +22,9 @@ java {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${Dependencies.KOTLIN_VERSION}")
-    implementation("com.squareup:javapoet:${Dependencies.JAVAPOET_VERSION}")
+    implementation(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
+    implementation(ProjectProperties.Dependencies.JAVAPOET)
     implementation(files(Jvm.current().getToolsJar()))
 
-    testImplementation("junit:junit:${Dependencies.JUNIT_VERSION}")
+    testImplementation(ProjectProperties.Dependencies.JUNIT)
 }
