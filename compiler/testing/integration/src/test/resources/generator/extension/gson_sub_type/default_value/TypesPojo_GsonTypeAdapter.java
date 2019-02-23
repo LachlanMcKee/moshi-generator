@@ -1,4 +1,4 @@
-package generator.extension.gson_sub_type.failure_outcome_fail;
+package generator.extension.gson_sub_type.default_value;
 
 import static gsonpath.GsonUtil.*;
 
@@ -12,9 +12,6 @@ import com.google.gson.stream.JsonWriter;
 import generator.extension.gson_sub_type.Type;
 import generator.extension.gson_sub_type.Type1;
 import generator.extension.gson_sub_type.Type2;
-import gsonpath.GsonSubTypeFailureException;
-import gsonpath.internal.StrictArrayTypeAdapter;
-
 import java.io.IOException;
 import java.lang.Class;
 import java.lang.Override;
@@ -30,15 +27,15 @@ import javax.annotation.Generated;
 public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
     private final Gson mGson;
 
-    private StrictArrayTypeAdapter itemsGsonSubtype;
+    private ItemsGsonSubtype itemsGsonSubtype;
 
     public TypesList_GsonTypeAdapter(Gson gson) {
         this.mGson = gson;
     }
 
-    private StrictArrayTypeAdapter getItemsGsonSubtype() {
+    private ItemsGsonSubtype getItemsGsonSubtype() {
         if (itemsGsonSubtype == null) {
-            itemsGsonSubtype = new StrictArrayTypeAdapter<>(new ItemsGsonSubtype(mGson), Type.class, false);
+            itemsGsonSubtype = new ItemsGsonSubtype(mGson);
         }
         return itemsGsonSubtype;
     }
@@ -65,7 +62,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                     jsonFieldCounter0++;
 
                     // Extension (Read) - 'GsonSubtype' Annotation
-                    Type[] value_items = (Type[]) getItemsGsonSubtype().read(in);
+                    Type value_items = (Type) getItemsGsonSubtype().read(in);
                     if (value_items != null) {
                         result.items = value_items;
                     }
@@ -90,7 +87,7 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
 
         // Begin
         out.beginObject();
-        Type[] obj0 = value.items;
+        Type obj0 = value.items;
         if (obj0 != null) {
             out.name("items");
             // Extension (Write) - 'GsonSubtype' Annotation
@@ -106,15 +103,15 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
 
         private final Map<Class<? extends Type>, TypeAdapter<? extends Type>> typeAdaptersDelegatedByClassMap;
 
+        private final TypeAdapter<? extends Type> defaultTypeAdapterDelegate;
+
         private ItemsGsonSubtype(Gson gson) {
             typeAdaptersDelegatedByValueMap = new java.util.HashMap<>();
             typeAdaptersDelegatedByClassMap = new java.util.HashMap<>();
 
             typeAdaptersDelegatedByValueMap.put("type1", gson.getAdapter(Type1.class));
             typeAdaptersDelegatedByClassMap.put(Type1.class, gson.getAdapter(Type1.class));
-
-            typeAdaptersDelegatedByValueMap.put("type2", gson.getAdapter(Type2.class));
-            typeAdaptersDelegatedByClassMap.put(Type2.class, gson.getAdapter(Type2.class));
+            defaultTypeAdapterDelegate = gson.getAdapter(Type2.class);
         }
 
         @Override
@@ -127,12 +124,10 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
             java.lang.String value = typeValueJsonElement.getAsString();
             TypeAdapter<? extends Type> delegate = typeAdaptersDelegatedByValueMap.get(value);
             if (delegate == null) {
-                throw new GsonSubTypeFailureException("Failed to find subtype for value: " + value);
+                // Use the default type adapter if the type is unknown.
+                delegate = defaultTypeAdapterDelegate;
             }
             Type result = delegate.fromJsonTree(jsonElement);
-            if (result == null) {
-                throw new GsonSubTypeFailureException("Failed to deserailize subtype for object: " + jsonElement);
-            }
             return result;
         }
 
@@ -143,6 +138,10 @@ public final class TypesList_GsonTypeAdapter extends TypeAdapter<TypesList> {
                 return;
             }
             TypeAdapter delegate = typeAdaptersDelegatedByClassMap.get(value.getClass());
+            if (delegate == null) {
+                // Use the default type adapter if the type is unknown.
+                delegate = defaultTypeAdapterDelegate;
+            }
             delegate.write(out, value);
         }
     }
