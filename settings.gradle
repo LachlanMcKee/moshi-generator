@@ -1,24 +1,7 @@
-// Core
-include ':gsonpath-core:library'
-include ':gsonpath-core:compiler:base'
-include ':gsonpath-core:compiler:standard'
-include ':gsonpath-core:compiler:testing:base'
-include ':gsonpath-core:compiler:testing:unit-standard'
-include ':gsonpath-core:compiler:testing:integration-base'
-include ':gsonpath-core:compiler:testing:integration-standard'
-include ':gsonpath-core:compiler:testing:integration-extension'
-include ':gsonpath-core:sample'
-
-// Extension
-include ':gsonpath-extensions:library'
-include ':gsonpath-extensions:compiler'
-include ':gsonpath-extensions:sample'
-
-// Fix collision of the two library sub-modules.
-rootProject.children.each { p ->
-    p.children.each { module ->
-        if (module.name == "library") {
-            module.name = p.name + '-' + module.name
-        }
-    }
-}
+include ':library'
+include ':compiler:base'
+include ':compiler:standard'
+include ':compiler:testing:base'
+include ':compiler:testing:unit'
+include ':compiler:testing:integration'
+include ':sample'
