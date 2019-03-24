@@ -26,7 +26,7 @@ object DependencyFactory {
         val annotationFetcher = AnnotationFetcher(typeHandler, fieldGetterFinder)
         val gsonObjectFactory = GsonObjectFactory(
                 GsonObjectValidator(),
-                FieldPathFetcher(FieldNamingPolicyMapper()))
+                FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()))
         val gsonObjectTreeFactory = GsonObjectTreeFactory(gsonObjectFactory)
 
         val extensions = ExtensionsLoader.loadExtensions(typeHandler, Logger(processingEnv))

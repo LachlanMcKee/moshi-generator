@@ -4,10 +4,11 @@ import gsonpath.model.FieldInfo
 import gsonpath.util.FieldNamingPolicyMapper
 
 class FieldPathFetcher(
+        private val serializedNameFetcher: SerializedNameFetcher,
         private val fieldNamingPolicyMapper: FieldNamingPolicyMapper) {
 
     fun getJsonFieldPath(fieldInfo: FieldInfo, metadata: GsonObjectMetadata): FieldPath {
-        val serializedName = SerializedNameFetcher.getSerializedName(fieldInfo, metadata.flattenDelimiter)
+        val serializedName = serializedNameFetcher.getSerializedName(fieldInfo, metadata.flattenDelimiter)
         val path = if (serializedName != null && serializedName.isNotBlank()) {
             if (metadata.pathSubstitutions.isNotEmpty()) {
 

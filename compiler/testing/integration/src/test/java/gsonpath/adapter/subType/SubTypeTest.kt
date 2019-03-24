@@ -1,4 +1,4 @@
-package gsonpath.generator.sub_type
+package gsonpath.adapter.subType
 
 import gsonpath.generator.GeneratorTester.assertGeneratedContent
 import gsonpath.generator.TestCriteria
