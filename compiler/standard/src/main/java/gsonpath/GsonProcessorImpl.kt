@@ -1,11 +1,11 @@
 package gsonpath
 
 import com.google.common.collect.Sets
-import gsonpath.adapter.StandardAdapterFactory
-import gsonpath.adapter.SubTypeAdapterFactory
+import gsonpath.adapter.AdapterGenerationResult
+import gsonpath.adapter.standard.StandardAdapterFactory
+import gsonpath.adapter.subType.SubTypeAdapterFactory
 import gsonpath.dependencies.Dependencies
 import gsonpath.dependencies.DependencyFactory
-import gsonpath.generator.HandleResult
 import gsonpath.util.Logger
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
@@ -47,7 +47,7 @@ open class GsonProcessorImpl : AbstractProcessor() {
     private fun generateTypeAdapterFactories(
             env: RoundEnvironment,
             dependencies: Dependencies,
-            autoGsonAdapterResults: List<HandleResult>) {
+            autoGsonAdapterResults: List<AdapterGenerationResult>) {
 
         if (autoGsonAdapterResults.isNotEmpty()) {
             val gsonPathFactories = env.getElementsAnnotatedWith(AutoGsonAdapterFactory::class.java)

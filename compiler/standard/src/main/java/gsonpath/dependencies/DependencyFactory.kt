@@ -1,16 +1,16 @@
 package gsonpath.dependencies
 
-import gsonpath.extension.ExtensionsHandler
-import gsonpath.extension.ExtensionsLoader
-import gsonpath.generator.standard.adapter.AdapterModelMetadataFactory
-import gsonpath.generator.standard.adapter.AutoGsonAdapterGenerator
-import gsonpath.generator.standard.adapter.read.ReadFunctions
-import gsonpath.generator.standard.adapter.write.WriteFunctions
-import gsonpath.generator.standard.extension.subtype.SubTypeMetadataFactoryImpl
-import gsonpath.generator.standard.factory.TypeAdapterFactoryGenerator
-import gsonpath.generator.standard.interf.InterfaceModelMetadataFactory
-import gsonpath.generator.standard.interf.ModelInterfaceGenerator
-import gsonpath.model.*
+import gsonpath.adapter.standard.adapter.AdapterModelMetadataFactory
+import gsonpath.adapter.standard.adapter.StandardGsonAdapterGenerator
+import gsonpath.adapter.standard.adapter.read.ReadFunctions
+import gsonpath.adapter.standard.adapter.write.WriteFunctions
+import gsonpath.adapter.standard.extension.ExtensionsHandler
+import gsonpath.adapter.standard.extension.ExtensionsLoader
+import gsonpath.adapter.standard.extension.subtype.SubTypeMetadataFactoryImpl
+import gsonpath.adapter.standard.factory.TypeAdapterFactoryGenerator
+import gsonpath.adapter.standard.interf.InterfaceModelMetadataFactory
+import gsonpath.adapter.standard.interf.ModelInterfaceGenerator
+import gsonpath.adapter.standard.model.*
 import gsonpath.util.*
 import javax.annotation.processing.ProcessingEnvironment
 
@@ -26,7 +26,7 @@ object DependencyFactory {
         val annotationFetcher = AnnotationFetcher(typeHandler, fieldGetterFinder)
         val gsonObjectFactory = GsonObjectFactory(
                 GsonObjectValidator(),
-                FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()))
+                FieldPathFetcher(FieldNamingPolicyMapper()))
         val gsonObjectTreeFactory = GsonObjectTreeFactory(gsonObjectFactory)
 
         val extensions = ExtensionsLoader.loadExtensions(typeHandler, Logger(processingEnv))
@@ -48,7 +48,7 @@ object DependencyFactory {
 
         // Handle the standard type adapters.
         return Dependencies(
-                autoGsonAdapterGenerator = AutoGsonAdapterGenerator(
+                standardGsonAdapterGenerator = StandardGsonAdapterGenerator(
                         adapterModelMetadataFactory,
                         fileWriter,
                         readFunctions,
