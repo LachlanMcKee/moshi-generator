@@ -1,7 +1,12 @@
 package gsonpath
 
 import com.google.common.collect.Sets
+import gsonpath.adapter.StandardAdapterFactory
+import gsonpath.adapter.SubTypeAdapterFactory
+import gsonpath.dependencies.Dependencies
+import gsonpath.dependencies.DependencyFactory
 import gsonpath.generator.HandleResult
+import gsonpath.util.Logger
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion

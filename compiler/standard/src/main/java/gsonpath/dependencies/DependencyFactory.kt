@@ -1,13 +1,15 @@
-package gsonpath
+package gsonpath.dependencies
 
-import gsonpath.generator.adapter.AdapterModelMetadataFactory
-import gsonpath.generator.adapter.AutoGsonAdapterGenerator
-import gsonpath.generator.adapter.read.ReadFunctions
-import gsonpath.generator.adapter.write.WriteFunctions
-import gsonpath.generator.extension.subtype.SubTypeMetadataFactoryImpl
-import gsonpath.generator.factory.TypeAdapterFactoryGenerator
-import gsonpath.generator.interf.InterfaceModelMetadataFactory
-import gsonpath.generator.interf.ModelInterfaceGenerator
+import gsonpath.extension.ExtensionsHandler
+import gsonpath.extension.ExtensionsLoader
+import gsonpath.generator.standard.adapter.AdapterModelMetadataFactory
+import gsonpath.generator.standard.adapter.AutoGsonAdapterGenerator
+import gsonpath.generator.standard.adapter.read.ReadFunctions
+import gsonpath.generator.standard.adapter.write.WriteFunctions
+import gsonpath.generator.standard.extension.subtype.SubTypeMetadataFactoryImpl
+import gsonpath.generator.standard.factory.TypeAdapterFactoryGenerator
+import gsonpath.generator.standard.interf.InterfaceModelMetadataFactory
+import gsonpath.generator.standard.interf.ModelInterfaceGenerator
 import gsonpath.model.*
 import gsonpath.util.*
 import javax.annotation.processing.ProcessingEnvironment
