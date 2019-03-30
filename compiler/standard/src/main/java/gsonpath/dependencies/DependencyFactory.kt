@@ -1,16 +1,27 @@
 package gsonpath.dependencies
 
+import gsonpath.adapter.common.SubTypeMetadataFactory
+import gsonpath.adapter.common.SubTypeMetadataFactoryImpl
 import gsonpath.adapter.standard.adapter.AdapterModelMetadataFactory
 import gsonpath.adapter.standard.adapter.StandardGsonAdapterGenerator
 import gsonpath.adapter.standard.adapter.read.ReadFunctions
 import gsonpath.adapter.standard.adapter.write.WriteFunctions
 import gsonpath.adapter.standard.extension.ExtensionsHandler
 import gsonpath.adapter.standard.extension.ExtensionsLoader
-import gsonpath.adapter.standard.extension.subtype.SubTypeMetadataFactoryImpl
+import gsonpath.adapter.standard.extension.def.intdef.IntDefExtension
+import gsonpath.adapter.standard.extension.def.stringdef.StringDefExtension
+import gsonpath.adapter.standard.extension.empty.EmptyToNullExtension
+import gsonpath.adapter.standard.extension.flatten.FlattenJsonExtension
+import gsonpath.adapter.standard.extension.invalid.RemoveInvalidElementsExtension
+import gsonpath.adapter.standard.extension.range.floatrange.FloatRangeExtension
+import gsonpath.adapter.standard.extension.range.intrange.IntRangeExtension
+import gsonpath.adapter.standard.extension.size.SizeExtension
+import gsonpath.adapter.standard.extension.subtype.GsonSubTypeExtension
 import gsonpath.adapter.standard.factory.TypeAdapterFactoryGenerator
 import gsonpath.adapter.standard.interf.InterfaceModelMetadataFactory
 import gsonpath.adapter.standard.interf.ModelInterfaceGenerator
 import gsonpath.adapter.standard.model.*
+import gsonpath.compiler.GsonPathExtension
 import gsonpath.util.*
 import javax.annotation.processing.ProcessingEnvironment
 
@@ -29,7 +40,8 @@ object DependencyFactory {
                 FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()))
         val gsonObjectTreeFactory = GsonObjectTreeFactory(gsonObjectFactory)
 
-        val extensions = ExtensionsLoader.loadExtensions(typeHandler, Logger(processingEnv))
+        val subTypeMetadataFactory = SubTypeMetadataFactoryImpl(typeHandler)
+        val extensions = loadExtensions(typeHandler, subTypeMetadataFactory, processingEnv)
         val extensionsHandler = ExtensionsHandler(processingEnv, extensions)
         val readFunctions = ReadFunctions(extensionsHandler)
         val writeFunctions = WriteFunctions(extensionsHandler)
@@ -56,7 +68,26 @@ object DependencyFactory {
                 fileWriter = fileWriter,
                 typeAdapterFactoryGenerator = TypeAdapterFactoryGenerator(
                         fileWriter),
-                subTypeMetadataFactory = SubTypeMetadataFactoryImpl(typeHandler)
+                subTypeMetadataFactory = subTypeMetadataFactory
         )
+    }
+
+    private fun loadExtensions(
+            typeHandler: TypeHandler,
+            subTypeMetadataFactory: SubTypeMetadataFactory,
+            processingEnv: ProcessingEnvironment): List<GsonPathExtension> {
+
+        return ExtensionsLoader.loadExtensions(Logger(processingEnv))
+                .plus(arrayOf(
+                        IntDefExtension(),
+                        StringDefExtension(),
+                        EmptyToNullExtension(),
+                        FlattenJsonExtension(),
+                        RemoveInvalidElementsExtension(),
+                        FloatRangeExtension(),
+                        IntRangeExtension(),
+                        SizeExtension(),
+                        GsonSubTypeExtension(typeHandler, subTypeMetadataFactory)
+                ))
     }
 }

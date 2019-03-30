@@ -6,12 +6,12 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.GsonSubtype
 import gsonpath.adapter.AdapterFactory
-import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
-import gsonpath.adapter.Constants
 import gsonpath.adapter.AdapterGenerationResult
-import gsonpath.adapter.standard.extension.subtype.GsonSubTypeCategory
-import gsonpath.adapter.standard.extension.subtype.GsonSubTypeFactory
-import gsonpath.adapter.standard.extension.subtype.GsonSubTypeResult
+import gsonpath.adapter.Constants
+import gsonpath.adapter.common.GsonSubTypeCategory
+import gsonpath.adapter.common.GsonSubTypeFactory
+import gsonpath.adapter.common.GsonSubTypeResult
+import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
 import gsonpath.adapter.util.writeFile
 import gsonpath.compiler.generateClassName
 import gsonpath.dependencies.Dependencies

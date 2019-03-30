@@ -1,7 +1,7 @@
 package gsonpath.dependencies
 
+import gsonpath.adapter.common.SubTypeMetadataFactory
 import gsonpath.adapter.standard.adapter.StandardGsonAdapterGenerator
-import gsonpath.adapter.standard.extension.subtype.SubTypeMetadataFactory
 import gsonpath.adapter.standard.factory.TypeAdapterFactoryGenerator
 import gsonpath.util.FileWriter
 

@@ -8,6 +8,10 @@ import gsonpath.GsonSubtype
 import gsonpath.ProcessingException
 import gsonpath.adapter.Constants
 import gsonpath.adapter.Constants.NULL
+import gsonpath.adapter.common.GsonSubTypeCategory
+import gsonpath.adapter.common.GsonSubTypeFactory
+import gsonpath.adapter.common.SubTypeMetadata
+import gsonpath.adapter.common.SubTypeMetadataFactory
 import gsonpath.compiler.ExtensionFieldMetadata
 import gsonpath.compiler.GsonPathExtension
 import gsonpath.internal.CollectionTypeAdapter

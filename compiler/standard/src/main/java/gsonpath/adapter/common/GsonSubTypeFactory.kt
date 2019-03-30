@@ -1,4 +1,4 @@
-package gsonpath.adapter.standard.extension.subtype
+package gsonpath.adapter.common
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException

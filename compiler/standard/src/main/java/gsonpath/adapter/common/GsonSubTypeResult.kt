@@ -1,4 +1,4 @@
-package gsonpath.adapter.standard.extension.subtype
+package gsonpath.adapter.common
 
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec

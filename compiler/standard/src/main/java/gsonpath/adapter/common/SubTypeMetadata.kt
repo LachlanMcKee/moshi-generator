@@ -1,4 +1,4 @@
-package gsonpath.adapter.standard.extension.subtype
+package gsonpath.adapter.common
 
 import gsonpath.GsonSubTypeFailureOutcome
 import javax.lang.model.element.Element
