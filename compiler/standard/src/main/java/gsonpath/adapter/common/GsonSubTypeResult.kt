@@ -9,6 +9,6 @@ data class GsonSubTypeResult(
         val constructorCodeBlock: CodeBlock? = null,
         val fieldSpecs: List<FieldSpec> = emptyList(),
         val typeSpecs: List<TypeSpec> = emptyList(),
-        val readMethodSpecs: MethodSpec,
-        val writeMethodSpecs: MethodSpec
+        val readMethodSpec: MethodSpec,
+        val writeMethodSpec: MethodSpec
 )

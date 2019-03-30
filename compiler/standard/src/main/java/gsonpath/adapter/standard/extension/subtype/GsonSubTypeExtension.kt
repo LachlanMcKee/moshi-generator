@@ -195,8 +195,8 @@ class GsonSubTypeExtension(
                 addCode(result.constructorCodeBlock)
             }
 
-            addMethod(result.readMethodSpecs)
-            addMethod(result.writeMethodSpecs)
+            addMethod(result.readMethodSpec)
+            addMethod(result.writeMethodSpec)
         }
     }
 
