@@ -22,9 +22,7 @@ java {
 }
 
 dependencies {
-    implementation(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
-    implementation(ProjectProperties.Dependencies.JAVAPOET)
-    implementation(files(Jvm.current().getToolsJar()))
-
-    testImplementation(ProjectProperties.Dependencies.JUNIT)
+    api(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
+    api(ProjectProperties.Dependencies.JAVAPOET)
+    api(files(Jvm.current().getToolsJar()))
 }
