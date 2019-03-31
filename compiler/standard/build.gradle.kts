@@ -1,3 +1,5 @@
+import org.gradle.internal.jvm.Jvm
+
 buildscript {
     repositories {
         mavenCentral()
@@ -28,4 +30,5 @@ dependencies {
     implementation(ProjectProperties.Dependencies.JAVAPOET)
     implementation("com.google.auto:auto-common:0.6")
     implementation(ProjectProperties.Dependencies.GSON)
+    implementation(files(Jvm.current().getToolsJar()))
 }

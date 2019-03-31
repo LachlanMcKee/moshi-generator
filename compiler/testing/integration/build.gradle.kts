@@ -14,8 +14,13 @@ java {
 }
 
 dependencies {
+    implementation(project(":library"))
+    implementation(project(":compiler:base"))
+    implementation(project(":compiler:standard"))
     implementation(project(":compiler:testing:base"))
+
+    implementation(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
     implementation("com.google.truth:truth:0.34")
     implementation("com.google.testing.compile:compile-testing:0.11")
-    implementation(files(org.gradle.internal.jvm.Jvm.current().getToolsJar()))
+    testImplementation(ProjectProperties.Dependencies.JUNIT)
 }

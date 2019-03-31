@@ -14,6 +14,11 @@ java {
 }
 
 dependencies {
+    testImplementation(project(":library"))
+    testImplementation(project(":compiler:base"))
+    testImplementation(project(":compiler:standard"))
     testImplementation(project(":compiler:testing:base"))
+
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0")
+    testImplementation(ProjectProperties.Dependencies.JUNIT)
 }
