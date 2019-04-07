@@ -9,5 +9,7 @@ java {
 }
 
 dependencies {
+    implementation(project(":compiler:base"))
     implementation(ProjectProperties.Dependencies.KOTLIN_STD_LIB)
+    implementation(ProjectProperties.Dependencies.JUNIT)
 }
