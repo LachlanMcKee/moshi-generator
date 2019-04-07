@@ -2,6 +2,7 @@ package gsonpath
 
 import com.google.common.collect.Sets
 import gsonpath.adapter.AdapterGenerationResult
+import gsonpath.adapter.enums.EnumAdapterFactory
 import gsonpath.adapter.standard.StandardAdapterFactory
 import gsonpath.adapter.subType.SubTypeAdapterFactory
 import gsonpath.dependencies.Dependencies
@@ -37,6 +38,7 @@ open class GsonProcessor : AbstractProcessor() {
         val dependencies = DependencyFactory.create(processingEnv)
         val autoGsonAdapterResults = StandardAdapterFactory.generateGsonAdapters(env, logger, annotations, dependencies)
                 .plus(SubTypeAdapterFactory.generateGsonAdapters(env, logger, annotations, dependencies))
+                .plus(EnumAdapterFactory.generateGsonAdapters(env, logger, annotations, dependencies))
 
         generateTypeAdapterFactories(env, dependencies, autoGsonAdapterResults)
 

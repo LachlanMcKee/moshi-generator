@@ -1,6 +1,5 @@
 package gsonpath.adapter.standard.adapter.write
 
-import com.google.gson.stream.JsonWriter
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
@@ -15,9 +14,9 @@ import gsonpath.adapter.standard.extension.ExtensionsHandler
 import gsonpath.adapter.standard.model.GsonArray
 import gsonpath.adapter.standard.model.GsonField
 import gsonpath.adapter.standard.model.GsonObject
+import gsonpath.adapter.AdapterMethodBuilder
 import gsonpath.model.FieldType
 import gsonpath.util.*
-import java.io.IOException
 
 /**
  * public void write(JsonWriter out, ImageSizes value) throws IOException {
@@ -25,10 +24,7 @@ import java.io.IOException
 class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
     @Throws(ProcessingException::class)
     fun handleWrite(typeSpecBuilder: TypeSpec.Builder, params: WriteParams) {
-        typeSpecBuilder.overrideMethod("write") {
-            addParameter(JsonWriter::class.java, OUT)
-            addParameter(params.elementClassName, VALUE)
-            addException(IOException::class.java)
+        typeSpecBuilder.addMethod(AdapterMethodBuilder.createWriteMethodBuilder(params.elementClassName).applyAndBuild {
             code {
                 // Initial block which prevents nulls being accessed.
                 `if`("$VALUE == $NULL") {
@@ -39,7 +35,7 @@ class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
                 comment("Begin")
                 writeGsonFieldWriter(params.rootElements, params.serializeNulls, true)
             }
-        }
+        })
     }
 
     @Throws(ProcessingException::class)

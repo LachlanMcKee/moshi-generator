@@ -1,4 +1,4 @@
-package gsonpath.adapter.standard
+package gsonpath.adapter.enums
 
 import gsonpath.AutoGsonAdapter
 import gsonpath.adapter.AdapterFactory
@@ -10,7 +10,7 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
-object StandardAdapterFactory : AdapterFactory {
+object EnumAdapterFactory : AdapterFactory {
 
     override fun generateGsonAdapters(
             env: RoundEnvironment,
@@ -18,9 +18,8 @@ object StandardAdapterFactory : AdapterFactory {
             annotations: Set<TypeElement>,
             dependencies: Dependencies): List<AdapterGenerationResult> {
 
-        return getAnnotatedModelElements<AutoGsonAdapter>(env, annotations, listOf(ElementKind.CLASS, ElementKind.INTERFACE))
+        return getAnnotatedModelElements<AutoGsonAdapter>(env, annotations, listOf(ElementKind.ENUM))
                 .onEach { logger.printMessage("Generating TypeAdapter (${it.element})") }
-                .map { dependencies.standardGsonAdapterGenerator.handle(it.element, it.annotation) }
+                .map { dependencies.enumGsonAdapterGenerator.handle(it.element, it.annotation) }
     }
-
 }

@@ -1,6 +1,5 @@
 package gsonpath.adapter.standard.adapter.read
 
-import com.google.gson.stream.JsonReader
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
@@ -17,9 +16,9 @@ import gsonpath.adapter.standard.model.GsonModel
 import gsonpath.adapter.standard.model.GsonObject
 import gsonpath.adapter.standard.model.MandatoryFieldInfoFactory.MandatoryFieldInfo
 import gsonpath.compiler.createDefaultVariableValueForTypeName
+import gsonpath.adapter.AdapterMethodBuilder
 import gsonpath.model.FieldType
 import gsonpath.util.*
-import java.io.IOException
 
 /**
  * public T read(JsonReader in) throws IOException {
@@ -28,10 +27,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     @Throws(ProcessingException::class)
     fun handleRead(typeSpecBuilder: TypeSpec.Builder, params: ReadParams) {
-        typeSpecBuilder.overrideMethod("read") {
-            returns(params.baseElement)
-            addParameter(JsonReader::class.java, IN)
-            addException(IOException::class.java)
+        typeSpecBuilder.addMethod(AdapterMethodBuilder.createReadMethodBuilder(params.baseElement).applyAndBuild {
             code {
                 comment("Ensure the object is not null.")
                 `if`("!isValidValue($IN)") {
@@ -51,7 +47,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
                     multiLinedNewObject(params.concreteElement, params.flattenedFields.map { it.variableName })
                 }
             }
-        }
+        })
     }
 
     private fun CodeBlock.Builder.addInitialisationBlock(params: ReadParams) {
