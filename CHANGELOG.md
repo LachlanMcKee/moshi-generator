@@ -1,6 +1,25 @@
 Change Log
 ===========
 
+Version 3.4.0 *(2019-06-19)*
+----------------------------
+
+* Improvement: `@GsonSubType` now supports null values. ([#210](../../issues/210)) 
+
+This is change in behaviour, as previously a null or missing value for a `subTypeKey` would have thrown an exception saying this was not allowed. Now that it is allowed, it is possible that elements may leak into an array/list.
+
+The main benefit is that it is now possible for `stringValueSubtypes` to handle situations where the `subTypeKey` value is null, such as:
+
+```java
+@GsonSubtype(
+        subTypeKey = "type",
+        defaultType = Type1.class,
+        stringValueSubtypes = {
+                @GsonSubtype.StringValueSubtype(value = GsonSubtype.StringValueSubtype.NULL_STRING, subtype = TypeNull.class)
+        }
+)
+``` 
+
 Version 3.3.0 *(2019-04-07)*
 ----------------------------
 
