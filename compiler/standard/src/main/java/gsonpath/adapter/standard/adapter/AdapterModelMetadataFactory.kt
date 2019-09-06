@@ -2,6 +2,7 @@ package gsonpath.adapter.standard.adapter
 
 import com.squareup.javapoet.ClassName
 import gsonpath.AutoGsonAdapter
+import gsonpath.adapter.Foo
 import gsonpath.adapter.standard.adapter.properties.AutoGsonAdapterPropertiesFactory
 import gsonpath.adapter.standard.adapter.read.ReadParams
 import gsonpath.adapter.standard.adapter.write.WriteParams
@@ -19,7 +20,7 @@ import javax.lang.model.type.ExecutableType
 
 class AdapterModelMetadataFactory(
         private val fieldInfoFactory: FieldInfoFactory,
-        private val gsonObjectTreeFactory: GsonObjectTreeFactory,
+        private val gsonObjectTreeFactory: GsonObjectTreeFactory<Foo>,
         private val typeHandler: TypeHandler,
         private val modelInterfaceGenerator: ModelInterfaceGenerator) {
 

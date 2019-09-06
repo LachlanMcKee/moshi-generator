@@ -1,5 +1,6 @@
 package gsonpath.adapter.standard.model
 
+import gsonpath.adapter.Foo
 import java.util.*
 
 class MandatoryFieldInfoFactory {
@@ -9,13 +10,13 @@ class MandatoryFieldInfoFactory {
      */
     class MandatoryFieldInfo(
             val indexVariableName: String,
-            val gsonField: GsonField)
+            val gsonField: GsonField<Foo>)
 
     /**
      * Add any mandatory field indexes as constants. This is done for code readability.
      * We will obtain the values using a depth-first recursion.
      */
-    fun createMandatoryFieldsFromGsonObject(gsonObject: GsonObject): Map<String, MandatoryFieldInfo> {
+    fun createMandatoryFieldsFromGsonObject(gsonObject: GsonObject<Foo>): Map<String, MandatoryFieldInfo> {
         return gsonObject.entries()
                 .fold(emptyMap()) { map, (_, gsonModel) ->
                     when (gsonModel) {
@@ -31,12 +32,12 @@ class MandatoryFieldInfoFactory {
      * value has been assigned after the json has been parsed.
      */
     private fun handleField(
-            gsonModel: GsonField,
+            gsonModel: GsonField<Foo>,
             map: Map<String, MandatoryFieldInfo>): Map<String, MandatoryFieldInfo> {
 
         return when {
-            gsonModel.isRequired -> {
-                val fieldName = gsonModel.fieldInfo.fieldName
+            gsonModel.value.isRequired -> {
+                val fieldName = gsonModel.value.fieldInfo.fieldName
                 val mandatoryFieldIndexName = "MANDATORY_INDEX_" + fieldName.toUpperCase(Locale.ENGLISH)
 
                 // Keep track of the information for later use. Since this is a linked list, we keep track of insert order.
@@ -47,7 +48,7 @@ class MandatoryFieldInfoFactory {
     }
 
     private fun handleArray(
-            arrayModel: GsonArray,
+            arrayModel: GsonArray<Foo>,
             map: Map<String, MandatoryFieldInfo>): Map<String, MandatoryFieldInfo> {
 
         return arrayModel.entries()

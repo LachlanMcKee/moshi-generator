@@ -353,7 +353,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
                     for ((_, mandatoryFieldInfo) in params.mandatoryInfoMap) {
                         case(mandatoryFieldInfo.indexVariableName) {
-                            addEscapedStatement("""$FIELD_NAME = "${mandatoryFieldInfo.gsonField.jsonPath}"""")
+                            addEscapedStatement("""$FIELD_NAME = "${mandatoryFieldInfo.gsonField.value.jsonPath}"""")
                         }
                     }
 

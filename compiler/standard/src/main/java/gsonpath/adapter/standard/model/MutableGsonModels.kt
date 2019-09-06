@@ -6,9 +6,13 @@ import java.util.*
 sealed class MutableGsonModel<T>
 sealed class MutableGsonArrayElement<T> : MutableGsonModel<T>()
 
-data class MutableGsonField<T>(val value: T) : MutableGsonArrayElement<T>() {
+data class MutableGsonField<T>(
+        val fieldIndex: Int,
+        val value: T
+) : MutableGsonArrayElement<T>() {
+
     fun toImmutable(): GsonField<T> {
-        return GsonField(value)
+        return GsonField(fieldIndex, value)
     }
 }
 

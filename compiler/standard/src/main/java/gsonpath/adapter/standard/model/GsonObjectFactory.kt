@@ -2,19 +2,18 @@ package gsonpath.adapter.standard.model
 
 import gsonpath.GsonFieldValidationType
 import gsonpath.ProcessingException
-import gsonpath.adapter.Foo
 import gsonpath.model.FieldInfo
 import gsonpath.model.FieldType
 import java.util.regex.Pattern
 import javax.lang.model.element.Element
 
-class GsonObjectFactory(
+class GsonObjectFactory<T>(
         private val gsonObjectValidator: GsonObjectValidator,
         private val fieldPathFetcher: FieldPathFetcher) {
 
     @Throws(ProcessingException::class)
     fun addGsonType(
-            gsonPathObject: MutableGsonObject<Foo>,
+            gsonPathObject: MutableGsonObject<T>,
             fieldInfo: FieldInfo,
             fieldInfoIndex: Int,
             metadata: GsonObjectMetadata) {
@@ -57,7 +56,7 @@ class GsonObjectFactory(
 
     @Throws(ProcessingException::class)
     private fun addNestedType(
-            gsonPathObject: MutableGsonObject<Foo>,
+            gsonPathObject: MutableGsonObject<T>,
             fieldInfo: FieldInfo,
             jsonFieldPath: FieldPath.Nested,
             flattenDelimiter: Char,
@@ -71,7 +70,7 @@ class GsonObjectFactory(
         val lastPathIndex = pathSegments.size - 1
         val arrayIndexes = IntArray(pathSegments.size)
 
-        (0..lastPathIndex).fold(gsonPathObject as MutableGsonModel<Foo>) { currentModel: MutableGsonModel<Foo>, index ->
+        (0..lastPathIndex).fold(gsonPathObject as MutableGsonModel<T>) { currentModel: MutableGsonModel<T>, index ->
             val pathType = getPathType(pathSegments[index])
             val pathKey = when (pathType) {
                 is PathType.Array -> pathType.beforeArrayPath
@@ -93,18 +92,18 @@ class GsonObjectFactory(
         }
     }
 
-    private fun handleNestedSegment(content: CommonSegmentContent): MutableGsonModel<Foo> {
+    private fun handleNestedSegment(content: CommonSegmentContent<T>): MutableGsonModel<T> {
         val currentModel = content.currentModel
         val pathType = content.pathType
         val pathKey = content.pathKey
 
         return when (currentModel) {
-            is MutableGsonObject<Foo> -> {
+            is MutableGsonObject<T> -> {
                 when (val existingGsonModel = currentModel[pathType.path]) {
                     null -> {
                         when (pathType) {
                             is PathType.Standard -> {
-                                MutableGsonObject<Foo>().also { newMap ->
+                                MutableGsonObject<T>().also { newMap ->
                                     currentModel.addObject(pathType.path, newMap)
                                 }
                             }
@@ -113,10 +112,10 @@ class GsonObjectFactory(
                             }
                         }
                     }
-                    is MutableGsonObject<Foo> -> {
+                    is MutableGsonObject<T> -> {
                         existingGsonModel
                     }
-                    is MutableGsonArray<Foo>, is MutableGsonField<Foo> -> {
+                    is MutableGsonArray<T>, is MutableGsonField<T> -> {
                         // If this value already exists, and it is not a tree branch,
                         // that means we have an invalid duplicate.
                         throw ProcessingException("Unexpected duplicate field '" + pathType.path +
@@ -124,7 +123,7 @@ class GsonObjectFactory(
                     }
                 }
             }
-            is MutableGsonArray<Foo> -> {
+            is MutableGsonArray<T> -> {
                 // Now that it is established that the array contains an object, we add a container object.
                 val previousArrayIndex = content.arrayIndexes[content.index - 1]
                 val currentGsonType = currentModel[previousArrayIndex]
@@ -132,7 +131,7 @@ class GsonObjectFactory(
                     val gsonObject = currentModel.getObjectAtIndex(previousArrayIndex)
                     gsonObject.addObject(pathKey, MutableGsonObject())
                 } else {
-                    (currentGsonType as MutableGsonObject<Foo>)[pathKey]!!
+                    (currentGsonType as MutableGsonObject<T>)[pathKey]!!
                 }
 
             }
@@ -143,21 +142,21 @@ class GsonObjectFactory(
     }
 
     private fun handleLastNestedSegment(
-            content: CommonSegmentContent,
+            content: CommonSegmentContent<T>,
             fieldIndex: Int,
             jsonFieldPath: FieldPath.Nested,
-            isRequired: Boolean): MutableGsonField<Foo> = try {
+            isRequired: Boolean): MutableGsonField<T> = try {
 
         val parentModel = content.currentModel
         val pathType = content.pathType
         val pathKey = content.pathKey
 
         val finalModel =
-                if (parentModel is MutableGsonArray<Foo>) {
+                if (parentModel is MutableGsonArray<T>) {
                     val previousArrayIndex = content.arrayIndexes[content.index - 1]
                     parentModel.getObjectAtIndex(previousArrayIndex)
                 } else {
-                    parentModel as MutableGsonObject<Foo>
+                    parentModel as MutableGsonObject<T>
                 }
 
         createField(fieldIndex, content.fieldInfo, jsonFieldPath.path, isRequired)
@@ -180,7 +179,7 @@ class GsonObjectFactory(
 
     @Throws(ProcessingException::class)
     private fun addStandardType(
-            gsonPathObject: MutableGsonObject<Foo>,
+            gsonPathObject: MutableGsonObject<T>,
             fieldInfo: FieldInfo,
             jsonFieldPath: FieldPath.Standard,
             fieldInfoIndex: Int,
@@ -208,10 +207,10 @@ class GsonObjectFactory(
             fieldIndex: Int,
             fieldInfo: FieldInfo,
             jsonPath: String,
-            isRequired: Boolean): MutableGsonField<Foo> {
+            isRequired: Boolean): MutableGsonField<T> {
 
         val variableName = "value_" + jsonPath.replace("[^A-Za-z0-9_]".toRegex(), "_")
-        return MutableGsonField(Foo(fieldIndex, fieldInfo, variableName, jsonPath, isRequired))
+        return MutableGsonField(T(fieldIndex, fieldInfo, variableName, jsonPath, isRequired))
     }
 
     @Throws(ProcessingException::class)
@@ -230,8 +229,8 @@ class GsonObjectFactory(
         }
     }
 
-    private data class CommonSegmentContent(
-            val currentModel: MutableGsonModel<Foo>,
+    private data class CommonSegmentContent<T>(
+            val currentModel: MutableGsonModel<T>,
             val arrayIndexes: List<Int>,
             val index: Int,
             val fieldInfo: FieldInfo,

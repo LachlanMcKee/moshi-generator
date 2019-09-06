@@ -3,7 +3,10 @@ package gsonpath.adapter.standard.model
 sealed class GsonModel<T>
 sealed class GsonArrayElement<T> : GsonModel<T>()
 
-data class GsonField<T>(val value: T) : GsonArrayElement<T>()
+data class GsonField<T>(
+        val fieldIndex: Int,
+        val value: T
+) : GsonArrayElement<T>()
 
 data class GsonObject<T>(private val fieldMap: Map<String, GsonModel<T>>) : GsonArrayElement<T>() {
 
