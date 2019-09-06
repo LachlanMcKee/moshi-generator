@@ -1,20 +1,13 @@
 package gsonpath.adapter.standard.model
 
-import gsonpath.model.FieldInfo
+sealed class GsonModel<T>
+sealed class GsonArrayElement<T> : GsonModel<T>()
 
-sealed class GsonModel
-sealed class GsonArrayElement : GsonModel()
+data class GsonField<T>(val value: T) : GsonArrayElement<T>()
 
-data class GsonField(
-        val fieldIndex: Int,
-        val fieldInfo: FieldInfo,
-        val variableName: String,
-        val jsonPath: String,
-        val isRequired: Boolean) : GsonArrayElement()
+data class GsonObject<T>(private val fieldMap: Map<String, GsonModel<T>>) : GsonArrayElement<T>() {
 
-data class GsonObject(private val fieldMap: Map<String, GsonModel>) : GsonArrayElement() {
-
-    fun entries(): Set<Map.Entry<String, GsonModel>> {
+    fun entries(): Set<Map.Entry<String, GsonModel<T>>> {
         return fieldMap.entries
     }
 
@@ -23,15 +16,15 @@ data class GsonObject(private val fieldMap: Map<String, GsonModel>) : GsonArrayE
     }
 }
 
-data class GsonArray(
-        private val arrayFields: Map<Int, GsonArrayElement> = HashMap(),
-        val maxIndex: Int) : GsonModel() {
+data class GsonArray<T>(
+        private val arrayFields: Map<Int, GsonArrayElement<T>> = HashMap(),
+        val maxIndex: Int) : GsonModel<T>() {
 
-    fun entries(): Set<Map.Entry<Int, GsonArrayElement>> {
+    fun entries(): Set<Map.Entry<Int, GsonArrayElement<T>>> {
         return arrayFields.entries
     }
 
-    operator fun get(arrayIndex: Int): GsonArrayElement? {
+    operator fun get(arrayIndex: Int): GsonArrayElement<T>? {
         return arrayFields[arrayIndex]
     }
 }

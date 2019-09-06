@@ -1,6 +1,7 @@
 package gsonpath.adapter.standard.extension
 
 import gsonpath.ProcessingException
+import gsonpath.adapter.Foo
 import gsonpath.adapter.standard.model.GsonField
 import gsonpath.compiler.ExtensionFieldMetadata
 import gsonpath.compiler.GsonPathExtension
@@ -11,7 +12,7 @@ class ExtensionsHandler(
         private val extensions: List<GsonPathExtension>) {
 
     private fun canHandleFieldFunc(
-            gsonField: GsonField,
+            gsonField: GsonField<Foo>,
             variableName: String,
             func: (GsonPathExtension, ExtensionFieldMetadata) -> Boolean): Boolean {
 
@@ -22,25 +23,25 @@ class ExtensionsHandler(
 
         if (supportedExtensions > 1) {
             throw ProcessingException("It is not possible to guarantee extension ordering, " +
-                    "therefore it is illegal to use multiple", gsonField.fieldInfo.element)
+                    "therefore it is illegal to use multiple", gsonField.value.fieldInfo.element)
         }
         return supportedExtensions == 1
     }
 
-    fun canHandleFieldRead(gsonField: GsonField, variableName: String): Boolean {
+    fun canHandleFieldRead(gsonField: GsonField<Foo>, variableName: String): Boolean {
         return canHandleFieldFunc(gsonField, variableName) { extension, metadata ->
             extension.canHandleFieldRead(processingEnvironment, metadata)
         }
     }
 
-    fun canHandleFieldWrite(gsonField: GsonField, variableName: String): Boolean {
+    fun canHandleFieldWrite(gsonField: GsonField<Foo>, variableName: String): Boolean {
         return canHandleFieldFunc(gsonField, variableName) { extension, metadata ->
             extension.canHandleFieldWrite(processingEnvironment, metadata)
         }
     }
 
     fun executeFieldRead(
-            gsonField: GsonField,
+            gsonField: GsonField<Foo>,
             variableName: String,
             checkIfResultIsNull: Boolean,
             handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
@@ -57,7 +58,7 @@ class ExtensionsHandler(
         }
     }
 
-    fun executeFieldWrite(gsonField: GsonField, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
+    fun executeFieldWrite(gsonField: GsonField<Foo>, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
         if (!canHandleFieldWrite(gsonField, variableName)) {
             throw IllegalStateException("canHandleFieldWrite must be checked before calling this method.")
         }
@@ -70,7 +71,7 @@ class ExtensionsHandler(
         }
     }
 
-    fun executePostRead(gsonField: GsonField, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
+    fun executePostRead(gsonField: GsonField<Foo>, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
         extensions.forEach { extension ->
             extension.createCodePostReadResult(processingEnvironment, createMetadata(gsonField, variableName))
                     ?.let {
@@ -79,6 +80,10 @@ class ExtensionsHandler(
         }
     }
 
-    private fun createMetadata(gsonField: GsonField, variableName: String) =
-            ExtensionFieldMetadata(gsonField.fieldInfo, variableName, gsonField.jsonPath, gsonField.isRequired)
+    private fun createMetadata(gsonField: GsonField<Foo>, variableName: String) =
+            ExtensionFieldMetadata(
+                    gsonField.value.fieldInfo,
+                    variableName,
+                    gsonField.value.jsonPath,
+                    gsonField.value.isRequired)
 }

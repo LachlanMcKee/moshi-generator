@@ -17,6 +17,7 @@ import gsonpath.adapter.standard.model.GsonObject
 import gsonpath.adapter.standard.model.MandatoryFieldInfoFactory.MandatoryFieldInfo
 import gsonpath.compiler.createDefaultVariableValueForTypeName
 import gsonpath.adapter.AdapterMethodBuilder
+import gsonpath.adapter.Foo
 import gsonpath.model.FieldType
 import gsonpath.util.*
 
@@ -44,7 +45,9 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
                 } else {
                     // Create the class using the constructor.
-                    multiLinedNewObject(params.concreteElement, params.flattenedFields.map { it.variableName })
+                    multiLinedNewObject(params.concreteElement, params.flattenedFields.map {
+                        it.value.variableName
+                    })
                 }
             }
         })
@@ -56,9 +59,9 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
         } else {
             params.flattenedFields.forEach {
-                createVariable(it.fieldInfo.fieldType.typeName,
-                        it.variableName,
-                        createDefaultVariableValueForTypeName(it.fieldInfo.fieldType.typeName))
+                createVariable(it.value.fieldInfo.fieldType.typeName,
+                        it.value.variableName,
+                        createDefaultVariableValueForTypeName(it.value.fieldInfo.fieldType.typeName))
             }
         }
 
@@ -77,7 +80,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.addReadCodeForElements(
             typeSpecBuilder: TypeSpec.Builder,
-            jsonMapping: GsonObject,
+            jsonMapping: GsonObject<Foo>,
             params: ReadParams,
             recursionCount: Int = 0): Int {
 
@@ -132,7 +135,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
             typeSpecBuilder: TypeSpec.Builder,
             params: ReadParams,
             key: String,
-            value: GsonModel,
+            value: GsonModel<Foo>,
             counterVariableName: String,
             currentOverallRecursionCount: Int): Int {
 
@@ -143,7 +146,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
             when (value) {
                 is GsonField -> {
                     writeGsonFieldReader(typeSpecBuilder, value, params.requiresConstructorInjection,
-                            params.mandatoryInfoMap[value.fieldInfo.fieldName])
+                            params.mandatoryInfoMap[value.value.fieldInfo.fieldName])
 
                     // No extra recursion has happened.
                     currentOverallRecursionCount
@@ -165,14 +168,15 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
         }
     }
 
+
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.writeGsonFieldReader(
             typeSpecBuilder: TypeSpec.Builder,
-            gsonField: GsonField,
+            gsonField: GsonField<Foo>,
             requiresConstructorInjection: Boolean,
             mandatoryFieldInfo: MandatoryFieldInfo?) {
 
-        val fieldInfo = gsonField.fieldInfo
+        val fieldInfo = gsonField.value.fieldInfo
 
         // Add a new line to improve readability for the multi-lined mapping.
         newLine()
@@ -183,7 +187,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
                 if (!requiresConstructorInjection) {
                     "$RESULT." + fieldInfo.fieldName
                 } else {
-                    gsonField.variableName
+                    gsonField.value.variableName
                 }
 
         if (result.checkIfNull) {
@@ -196,7 +200,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
                     newLine()
 
                     nextControlFlow("else")
-                    addEscapedStatement("""throw new $JSON_FIELD_MISSING_EXCEPTION("Mandatory JSON element '${gsonField.jsonPath}' was null for class '${fieldInfo.parentClassName}'")""")
+                    addEscapedStatement("""throw new $JSON_FIELD_MISSING_EXCEPTION("Mandatory JSON element '${gsonField.value.jsonPath}' was null for class '${fieldInfo.parentClassName}'")""")
                 }
             }
         }
@@ -226,13 +230,12 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
             }
         }
     }
-
     /**
      * Writes the Java code for field reading that is not supported by Gson.
      */
     private fun CodeBlock.Builder.writeGsonFieldReading(
             typeSpecBuilder: TypeSpec.Builder,
-            gsonField: GsonField,
+            gsonField: GsonField<Foo>,
             requiresConstructorInjection: Boolean): FieldReaderResult {
 
         val variableName = getVariableName(gsonField, requiresConstructorInjection)
@@ -250,7 +253,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
             }
 
         } else {
-            val fieldTypeName = gsonField.fieldInfo.fieldType.typeName.box()
+            val fieldTypeName = gsonField.value.fieldInfo.fieldType.typeName.box()
             val adapterName =
                     if (fieldTypeName is ParameterizedTypeName)
                         "new com.google.gson.reflect.TypeToken<\$T>(){}" // This is a generic type
@@ -270,7 +273,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     private fun CodeBlock.Builder.writeGsonArrayReader(
             typeSpecBuilder: TypeSpec.Builder,
-            value: GsonArray,
+            value: GsonArray<Foo>,
             params: ReadParams,
             key: String,
             currentOverallRecursionCount: Int): Int {
@@ -304,7 +307,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     private fun CodeBlock.Builder.writeGsonArrayReaderCases(
             typeSpecBuilder: TypeSpec.Builder,
-            value: GsonArray,
+            value: GsonArray<Foo>,
             params: ReadParams,
             seedValue: Int): Int {
 
@@ -313,7 +316,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
                 when (arrayItemValue) {
                     is GsonField -> {
                         writeGsonFieldReader(typeSpecBuilder, arrayItemValue, params.requiresConstructorInjection,
-                                params.mandatoryInfoMap[arrayItemValue.fieldInfo.fieldName])
+                                params.mandatoryInfoMap[arrayItemValue.value.fieldInfo.fieldName])
 
                         // No extra recursion has happened.
                         previousRecursionCount
@@ -360,15 +363,15 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
         }
     }
 
-    private fun getVariableName(gsonField: GsonField, requiresConstructorInjection: Boolean): String {
-        return if (gsonField.isRequired && requiresConstructorInjection)
-            "${gsonField.variableName}_safe"
+    private fun getVariableName(gsonField: GsonField<Foo>, requiresConstructorInjection: Boolean): String {
+        return if (gsonField.value.isRequired && requiresConstructorInjection)
+            "${gsonField.value.variableName}_safe"
         else
-            gsonField.variableName
+            gsonField.value.variableName
     }
 
-    private fun isCheckIfNullApplicable(gsonField: GsonField, requiresConstructorInjection: Boolean): Boolean {
-        return !requiresConstructorInjection || gsonField.isRequired
+    private fun isCheckIfNullApplicable(gsonField: GsonField<Foo>, requiresConstructorInjection: Boolean): Boolean {
+        return !requiresConstructorInjection || gsonField.value.isRequired
     }
 
     private data class FieldReaderResult(

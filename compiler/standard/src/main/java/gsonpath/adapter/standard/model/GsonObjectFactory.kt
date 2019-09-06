@@ -2,6 +2,7 @@ package gsonpath.adapter.standard.model
 
 import gsonpath.GsonFieldValidationType
 import gsonpath.ProcessingException
+import gsonpath.adapter.Foo
 import gsonpath.model.FieldInfo
 import gsonpath.model.FieldType
 import java.util.regex.Pattern
@@ -13,7 +14,7 @@ class GsonObjectFactory(
 
     @Throws(ProcessingException::class)
     fun addGsonType(
-            gsonPathObject: MutableGsonObject,
+            gsonPathObject: MutableGsonObject<Foo>,
             fieldInfo: FieldInfo,
             fieldInfoIndex: Int,
             metadata: GsonObjectMetadata) {
@@ -56,7 +57,7 @@ class GsonObjectFactory(
 
     @Throws(ProcessingException::class)
     private fun addNestedType(
-            gsonPathObject: MutableGsonObject,
+            gsonPathObject: MutableGsonObject<Foo>,
             fieldInfo: FieldInfo,
             jsonFieldPath: FieldPath.Nested,
             flattenDelimiter: Char,
@@ -70,7 +71,7 @@ class GsonObjectFactory(
         val lastPathIndex = pathSegments.size - 1
         val arrayIndexes = IntArray(pathSegments.size)
 
-        (0..lastPathIndex).fold(gsonPathObject as MutableGsonModel) { currentModel: MutableGsonModel, index ->
+        (0..lastPathIndex).fold(gsonPathObject as MutableGsonModel<Foo>) { currentModel: MutableGsonModel<Foo>, index ->
             val pathType = getPathType(pathSegments[index])
             val pathKey = when (pathType) {
                 is PathType.Array -> pathType.beforeArrayPath
@@ -92,18 +93,18 @@ class GsonObjectFactory(
         }
     }
 
-    private fun handleNestedSegment(content: CommonSegmentContent): MutableGsonModel {
+    private fun handleNestedSegment(content: CommonSegmentContent): MutableGsonModel<Foo> {
         val currentModel = content.currentModel
         val pathType = content.pathType
         val pathKey = content.pathKey
 
         return when (currentModel) {
-            is MutableGsonObject -> {
+            is MutableGsonObject<Foo> -> {
                 when (val existingGsonModel = currentModel[pathType.path]) {
                     null -> {
                         when (pathType) {
                             is PathType.Standard -> {
-                                MutableGsonObject().also { newMap ->
+                                MutableGsonObject<Foo>().also { newMap ->
                                     currentModel.addObject(pathType.path, newMap)
                                 }
                             }
@@ -112,10 +113,10 @@ class GsonObjectFactory(
                             }
                         }
                     }
-                    is MutableGsonObject -> {
+                    is MutableGsonObject<Foo> -> {
                         existingGsonModel
                     }
-                    is MutableGsonArray, is MutableGsonField -> {
+                    is MutableGsonArray<Foo>, is MutableGsonField<Foo> -> {
                         // If this value already exists, and it is not a tree branch,
                         // that means we have an invalid duplicate.
                         throw ProcessingException("Unexpected duplicate field '" + pathType.path +
@@ -123,7 +124,7 @@ class GsonObjectFactory(
                     }
                 }
             }
-            is MutableGsonArray -> {
+            is MutableGsonArray<Foo> -> {
                 // Now that it is established that the array contains an object, we add a container object.
                 val previousArrayIndex = content.arrayIndexes[content.index - 1]
                 val currentGsonType = currentModel[previousArrayIndex]
@@ -131,7 +132,7 @@ class GsonObjectFactory(
                     val gsonObject = currentModel.getObjectAtIndex(previousArrayIndex)
                     gsonObject.addObject(pathKey, MutableGsonObject())
                 } else {
-                    (currentGsonType as MutableGsonObject)[pathKey]!!
+                    (currentGsonType as MutableGsonObject<Foo>)[pathKey]!!
                 }
 
             }
@@ -145,18 +146,18 @@ class GsonObjectFactory(
             content: CommonSegmentContent,
             fieldIndex: Int,
             jsonFieldPath: FieldPath.Nested,
-            isRequired: Boolean): MutableGsonField = try {
+            isRequired: Boolean): MutableGsonField<Foo> = try {
 
         val parentModel = content.currentModel
         val pathType = content.pathType
         val pathKey = content.pathKey
 
         val finalModel =
-                if (parentModel is MutableGsonArray) {
+                if (parentModel is MutableGsonArray<Foo>) {
                     val previousArrayIndex = content.arrayIndexes[content.index - 1]
                     parentModel.getObjectAtIndex(previousArrayIndex)
                 } else {
-                    parentModel as MutableGsonObject
+                    parentModel as MutableGsonObject<Foo>
                 }
 
         createField(fieldIndex, content.fieldInfo, jsonFieldPath.path, isRequired)
@@ -179,7 +180,7 @@ class GsonObjectFactory(
 
     @Throws(ProcessingException::class)
     private fun addStandardType(
-            gsonPathObject: MutableGsonObject,
+            gsonPathObject: MutableGsonObject<Foo>,
             fieldInfo: FieldInfo,
             jsonFieldPath: FieldPath.Standard,
             fieldInfoIndex: Int,
@@ -207,10 +208,10 @@ class GsonObjectFactory(
             fieldIndex: Int,
             fieldInfo: FieldInfo,
             jsonPath: String,
-            isRequired: Boolean): MutableGsonField {
+            isRequired: Boolean): MutableGsonField<Foo> {
 
         val variableName = "value_" + jsonPath.replace("[^A-Za-z0-9_]".toRegex(), "_")
-        return MutableGsonField(fieldIndex, fieldInfo, variableName, jsonPath, isRequired)
+        return MutableGsonField(Foo(fieldIndex, fieldInfo, variableName, jsonPath, isRequired))
     }
 
     @Throws(ProcessingException::class)
@@ -230,7 +231,7 @@ class GsonObjectFactory(
     }
 
     private data class CommonSegmentContent(
-            val currentModel: MutableGsonModel,
+            val currentModel: MutableGsonModel<Foo>,
             val arrayIndexes: List<Int>,
             val index: Int,
             val fieldInfo: FieldInfo,

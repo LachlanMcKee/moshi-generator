@@ -15,6 +15,7 @@ import gsonpath.adapter.standard.model.GsonArray
 import gsonpath.adapter.standard.model.GsonField
 import gsonpath.adapter.standard.model.GsonObject
 import gsonpath.adapter.AdapterMethodBuilder
+import gsonpath.adapter.Foo
 import gsonpath.model.FieldType
 import gsonpath.util.*
 
@@ -40,7 +41,7 @@ class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.writeGsonFieldWriter(
-            jsonMapping: GsonObject,
+            jsonMapping: GsonObject<Foo>,
             serializeNulls: Boolean,
             writeKeyName: Boolean,
             currentPath: String = "",
@@ -68,7 +69,7 @@ class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
     }
 
     private fun CodeBlock.Builder.handleObject(
-            value: GsonObject,
+            value: GsonObject<Foo>,
             fieldCount: Int,
             serializeNulls: Boolean,
             currentPath: String,
@@ -90,13 +91,13 @@ class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
     }
 
     private fun CodeBlock.Builder.handleField(
-            value: GsonField,
+            value: GsonField<Foo>,
             fieldCount: Int,
             serializeNulls: Boolean,
             key: String,
             writeKeyName: Boolean): Int {
 
-        val fieldInfo = value.fieldInfo
+        val fieldInfo = value.value.fieldInfo
         val fieldTypeName = fieldInfo.fieldType.typeName
         val isPrimitive = fieldInfo.fieldType is FieldType.Primitive
         val fieldAccessor = fieldInfo.fieldAccessor
@@ -136,7 +137,7 @@ class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
     }
 
     private fun CodeBlock.Builder.handleArray(
-            gsonArray: GsonArray,
+            gsonArray: GsonArray<Foo>,
             currentFieldCount: Int,
             serializeNulls: Boolean,
             currentPath: String,
@@ -182,7 +183,7 @@ class WriteFunctions(private val extensionsHandler: ExtensionsHandler) {
                 }
     }
 
-    private fun CodeBlock.Builder.writeField(value: GsonField, objectName: String, fieldTypeName: TypeName) {
+    private fun CodeBlock.Builder.writeField(value: GsonField<Foo>, objectName: String, fieldTypeName: TypeName) {
         when {
             extensionsHandler.canHandleFieldWrite(value, objectName) -> {
                 extensionsHandler.executeFieldWrite(value, objectName) { extensionName, writeResult ->
