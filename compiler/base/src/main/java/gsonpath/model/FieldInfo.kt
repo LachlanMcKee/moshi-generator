@@ -1,13 +1,9 @@
 package gsonpath.model
 
-import javax.lang.model.element.Element
-
 /**
  * Contains important information about a class field within a class annotated with the AutoGsonAdapter annotation.
  */
-interface FieldInfo {
-    val fieldType: FieldType
-
+interface FieldInfo : Bah {
     /**
      * The name of the class that field is contained within.
      */
@@ -37,12 +33,6 @@ interface FieldInfo {
      * annotation processor library.
      */
     val annotationNames: List<String>
-
-    /**
-     * The raw annotation processor field element.
-     * This should mainly be used for reporting errors back to the user.
-     */
-    val element: Element
 
     /**
      * Whether the field has a default value assigned.

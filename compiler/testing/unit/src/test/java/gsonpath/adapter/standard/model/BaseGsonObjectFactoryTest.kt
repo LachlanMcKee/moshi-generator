@@ -1,14 +1,15 @@
 package gsonpath.adapter.standard.model
 
 import com.google.gson.FieldNamingPolicy
+import com.nhaarman.mockitokotlin2.mock
 import gsonpath.GsonFieldValidationType
 import gsonpath.PathSubstitution
 import gsonpath.ProcessingException
+import gsonpath.adapter.Foo
+import gsonpath.model.Bah
 import gsonpath.model.FieldInfo
 import org.junit.Rule
 import org.junit.rules.ExpectedException
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when` as whenever
 
 open class BaseGsonObjectFactoryTest {
 
@@ -16,12 +17,13 @@ open class BaseGsonObjectFactoryTest {
     @Rule
     val exception: ExpectedException = ExpectedException.none()
 
-    val gsonObjectValidator: GsonObjectValidator = mock(GsonObjectValidator::class.java)
-    val fieldPathFetcher: FieldPathFetcher = mock(FieldPathFetcher::class.java)
+    val bahRequiredDetector: BahRequiredDetector<Bah> = mock()
+    val bahFieldPathFetcher: BahFieldPathFetcher<Bah> = mock()
+    val gsonFieldValueFactory = FooGsonFieldValueFactory()
 
     @Throws(ProcessingException::class)
-    fun executeAddGsonType(arguments: GsonTypeArguments, metadata: GsonObjectMetadata, outputGsonObject: MutableGsonObject = MutableGsonObject()): MutableGsonObject {
-        GsonObjectFactory(gsonObjectValidator, fieldPathFetcher).addGsonType(
+    fun executeAddGsonType(arguments: GsonTypeArguments, metadata: GsonObjectMetadata, outputGsonObject: MutableGsonObject<Foo> = MutableGsonObject()): MutableGsonObject<Foo> {
+        GsonObjectFactory(bahRequiredDetector, bahFieldPathFetcher, gsonFieldValueFactory).addGsonType(
                 outputGsonObject,
                 arguments.fieldInfo,
                 arguments.fieldInfoIndex,

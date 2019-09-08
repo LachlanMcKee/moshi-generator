@@ -20,7 +20,7 @@ import javax.lang.model.type.ExecutableType
 
 class AdapterModelMetadataFactory(
         private val fieldInfoFactory: FieldInfoFactory,
-        private val gsonObjectTreeFactory: GsonObjectTreeFactory<Foo>,
+        private val gsonObjectTreeFactory: GsonObjectTreeFactory<FieldInfo, Foo>,
         private val typeHandler: TypeHandler,
         private val modelInterfaceGenerator: ModelInterfaceGenerator) {
 

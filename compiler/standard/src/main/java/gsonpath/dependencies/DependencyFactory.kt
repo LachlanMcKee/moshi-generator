@@ -23,6 +23,7 @@ import gsonpath.adapter.standard.interf.InterfaceModelMetadataFactory
 import gsonpath.adapter.standard.interf.ModelInterfaceGenerator
 import gsonpath.adapter.standard.model.*
 import gsonpath.compiler.GsonPathExtension
+import gsonpath.model.FieldInfo
 import gsonpath.util.*
 import javax.annotation.processing.ProcessingEnvironment
 
@@ -35,9 +36,10 @@ object DependencyFactory {
         val typeHandler = ProcessorTypeHandler(processingEnv)
         val fieldGetterFinder = FieldGetterFinder(typeHandler)
         val annotationFetcher = AnnotationFetcher(typeHandler, fieldGetterFinder)
-        val gsonObjectFactory = GsonObjectFactory<Foo>(
-                GsonObjectValidator(),
-                FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()))
+        val gsonObjectFactory = GsonObjectFactory<FieldInfo, Foo>(
+                FieldInfoBahRequiredDetector(GsonObjectValidator()),
+                FieldPathFetcher(SerializedNameFetcher, FieldNamingPolicyMapper()),
+                FooGsonFieldValueFactory())
         val gsonObjectTreeFactory = GsonObjectTreeFactory(gsonObjectFactory)
 
         val subTypeMetadataFactory = SubTypeMetadataFactoryImpl(typeHandler)

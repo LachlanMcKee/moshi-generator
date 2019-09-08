@@ -16,20 +16,19 @@ class MutableGsonModelTest {
 
     @Test
     fun testGsonField() {
-        val fieldInfo = mock(FieldInfo::class.java)
-        val mutableGsonField = MutableGsonField(0, fieldInfo, "variable", "path", true)
+        val mutableGsonField = MutableGsonField(0, TestGsonValue("Foo"))
 
         Assert.assertEquals(
-                GsonField(0, fieldInfo, "variable", "path", true),
+                GsonField(0, TestGsonValue("Foo")),
                 mutableGsonField.toImmutable())
     }
 
     @Test
     fun testGsonObject() {
         val fieldInfo = mock(FieldInfo::class.java)
-        val mutableGsonField = MutableGsonField(0, fieldInfo, "variable", "path", true)
+        val mutableGsonField = MutableGsonField(0, TestGsonValue("Foo"))
 
-        val mutableGsonObject = MutableGsonObject()
+        val mutableGsonObject = MutableGsonObject<TestGsonValue>()
         mutableGsonObject.addField("field1", mutableGsonField)
         mutableGsonObject.addObject("object1", MutableGsonObject())
         val array = mutableGsonObject.addArray("array1")
@@ -38,9 +37,9 @@ class MutableGsonModelTest {
         Assert.assertEquals(
                 GsonObject(
                         mapOf(
-                                "field1" to GsonField(0, fieldInfo, "variable", "path", true),
+                                "field1" to GsonField(0, TestGsonValue("Foo")),
                                 "object1" to GsonObject(emptyMap()),
-                                "array1" to GsonArray(mapOf(0 to GsonObject(emptyMap())), 0)
+                                "array1" to GsonArray(mapOf(0 to GsonObject<TestGsonValue>(emptyMap())), 0)
                         )
                 ),
                 mutableGsonObject.toImmutable())
@@ -49,8 +48,8 @@ class MutableGsonModelTest {
     @Test
     fun testGsonArray() {
         val fieldInfo = mock(FieldInfo::class.java)
-        val mutableGsonField = MutableGsonField(0, fieldInfo, "variable", "path", true)
-        val mutableGsonArray = MutableGsonArray()
+        val mutableGsonField = MutableGsonField(0, TestGsonValue("Foo"))
+        val mutableGsonArray = MutableGsonArray<TestGsonValue>()
 
         mutableGsonArray.addField(0, mutableGsonField)
         mutableGsonArray.getObjectAtIndex(1)
@@ -58,8 +57,8 @@ class MutableGsonModelTest {
         Assert.assertEquals(
                 GsonArray(
                         mapOf(
-                                0 to GsonField(0, fieldInfo, "variable", "path", true),
-                                1 to GsonObject(emptyMap())
+                                0 to GsonField(0, TestGsonValue("Foo")),
+                                1 to GsonObject<TestGsonValue>(emptyMap())
                         ),
                         1
                 ),
@@ -69,6 +68,6 @@ class MutableGsonModelTest {
     @Test
     fun testInvalidGsonArray() {
         expectedException.expect(`is`(processingExceptionMatcher(null, "Array should not be empty")))
-        MutableGsonArray().toImmutable()
+        MutableGsonArray<TestGsonValue>().toImmutable()
     }
 }
