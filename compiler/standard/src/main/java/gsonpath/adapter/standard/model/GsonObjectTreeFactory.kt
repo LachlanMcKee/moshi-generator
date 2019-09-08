@@ -1,7 +1,7 @@
 package gsonpath.adapter.standard.model
 
 import gsonpath.ProcessingException
-import gsonpath.model.Bah
+import gsonpath.model.FieldInfo
 import java.util.regex.Pattern
 
 data class GsonTreeResult<T>(
@@ -9,7 +9,7 @@ data class GsonTreeResult<T>(
         val flattenedFields: List<GsonField<T>>
 )
 
-class GsonObjectTreeFactory<T: Bah, R>(private val gsonObjectFactory: GsonObjectFactory<T, R>) {
+class GsonObjectTreeFactory<T: FieldInfo, R>(private val gsonObjectFactory: GsonObjectFactory<T, R>) {
     @Throws(ProcessingException::class)
     fun createGsonObject(
             fieldInfoList: List<T>,

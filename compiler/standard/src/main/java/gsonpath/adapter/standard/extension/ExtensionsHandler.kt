@@ -1,7 +1,7 @@
 package gsonpath.adapter.standard.extension
 
 import gsonpath.ProcessingException
-import gsonpath.adapter.Foo
+import gsonpath.adapter.AdapterFieldMetadata
 import gsonpath.adapter.standard.model.GsonField
 import gsonpath.compiler.ExtensionFieldMetadata
 import gsonpath.compiler.GsonPathExtension
@@ -12,7 +12,7 @@ class ExtensionsHandler(
         private val extensions: List<GsonPathExtension>) {
 
     private fun canHandleFieldFunc(
-            gsonField: GsonField<Foo>,
+            gsonField: GsonField<AdapterFieldMetadata>,
             variableName: String,
             func: (GsonPathExtension, ExtensionFieldMetadata) -> Boolean): Boolean {
 
@@ -28,20 +28,20 @@ class ExtensionsHandler(
         return supportedExtensions == 1
     }
 
-    fun canHandleFieldRead(gsonField: GsonField<Foo>, variableName: String): Boolean {
+    fun canHandleFieldRead(gsonField: GsonField<AdapterFieldMetadata>, variableName: String): Boolean {
         return canHandleFieldFunc(gsonField, variableName) { extension, metadata ->
             extension.canHandleFieldRead(processingEnvironment, metadata)
         }
     }
 
-    fun canHandleFieldWrite(gsonField: GsonField<Foo>, variableName: String): Boolean {
+    fun canHandleFieldWrite(gsonField: GsonField<AdapterFieldMetadata>, variableName: String): Boolean {
         return canHandleFieldFunc(gsonField, variableName) { extension, metadata ->
             extension.canHandleFieldWrite(processingEnvironment, metadata)
         }
     }
 
     fun executeFieldRead(
-            gsonField: GsonField<Foo>,
+            gsonField: GsonField<AdapterFieldMetadata>,
             variableName: String,
             checkIfResultIsNull: Boolean,
             handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
@@ -58,7 +58,7 @@ class ExtensionsHandler(
         }
     }
 
-    fun executeFieldWrite(gsonField: GsonField<Foo>, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
+    fun executeFieldWrite(gsonField: GsonField<AdapterFieldMetadata>, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
         if (!canHandleFieldWrite(gsonField, variableName)) {
             throw IllegalStateException("canHandleFieldWrite must be checked before calling this method.")
         }
@@ -71,7 +71,7 @@ class ExtensionsHandler(
         }
     }
 
-    fun executePostRead(gsonField: GsonField<Foo>, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
+    fun executePostRead(gsonField: GsonField<AdapterFieldMetadata>, variableName: String, handleFunc: (String, GsonPathExtension.ExtensionResult) -> Unit) {
         extensions.forEach { extension ->
             extension.createCodePostReadResult(processingEnvironment, createMetadata(gsonField, variableName))
                     ?.let {
@@ -80,7 +80,7 @@ class ExtensionsHandler(
         }
     }
 
-    private fun createMetadata(gsonField: GsonField<Foo>, variableName: String) =
+    private fun createMetadata(gsonField: GsonField<AdapterFieldMetadata>, variableName: String) =
             ExtensionFieldMetadata(
                     gsonField.value.fieldInfo,
                     variableName,

@@ -2,7 +2,7 @@ package gsonpath.adapter.standard.adapter
 
 import com.squareup.javapoet.ClassName
 import gsonpath.AutoGsonAdapter
-import gsonpath.adapter.Foo
+import gsonpath.adapter.AdapterFieldMetadata
 import gsonpath.adapter.standard.adapter.properties.AutoGsonAdapterPropertiesFactory
 import gsonpath.adapter.standard.adapter.read.ReadParams
 import gsonpath.adapter.standard.adapter.write.WriteParams
@@ -12,7 +12,7 @@ import gsonpath.adapter.standard.model.GsonObjectMetadata
 import gsonpath.adapter.standard.model.GsonObjectTreeFactory
 import gsonpath.adapter.standard.model.MandatoryFieldInfoFactory
 import gsonpath.compiler.generateClassName
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import gsonpath.util.TypeHandler
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
@@ -20,7 +20,7 @@ import javax.lang.model.type.ExecutableType
 
 class AdapterModelMetadataFactory(
         private val fieldInfoFactory: FieldInfoFactory,
-        private val gsonObjectTreeFactory: GsonObjectTreeFactory<FieldInfo, Foo>,
+        private val gsonObjectTreeFactory: GsonObjectTreeFactory<AdapterFieldInfo, AdapterFieldMetadata>,
         private val typeHandler: TypeHandler,
         private val modelInterfaceGenerator: ModelInterfaceGenerator) {
 
@@ -32,7 +32,7 @@ class AdapterModelMetadataFactory(
                 generateClassName(modelClassName, "GsonTypeAdapter"))
 
         val concreteClassName: ClassName
-        val fieldInfoList: List<FieldInfo>
+        val fieldInfoList: List<AdapterFieldInfo>
         val isModelInterface = modelElement.kind.isInterface
 
         val properties = AutoGsonAdapterPropertiesFactory().create(modelElement, autoGsonAnnotation, isModelInterface)

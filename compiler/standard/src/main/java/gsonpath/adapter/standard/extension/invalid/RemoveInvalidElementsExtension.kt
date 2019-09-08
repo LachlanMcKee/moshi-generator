@@ -6,7 +6,7 @@ import gsonpath.compiler.ExtensionFieldMetadata
 import gsonpath.compiler.GsonPathExtension
 import gsonpath.extension.RemoveInvalidElementsUtil
 import gsonpath.extension.annotation.RemoveInvalidElements
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import gsonpath.model.FieldType
 import gsonpath.util.assign
 import gsonpath.util.codeBlock
@@ -18,7 +18,7 @@ class RemoveInvalidElementsExtension : GsonPathExtension {
     override val extensionName: String
         get() = "'RemoveInvalidElements' Annotation"
 
-    private fun verifyMultipleValuesFieldType(fieldInfo: FieldInfo): FieldType.MultipleValues {
+    private fun verifyMultipleValuesFieldType(fieldInfo: AdapterFieldInfo): FieldType.MultipleValues {
         return when (val fieldType = fieldInfo.fieldType) {
             is FieldType.MultipleValues -> fieldType
             else -> throw ProcessingException("@RemoveInvalidElements can only be used with arrays and collections",

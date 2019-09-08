@@ -1,13 +1,13 @@
 package gsonpath.adapter.standard.model
 
 import gsonpath.ProcessingException
-import gsonpath.model.Bah
+import gsonpath.model.FieldInfo
 import java.util.regex.Pattern
 import javax.lang.model.element.Element
 
-class GsonObjectFactory<T: Bah, R>(
-        private val bahRequiredDetector: BahRequiredDetector<T>,
-        private val bahFieldPathFetcher: BahFieldPathFetcher<T>,
+class GsonObjectFactory<T: FieldInfo, R>(
+        private val fieldInfoRequiredDetector: FieldInfoRequiredDetector<T>,
+        private val fieldInfoPathFetcher: FieldInfoPathFetcher<T>,
         private val gsonFieldValueFactory: GsonFieldValueFactory<T, R>) {
 
     @Throws(ProcessingException::class)
@@ -17,9 +17,9 @@ class GsonObjectFactory<T: Bah, R>(
             fieldInfoIndex: Int,
             metadata: GsonObjectMetadata) {
 
-        val isRequired = bahRequiredDetector.isRequired(fieldInfo, metadata)
+        val isRequired = fieldInfoRequiredDetector.isRequired(fieldInfo, metadata)
 
-        when (val jsonFieldPath = bahFieldPathFetcher.getJsonFieldPath(fieldInfo, metadata)) {
+        when (val jsonFieldPath = fieldInfoPathFetcher.getJsonFieldPath(fieldInfo, metadata)) {
             is FieldPath.Nested -> {
                 addNestedType(gsonPathObject, fieldInfo, jsonFieldPath, metadata.flattenDelimiter,
                         fieldInfoIndex, isRequired)
@@ -207,7 +207,7 @@ class GsonObjectFactory<T: Bah, R>(
         }
     }
 
-    private data class CommonSegmentContent<T: Bah, R>(
+    private data class CommonSegmentContent<T: FieldInfo, R>(
             val currentModel: MutableGsonModel<R>,
             val arrayIndexes: List<Int>,
             val index: Int,

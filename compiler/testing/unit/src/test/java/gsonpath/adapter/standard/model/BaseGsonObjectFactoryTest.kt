@@ -5,9 +5,9 @@ import com.nhaarman.mockitokotlin2.mock
 import gsonpath.GsonFieldValidationType
 import gsonpath.PathSubstitution
 import gsonpath.ProcessingException
-import gsonpath.adapter.Foo
-import gsonpath.model.Bah
+import gsonpath.adapter.AdapterFieldMetadata
 import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import org.junit.Rule
 import org.junit.rules.ExpectedException
 
@@ -17,13 +17,13 @@ open class BaseGsonObjectFactoryTest {
     @Rule
     val exception: ExpectedException = ExpectedException.none()
 
-    val bahRequiredDetector: BahRequiredDetector<Bah> = mock()
-    val bahFieldPathFetcher: BahFieldPathFetcher<Bah> = mock()
-    val gsonFieldValueFactory = FooGsonFieldValueFactory()
+    val fieldInfoRequiredDetector: FieldInfoRequiredDetector<FieldInfo> = mock()
+    val fieldInfoPathFetcher: FieldInfoPathFetcher<FieldInfo> = mock()
+    val gsonFieldValueFactory = AdapterGsonFieldValueFactory()
 
     @Throws(ProcessingException::class)
-    fun executeAddGsonType(arguments: GsonTypeArguments, metadata: GsonObjectMetadata, outputGsonObject: MutableGsonObject<Foo> = MutableGsonObject()): MutableGsonObject<Foo> {
-        GsonObjectFactory(bahRequiredDetector, bahFieldPathFetcher, gsonFieldValueFactory).addGsonType(
+    fun executeAddGsonType(arguments: GsonTypeArguments, metadata: GsonObjectMetadata, outputGsonObject: MutableGsonObject<AdapterFieldMetadata> = MutableGsonObject()): MutableGsonObject<AdapterFieldMetadata> {
+        GsonObjectFactory(fieldInfoRequiredDetector, fieldInfoPathFetcher, gsonFieldValueFactory).addGsonType(
                 outputGsonObject,
                 arguments.fieldInfo,
                 arguments.fieldInfoIndex,
@@ -46,7 +46,7 @@ open class BaseGsonObjectFactoryTest {
     }
 
     class GsonTypeArguments(
-            val fieldInfo: FieldInfo,
+            val fieldInfo: AdapterFieldInfo,
             val fieldInfoIndex: Int = 0)
 
     companion object {

@@ -3,13 +3,13 @@ package gsonpath.adapter.standard.model
 import com.squareup.javapoet.TypeName
 import gsonpath.ProcessingException
 import gsonpath.adapter.util.NullableUtil
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import gsonpath.model.FieldType
 
 class GsonObjectValidator {
 
     @Throws(ProcessingException::class)
-    fun validate(fieldInfo: FieldInfo): Result {
+    fun validate(fieldInfo: AdapterFieldInfo): Result {
         val fieldTypeName = fieldInfo.fieldType.typeName
 
         if (fieldTypeName == TypeName.OBJECT) {

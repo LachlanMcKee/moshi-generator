@@ -17,7 +17,7 @@ import gsonpath.adapter.standard.model.GsonObject
 import gsonpath.adapter.standard.model.MandatoryFieldInfoFactory.MandatoryFieldInfo
 import gsonpath.compiler.createDefaultVariableValueForTypeName
 import gsonpath.adapter.AdapterMethodBuilder
-import gsonpath.adapter.Foo
+import gsonpath.adapter.AdapterFieldMetadata
 import gsonpath.model.FieldType
 import gsonpath.util.*
 
@@ -80,7 +80,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.addReadCodeForElements(
             typeSpecBuilder: TypeSpec.Builder,
-            jsonMapping: GsonObject<Foo>,
+            jsonMapping: GsonObject<AdapterFieldMetadata>,
             params: ReadParams,
             recursionCount: Int = 0): Int {
 
@@ -135,7 +135,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
             typeSpecBuilder: TypeSpec.Builder,
             params: ReadParams,
             key: String,
-            value: GsonModel<Foo>,
+            value: GsonModel<AdapterFieldMetadata>,
             counterVariableName: String,
             currentOverallRecursionCount: Int): Int {
 
@@ -172,7 +172,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
     @Throws(ProcessingException::class)
     private fun CodeBlock.Builder.writeGsonFieldReader(
             typeSpecBuilder: TypeSpec.Builder,
-            gsonField: GsonField<Foo>,
+            gsonField: GsonField<AdapterFieldMetadata>,
             requiresConstructorInjection: Boolean,
             mandatoryFieldInfo: MandatoryFieldInfo?) {
 
@@ -235,7 +235,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
      */
     private fun CodeBlock.Builder.writeGsonFieldReading(
             typeSpecBuilder: TypeSpec.Builder,
-            gsonField: GsonField<Foo>,
+            gsonField: GsonField<AdapterFieldMetadata>,
             requiresConstructorInjection: Boolean): FieldReaderResult {
 
         val variableName = getVariableName(gsonField, requiresConstructorInjection)
@@ -273,7 +273,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     private fun CodeBlock.Builder.writeGsonArrayReader(
             typeSpecBuilder: TypeSpec.Builder,
-            value: GsonArray<Foo>,
+            value: GsonArray<AdapterFieldMetadata>,
             params: ReadParams,
             key: String,
             currentOverallRecursionCount: Int): Int {
@@ -307,7 +307,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
     private fun CodeBlock.Builder.writeGsonArrayReaderCases(
             typeSpecBuilder: TypeSpec.Builder,
-            value: GsonArray<Foo>,
+            value: GsonArray<AdapterFieldMetadata>,
             params: ReadParams,
             seedValue: Int): Int {
 
@@ -363,14 +363,14 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
         }
     }
 
-    private fun getVariableName(gsonField: GsonField<Foo>, requiresConstructorInjection: Boolean): String {
+    private fun getVariableName(gsonField: GsonField<AdapterFieldMetadata>, requiresConstructorInjection: Boolean): String {
         return if (gsonField.value.isRequired && requiresConstructorInjection)
             "${gsonField.value.variableName}_safe"
         else
             gsonField.value.variableName
     }
 
-    private fun isCheckIfNullApplicable(gsonField: GsonField<Foo>, requiresConstructorInjection: Boolean): Boolean {
+    private fun isCheckIfNullApplicable(gsonField: GsonField<AdapterFieldMetadata>, requiresConstructorInjection: Boolean): Boolean {
         return !requiresConstructorInjection || gsonField.value.isRequired
     }
 

@@ -1,15 +1,15 @@
 package gsonpath.adapter.standard.model
 
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import gsonpath.util.FieldNamingPolicyMapper
 
-class FieldPathFetcher(
+class AdapterFieldInfoPathFetcher(
         private val serializedNameFetcher: SerializedNameFetcher,
         private val fieldNamingPolicyMapper: FieldNamingPolicyMapper
-): BahFieldPathFetcher<FieldInfo> {
+): FieldInfoPathFetcher<AdapterFieldInfo> {
 
-    override fun getJsonFieldPath(bah: FieldInfo, metadata: GsonObjectMetadata): FieldPath {
-        val serializedName = serializedNameFetcher.getSerializedName(bah, metadata.flattenDelimiter)
+    override fun getJsonFieldPath(fieldInfo: AdapterFieldInfo, metadata: GsonObjectMetadata): FieldPath {
+        val serializedName = serializedNameFetcher.getSerializedName(fieldInfo, metadata.flattenDelimiter)
         val path = if (serializedName != null && serializedName.isNotBlank()) {
             if (metadata.pathSubstitutions.isNotEmpty()) {
 
@@ -24,13 +24,13 @@ class FieldPathFetcher(
 
         } else {
             // Since the serialized annotation wasn't specified, we need to apply the naming policy instead.
-            fieldNamingPolicyMapper.applyFieldNamingPolicy(metadata.gsonFieldNamingPolicy, bah.fieldName)
+            fieldNamingPolicyMapper.applyFieldNamingPolicy(metadata.gsonFieldNamingPolicy, fieldInfo.fieldName)
         }
 
         return if (path.contains(metadata.flattenDelimiter)) {
             FieldPath.Nested(
                     if (path.last() == metadata.flattenDelimiter) {
-                        path + bah.fieldName
+                        path + fieldInfo.fieldName
                     } else {
                         path
                     }

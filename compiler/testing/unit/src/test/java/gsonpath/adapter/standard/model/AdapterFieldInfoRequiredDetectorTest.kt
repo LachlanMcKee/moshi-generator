@@ -13,14 +13,14 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class FieldInfoBahRequiredDetectorTest(
+class AdapterFieldInfoRequiredDetectorTest(
         private val validationResult: GsonObjectValidator.Result,
         private val gsonFieldValidationType: GsonFieldValidationType,
         private val fieldType: FieldType,
         private val isRequired: Boolean) : BaseGsonObjectFactoryTest() {
 
     private val gsonObjectValidator: GsonObjectValidator = mock()
-    private val detector = FieldInfoBahRequiredDetector(gsonObjectValidator)
+    private val detector = AdapterFieldInfoRequiredDetector(gsonObjectValidator)
 
     @Test
     @Throws(ProcessingException::class)

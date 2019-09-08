@@ -1,6 +1,6 @@
 package gsonpath.adapter.standard.model
 
-import gsonpath.adapter.Foo
+import gsonpath.adapter.AdapterFieldMetadata
 import java.util.*
 
 class MandatoryFieldInfoFactory {
@@ -10,13 +10,13 @@ class MandatoryFieldInfoFactory {
      */
     class MandatoryFieldInfo(
             val indexVariableName: String,
-            val gsonField: GsonField<Foo>)
+            val gsonField: GsonField<AdapterFieldMetadata>)
 
     /**
      * Add any mandatory field indexes as constants. This is done for code readability.
      * We will obtain the values using a depth-first recursion.
      */
-    fun createMandatoryFieldsFromGsonObject(gsonObject: GsonObject<Foo>): Map<String, MandatoryFieldInfo> {
+    fun createMandatoryFieldsFromGsonObject(gsonObject: GsonObject<AdapterFieldMetadata>): Map<String, MandatoryFieldInfo> {
         return gsonObject.entries()
                 .fold(emptyMap()) { map, (_, gsonModel) ->
                     when (gsonModel) {
@@ -32,7 +32,7 @@ class MandatoryFieldInfoFactory {
      * value has been assigned after the json has been parsed.
      */
     private fun handleField(
-            gsonModel: GsonField<Foo>,
+            gsonModel: GsonField<AdapterFieldMetadata>,
             map: Map<String, MandatoryFieldInfo>): Map<String, MandatoryFieldInfo> {
 
         return when {
@@ -48,7 +48,7 @@ class MandatoryFieldInfoFactory {
     }
 
     private fun handleArray(
-            arrayModel: GsonArray<Foo>,
+            arrayModel: GsonArray<AdapterFieldMetadata>,
             map: Map<String, MandatoryFieldInfo>): Map<String, MandatoryFieldInfo> {
 
         return arrayModel.entries()

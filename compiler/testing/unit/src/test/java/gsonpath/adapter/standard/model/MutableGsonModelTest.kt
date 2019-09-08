@@ -1,7 +1,7 @@
 package gsonpath.adapter.standard.model
 
 import gsonpath.generator.processingExceptionMatcher
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert
 import org.junit.Rule
@@ -25,7 +25,7 @@ class MutableGsonModelTest {
 
     @Test
     fun testGsonObject() {
-        val fieldInfo = mock(FieldInfo::class.java)
+        val fieldInfo = mock(AdapterFieldInfo::class.java)
         val mutableGsonField = MutableGsonField(0, TestGsonValue("Foo"))
 
         val mutableGsonObject = MutableGsonObject<TestGsonValue>()
@@ -47,7 +47,7 @@ class MutableGsonModelTest {
 
     @Test
     fun testGsonArray() {
-        val fieldInfo = mock(FieldInfo::class.java)
+        val fieldInfo = mock(AdapterFieldInfo::class.java)
         val mutableGsonField = MutableGsonField(0, TestGsonValue("Foo"))
         val mutableGsonArray = MutableGsonArray<TestGsonValue>()
 

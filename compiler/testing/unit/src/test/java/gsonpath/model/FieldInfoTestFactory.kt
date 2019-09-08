@@ -7,8 +7,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when` as whenever
 
 object FieldInfoTestFactory {
-    fun mockFieldInfo(fieldName: String, jsonPath: String? = null): FieldInfo {
-        val fieldInfo = Mockito.mock(FieldInfo::class.java)
+    fun mockFieldInfo(fieldName: String, jsonPath: String? = null): AdapterFieldInfo {
+        val fieldInfo = Mockito.mock(AdapterFieldInfo::class.java)
         whenever(fieldInfo.fieldType).thenReturn(FieldType.Primitive(TypeName.INT, mock()))
         whenever(fieldInfo.annotationNames).thenReturn(emptyList())
         whenever(fieldInfo.fieldName).thenReturn(fieldName)

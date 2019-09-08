@@ -3,7 +3,7 @@ package gsonpath.adapter.standard.model
 import com.google.gson.FieldNamingPolicy
 import gsonpath.GsonFieldValidationType
 import gsonpath.PathSubstitution
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import gsonpath.util.FieldNamingPolicyMapper
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -19,9 +19,9 @@ class FieldPathFetcherTest {
     @Mock
     lateinit var fieldNamingPolicyMapper: FieldNamingPolicyMapper
 
-    lateinit var fieldPathFetcher: FieldPathFetcher
+    lateinit var fieldPathFetcher: AdapterFieldInfoPathFetcher
 
-    private val fieldInfo = mock(FieldInfo::class.java)
+    private val fieldInfo = mock(AdapterFieldInfo::class.java)
     private val fieldName = "foo"
     private val delimiter = '.'
     private val fieldNamingPolicy = FieldNamingPolicy.IDENTITY
@@ -29,7 +29,7 @@ class FieldPathFetcherTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        fieldPathFetcher = FieldPathFetcher(serializedNameFetcher, fieldNamingPolicyMapper)
+        fieldPathFetcher = AdapterFieldInfoPathFetcher(serializedNameFetcher, fieldNamingPolicyMapper)
 
         whenever(fieldInfo.fieldName).thenReturn(fieldName)
     }

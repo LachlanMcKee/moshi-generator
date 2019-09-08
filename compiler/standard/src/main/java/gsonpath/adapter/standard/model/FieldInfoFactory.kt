@@ -6,7 +6,7 @@ import com.squareup.javapoet.TypeName
 import gsonpath.ExcludeField
 import gsonpath.NestedJson
 import gsonpath.ProcessingException
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import gsonpath.model.FieldType
 import gsonpath.util.*
 import javax.lang.model.element.Element
@@ -47,7 +47,7 @@ class FieldInfoFactory(
     fun getModelFieldsFromElement(
             modelElement: TypeElement,
             fieldsRequireAnnotation: Boolean,
-            useConstructor: Boolean): List<FieldInfo> {
+            useConstructor: Boolean): List<AdapterFieldInfo> {
 
         val filterFunc: (Element) -> Boolean = {
 
@@ -66,7 +66,7 @@ class FieldInfoFactory(
         }
         return typeHandler.getFields(modelElement, filterFunc)
                 .map { (memberElement, generifiedElement) ->
-                    object : FieldInfo {
+                    object : AdapterFieldInfo {
                         override val fieldType: FieldType
                             get() = fieldTypeFactory.createFieldType(TypeName.get(generifiedElement), generifiedElement)
 
@@ -117,9 +117,9 @@ class FieldInfoFactory(
         return method.simpleName.toString()
     }
 
-    fun getModelFieldsFromInterface(interfaceInfo: InterfaceInfo): List<FieldInfo> {
+    fun getModelFieldsFromInterface(interfaceInfo: InterfaceInfo): List<AdapterFieldInfo> {
         return interfaceInfo.fieldInfo.map {
-            object : FieldInfo {
+            object : AdapterFieldInfo {
                 override val fieldType: FieldType
                     get() = fieldTypeFactory.createFieldType(it.typeName, it.typeMirror)
 

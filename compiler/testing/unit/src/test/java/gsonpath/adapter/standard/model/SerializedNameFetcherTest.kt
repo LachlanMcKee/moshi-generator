@@ -3,7 +3,7 @@ package gsonpath.adapter.standard.model
 import com.google.gson.annotations.SerializedName
 import gsonpath.NestedJson
 import gsonpath.generator.processingExceptionMatcher
-import gsonpath.model.FieldInfo
+import gsonpath.model.AdapterFieldInfo
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert
 import org.junit.Before
@@ -19,7 +19,7 @@ class SerializedNameFetcherTest {
     @Rule
     val expectedException: ExpectedException = ExpectedException.none()
 
-    private val fieldInfo = mock(FieldInfo::class.java)
+    private val fieldInfo = mock(AdapterFieldInfo::class.java)
     private val serializedName = mock(SerializedName::class.java)
     private val nestedJson = mock(NestedJson::class.java)
     private val element = mock(Element::class.java)
