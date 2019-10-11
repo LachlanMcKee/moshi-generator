@@ -1,6 +1,12 @@
 Change Log
 ===========
 
+Version 3.5.0 *(2019-10-05)*
+----------------------------
+
+* Improvement: `@GsonSubType` has been completely rewriten to offer a much more powerful API. See issue [#214](../../issues/214) for details. 
+
+
 Version 3.4.0 *(2019-06-19)*
 ----------------------------
 
