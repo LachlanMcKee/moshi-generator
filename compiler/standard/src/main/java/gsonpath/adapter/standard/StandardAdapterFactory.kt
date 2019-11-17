@@ -1,26 +1,43 @@
 package gsonpath.adapter.standard
 
+import com.squareup.javapoet.ClassName
 import gsonpath.AutoGsonAdapter
 import gsonpath.adapter.AdapterFactory
-import gsonpath.adapter.AdapterGenerationResult
-import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
+import gsonpath.adapter.AdapterMetadata
+import gsonpath.adapter.util.ElementAndAnnotation
+import gsonpath.compiler.generateClassName
 import gsonpath.dependencies.Dependencies
-import gsonpath.util.Logger
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
-object StandardAdapterFactory : AdapterFactory {
+object StandardAdapterFactory : AdapterFactory<AutoGsonAdapter>() {
+    override fun getHandledElement(
+            element: TypeElement,
+            elementClassName: ClassName,
+            adapterClassName: ClassName): AdapterMetadata {
 
-    override fun generateGsonAdapters(
-            env: RoundEnvironment,
-            logger: Logger,
-            annotations: Set<TypeElement>,
-            dependencies: Dependencies): List<AdapterGenerationResult> {
+        val elementClassNames = if (element.kind.isInterface) {
+            listOf(
+                    ClassName.get(elementClassName.packageName(), generateClassName(elementClassName, "GsonPathModel")),
+                    elementClassName
+            )
+        } else {
+            listOf(elementClassName)
+        }
 
-        return getAnnotatedModelElements<AutoGsonAdapter>(env, annotations, listOf(ElementKind.CLASS, ElementKind.INTERFACE))
-                .onEach { logger.printMessage("Generating TypeAdapter (${it.element})") }
-                .map { dependencies.standardGsonAdapterGenerator.handle(it.element, it.annotation) }
+        return AdapterMetadata(element, elementClassNames, adapterClassName)
     }
 
+    override fun getAnnotationClass() = AutoGsonAdapter::class.java
+
+    override fun getSupportedElementKinds() = listOf(ElementKind.CLASS, ElementKind.INTERFACE)
+
+    override fun generate(
+            env: RoundEnvironment,
+            dependencies: Dependencies,
+            elementAndAnnotation: ElementAndAnnotation<AutoGsonAdapter>) {
+
+        dependencies.standardGsonAdapterGenerator.handle(elementAndAnnotation.element, elementAndAnnotation.annotation)
+    }
 }
