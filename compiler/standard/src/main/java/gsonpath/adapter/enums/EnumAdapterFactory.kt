@@ -1,33 +1,25 @@
 package gsonpath.adapter.enums
 
-import com.squareup.javapoet.ClassName
 import gsonpath.AutoGsonAdapter
 import gsonpath.adapter.AdapterFactory
-import gsonpath.adapter.AdapterMetadata
-import gsonpath.adapter.util.ElementAndAnnotation
+import gsonpath.adapter.AdapterGenerationResult
+import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
 import gsonpath.dependencies.Dependencies
+import gsonpath.util.Logger
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
-object EnumAdapterFactory : AdapterFactory<AutoGsonAdapter>() {
-    override fun getHandledElement(
-            element: TypeElement,
-            elementClassName: ClassName,
-            adapterClassName: ClassName): AdapterMetadata {
+object EnumAdapterFactory : AdapterFactory {
 
-        return AdapterMetadata(element, listOf(elementClassName), adapterClassName)
-    }
-
-    override fun getAnnotationClass() = AutoGsonAdapter::class.java
-
-    override fun getSupportedElementKinds() = listOf(ElementKind.ENUM)
-
-    override fun generate(
+    override fun generateGsonAdapters(
             env: RoundEnvironment,
-            dependencies: Dependencies,
-            elementAndAnnotation: ElementAndAnnotation<AutoGsonAdapter>) {
+            logger: Logger,
+            annotations: Set<TypeElement>,
+            dependencies: Dependencies): List<AdapterGenerationResult> {
 
-        dependencies.enumGsonAdapterGenerator.handle(elementAndAnnotation.element, elementAndAnnotation.annotation)
+        return getAnnotatedModelElements<AutoGsonAdapter>(env, annotations, listOf(ElementKind.ENUM))
+                .onEach { logger.printMessage("Generating TypeAdapter (${it.element})") }
+                .map { dependencies.enumGsonAdapterGenerator.handle(it.element, it.annotation) }
     }
 }

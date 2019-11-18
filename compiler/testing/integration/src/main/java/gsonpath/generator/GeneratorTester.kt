@@ -5,8 +5,7 @@ import com.google.testing.compile.JavaFileObjects
 import com.google.testing.compile.JavaSourceSubjectFactory.javaSource
 import com.google.testing.compile.JavaSourcesSubjectFactory.javaSources
 import com.google.testing.compile.ProcessedCompileTesterFactory
-import gsonpath.GsonPathAdapterProcessor
-import gsonpath.GsonPathFactoryProcessor
+import gsonpath.GsonProcessor
 import javax.tools.JavaFileObject
 
 object GeneratorTester {
@@ -24,8 +23,7 @@ object GeneratorTester {
             assertAbout(javaSources()).that(sources)
         }
 
-        testerFactory
-                .processedWith(GsonPathAdapterProcessor(), GsonPathFactoryProcessor())
+        testerFactory.processedWith(GsonProcessor())
                 .compilesWithoutError()
                 .and()
                 .apply {

@@ -6,48 +6,41 @@ import com.squareup.javapoet.ParameterizedTypeName
 import gsonpath.GsonPathTypeAdapter
 import gsonpath.GsonSubtype
 import gsonpath.adapter.AdapterFactory
-import gsonpath.adapter.AdapterMetadata
+import gsonpath.adapter.AdapterGenerationResult
 import gsonpath.adapter.Constants
 import gsonpath.adapter.common.GsonSubTypeFactory
 import gsonpath.adapter.common.GsonSubTypeResult
-import gsonpath.adapter.util.ElementAndAnnotation
+import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
 import gsonpath.adapter.util.writeFile
 import gsonpath.compiler.generateClassName
 import gsonpath.dependencies.Dependencies
 import gsonpath.model.FieldType
+import gsonpath.util.Logger
 import gsonpath.util.TypeSpecExt
 import gsonpath.util.constructor
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
-object SubTypeAdapterFactory : AdapterFactory<GsonSubtype>() {
+object SubTypeAdapterFactory : AdapterFactory {
 
-    override fun getHandledElement(
-            element: TypeElement,
-            elementClassName: ClassName,
-            adapterClassName: ClassName): AdapterMetadata {
-
-        return AdapterMetadata(element, listOf(elementClassName), adapterClassName)
-    }
-
-    override fun getAnnotationClass() = GsonSubtype::class.java
-
-    override fun getSupportedElementKinds() = listOf(ElementKind.CLASS)
-
-    override fun generate(
+    override fun generateGsonAdapters(
             env: RoundEnvironment,
-            dependencies: Dependencies,
-            elementAndAnnotation: ElementAndAnnotation<GsonSubtype>) {
+            logger: Logger,
+            annotations: Set<TypeElement>,
+            dependencies: Dependencies): List<AdapterGenerationResult> {
 
-        generateAdapter(elementAndAnnotation.element, elementAndAnnotation.annotation, dependencies)
+        return getAnnotatedModelElements<GsonSubtype>(env, annotations)
+                .map { generateAdapter(it.element, it.annotation, logger, dependencies) }
     }
 
     private fun generateAdapter(
             element: TypeElement,
             gsonSubtype: GsonSubtype,
-            dependencies: Dependencies) {
+            logger: Logger,
+            dependencies: Dependencies): AdapterGenerationResult {
+
+        logger.printMessage("Generating TypeAdapter ($element)")
 
         val typeName = ClassName.get(element)
         val subTypeMetadata = dependencies.subTypeMetadataFactory.getGsonSubType(
@@ -59,13 +52,14 @@ object SubTypeAdapterFactory : AdapterFactory<GsonSubtype>() {
                 "Type",
                 element)
 
-        GsonSubTypeFactory.createSubTypeMetadata(typeName, subTypeMetadata)
-                .also { result ->
+        return GsonSubTypeFactory.createSubTypeMetadata(typeName, subTypeMetadata)
+                .let { result ->
                     val adapterClassName = ClassName.get(typeName.packageName(),
                             generateClassName(typeName, "GsonTypeAdapter"))
 
                     createSubTypeAdapterSpec(adapterClassName, typeName, result)
                             .writeFile(dependencies.fileWriter, adapterClassName.packageName())
+                    AdapterGenerationResult(arrayOf(typeName), adapterClassName)
                 }
     }
 
