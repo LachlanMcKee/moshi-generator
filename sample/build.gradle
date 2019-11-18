@@ -19,7 +19,7 @@ buildscript {
 
 kapt {
     arguments {
-        arg("gsonpath.addtionalAnnotations", "gsonpath.kotlin.CustomAnnotation,gsonpath.kotlin.TypeSubType")
+        arg("gsonpath.additionalAnnotations", "gsonpath.kotlin.CustomAnnotation,gsonpath.kotlin.TypeSubType")
     }
 }
 

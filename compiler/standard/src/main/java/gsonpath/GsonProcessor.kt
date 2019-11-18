@@ -71,7 +71,7 @@ open class GsonProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): Set<String> {
-        val additonalAnnotations: Set<String> = processingEnv.options["gsonpath.addtionalAnnotations"]
+        val additonalAnnotations: Set<String> = processingEnv.options["gsonpath.additionalAnnotations"]
                 ?.split(",")
                 ?.toSet()
                 ?: emptySet()
