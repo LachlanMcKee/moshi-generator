@@ -15,7 +15,7 @@ import javax.lang.model.element.TypeElement
 open class GsonProcessor : AbstractProcessor() {
 
     override fun process(annotations: Set<TypeElement>?, env: RoundEnvironment): Boolean {
-        if (annotations == null || annotations.isEmpty()) {
+        if (annotations == null) {
             return false
         }
 

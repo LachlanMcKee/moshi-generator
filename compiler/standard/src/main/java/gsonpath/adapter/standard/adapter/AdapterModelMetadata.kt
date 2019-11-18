@@ -12,7 +12,6 @@ data class AdapterModelMetadata(
         val adapterClassName: ClassName,
         val isModelInterface: Boolean,
         val rootGsonObject: GsonObject,
-        val mandatoryFields: List<GsonField>,
         val readParams: ReadParams,
         val writeParams: WriteParams
 )

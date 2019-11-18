@@ -27,12 +27,8 @@ fun CodeBlock.Builder.comment(comment: String): CodeBlock.Builder {
     return this
 }
 
-fun CodeBlock.Builder.`return`(format: String? = null, vararg args: Any): CodeBlock.Builder {
-    if (format != null) {
-        this.addStatement("return $format", *args)
-    } else {
-        this.addStatement("return")
-    }
+fun CodeBlock.Builder.`return`(format: String, vararg args: Any): CodeBlock.Builder {
+    this.addStatement("return $format", *args)
     return this
 }
 

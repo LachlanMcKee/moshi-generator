@@ -91,7 +91,6 @@ class AdapterModelMetadataFactory(
                 adapterClassName,
                 isModelInterface,
                 rootObject,
-                mandatoryFields,
                 readParams,
                 writeParams)
     }
