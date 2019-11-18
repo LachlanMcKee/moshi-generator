@@ -2,6 +2,7 @@ package gsonpath.adapter.standard.interf
 
 import com.squareup.javapoet.*
 import gsonpath.ProcessingException
+import gsonpath.adapter.Constants.GENERATED_ANNOTATION
 import gsonpath.adapter.Constants.NULL
 import gsonpath.adapter.standard.model.FieldInfoFactory
 import gsonpath.adapter.standard.model.FieldInfoFactory.InterfaceFieldInfo
@@ -27,6 +28,7 @@ class ModelInterfaceGenerator(
 
     private fun TypeSpec.Builder.addDetails(element: TypeElement, outputClassName: ClassName): InterfaceInfo {
         addSuperinterface(ClassName.get(element))
+        addAnnotation(GENERATED_ANNOTATION)
 
         val modelMetadataList = interfaceModelMetadataFactory.createMetadata(element)
 

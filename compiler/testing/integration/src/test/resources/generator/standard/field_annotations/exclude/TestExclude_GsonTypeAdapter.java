@@ -3,14 +3,14 @@ package generator.standard.field_annotations.exclude;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.JsonReaderHelper;
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
-@GeneratedAdapter(adapterElementClassNames = {"generator.standard.field_annotations.exclude.TestExclude"})
+@GsonPathGenerated
 public final class TestExclude_GsonTypeAdapter extends GsonPathTypeAdapter<TestExclude> {
     public TestExclude_GsonTypeAdapter(Gson gson) {
         super(gson);

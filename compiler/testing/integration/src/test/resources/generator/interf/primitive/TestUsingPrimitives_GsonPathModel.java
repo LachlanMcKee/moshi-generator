@@ -1,9 +1,11 @@
 package generator.interf.primitive;
 
+import gsonpath.GsonPathGenerated;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 
+@GsonPathGenerated
 public final class TestUsingPrimitives_GsonPathModel implements TestUsingPrimitives {
     private final int intExample;
 

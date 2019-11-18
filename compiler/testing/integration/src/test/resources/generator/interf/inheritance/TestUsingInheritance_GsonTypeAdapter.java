@@ -3,7 +3,7 @@ package generator.interf.inheritance;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.GsonUtil;
 import gsonpath.JsonReaderHelper;
@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
-@GeneratedAdapter(
-        adapterElementClassNames = {"generator.interf.inheritance.TestUsingInheritance_GsonPathModel", "generator.interf.inheritance.TestUsingInheritance"}
-)
+@GsonPathGenerated
 public final class TestUsingInheritance_GsonTypeAdapter extends GsonPathTypeAdapter<TestUsingInheritance> {
 
     public TestUsingInheritance_GsonTypeAdapter(Gson gson) {

@@ -3,14 +3,14 @@ package generator.standard.nested_json.field_nesting;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.JsonReaderHelper;
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
-@GeneratedAdapter(adapterElementClassNames = {"generator.standard.nested_json.field_nesting.TestFieldNesting"})
+@GsonPathGenerated
 public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<TestFieldNesting> {
     public TestFieldNesting_GsonTypeAdapter(Gson gson) {
         super(gson);

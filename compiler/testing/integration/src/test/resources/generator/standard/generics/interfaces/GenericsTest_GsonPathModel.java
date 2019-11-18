@@ -1,5 +1,6 @@
 package generator.standard.generics.interfaces;
 
+import gsonpath.GsonPathGenerated;
 import java.lang.Double;
 import java.lang.Integer;
 import java.lang.Object;
@@ -7,6 +8,7 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.Map;
 
+@GsonPathGenerated
 public final class GenericsTest_GsonPathModel implements GenericsTest {
     private final String value1;
 
