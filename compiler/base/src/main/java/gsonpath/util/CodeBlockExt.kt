@@ -27,12 +27,8 @@ fun CodeBlock.Builder.comment(comment: String): CodeBlock.Builder {
     return this
 }
 
-fun CodeBlock.Builder.`return`(format: String? = null, vararg args: Any): CodeBlock.Builder {
-    if (format != null) {
-        this.addStatement("return $format", *args)
-    } else {
-        this.addStatement("return")
-    }
+fun CodeBlock.Builder.`return`(format: String, vararg args: Any): CodeBlock.Builder {
+    this.addStatement("return $format", *args)
     return this
 }
 
@@ -137,24 +133,32 @@ fun <T> CodeBlock.Builder.`for`(
 
 fun <T> CodeBlock.Builder.case(
         label: String,
+        addBreak: Boolean = true,
         func: CodeBlock.Builder.() -> T): T {
 
     addEscaped("case $label:")
     newLine()
     indent()
     val result = func(this)
-    addStatement("break")
+    if (addBreak) {
+        addStatement("break")
+    }
     unindent()
     newLine()
     return result
 }
 
-fun <T> CodeBlock.Builder.default(func: CodeBlock.Builder.() -> T): T {
+fun <T> CodeBlock.Builder.default(
+        addBreak: Boolean = true,
+        func: CodeBlock.Builder.() -> T): T {
+
     add("default:")
     newLine()
     indent()
     val result = func(this)
-    addStatement("break")
+    if (addBreak) {
+        addStatement("break")
+    }
     unindent()
     newLine()
     return result

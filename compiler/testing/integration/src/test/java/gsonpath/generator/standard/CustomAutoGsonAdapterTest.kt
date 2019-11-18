@@ -18,6 +18,6 @@ class CustomAutoGsonAdapterTest {
 
                 relativeGeneratedNames = listOf(
                         "TestCustomAutoGsonAdapterModel_GsonTypeAdapter.java")
-        ))
+        ), "-Agsonpath.additionalAnnotations=generator.standard.custom_adapter_annotation.CustomAutoGsonAdapter")
     }
 }

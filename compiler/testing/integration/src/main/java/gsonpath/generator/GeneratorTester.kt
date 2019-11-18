@@ -10,7 +10,7 @@ import javax.tools.JavaFileObject
 
 object GeneratorTester {
 
-    fun assertGeneratedContent(criteria: TestCriteria) {
+    fun assertGeneratedContent(criteria: TestCriteria, vararg options: String) {
         val sourceFilesSize = criteria.absoluteSourceNames.size + criteria.relativeSourceNames.size
 
         // Add all the required 'source' files.
@@ -23,12 +23,14 @@ object GeneratorTester {
             assertAbout(javaSources()).that(sources)
         }
 
-        testerFactory.processedWith(GsonProcessor())
+        testerFactory
+                .withCompilerOptions(*options)
+                .processedWith(GsonProcessor())
                 .compilesWithoutError()
                 .and()
                 .apply {
                     // Add all the required 'generated' files based off the input source files.
-                    val generatedSources = (0 until criteria.relativeGeneratedNames.size).map {
+                    val generatedSources = criteria.relativeGeneratedNames.indices.map {
                         getGeneratedFileObject(criteria, it)
                     }
 
