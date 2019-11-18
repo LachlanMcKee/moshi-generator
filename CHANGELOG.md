@@ -1,11 +1,21 @@
 Change Log
 ===========
 
+Version 3.7.0 *(2019-11-18)*
+----------------------------
+
+* Improvement: Added [incremental annotation processing](https://docs.gradle.org/current/userguide/java_plugin.html#sec:incremental_annotation_processing) support [#227](../../issues/227).
+     * The processor is 'Aggregating' rather than 'Isolating' for now due to how the adapter factories are constructed.
+* Tech Debt: Removed support for `StringDef` and `IntDef` annotations [#223](../../issues/223).
+     * This change was unfortunately required to support incremental annotation processing.
+* Improvement: Extracted repeated logic from generated type adapters into reusable logic [#226](../../issues/226).
+     * This should speed up code generation time without affecting the performance of the type adapter
+
 Version 3.6.0 *(2019-10-13)*
 ----------------------------
 
 * Improvement: Added a new `gsonpath-kt` library that will contain Kotlin specific features.
-* Improvement: Added `GsonResultList` and `GsonSafeArrayList`. [#214](../../issues/217)
+* Improvement: Added `GsonResultList` and `GsonSafeArrayList`. [#217](../../issues/217)
      * `GsonSafeArrayList` is a list that has an interlying type adapter that remove any invalid elements. It is quite similar to `@RemoveInvalidElements`, however it can also be used when a list is the root element of the array (something `@RemoveInvalidElements` cannot do)
      * `GsonResultList` is Kotlin only and uses a sealed class (`GsonResult`) to either return a `Success` or `Failure` result. 
      * To use these types you need to register the correct type adapter. If you use Kotlin, use `GsonPathTypeAdapterFactoryKt` (also ensure you include the `gsonpath-kt` library), otherwise use `GsonPathTypeAdapterFactory`.
@@ -33,6 +43,7 @@ The main benefit is that it is now possible for `stringValueSubtypes` to handle 
                 @GsonSubtype.StringValueSubtype(value = GsonSubtype.StringValueSubtype.NULL_STRING, subtype = TypeNull.class)
         }
 )
+class Example {}
 ``` 
 
 Version 3.3.0 *(2019-04-07)*
