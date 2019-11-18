@@ -6,14 +6,14 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 
 import java.io.IOException;
 import java.lang.Class;
 import java.lang.Override;
 
-@GeneratedAdapter(adapterElementClassNames = {"generator.gson_sub_type.indirectly_annotated.IndirectlyAnnotatedSubType"})
+@GsonPathGenerated
 public final class IndirectlyAnnotatedSubType_GsonTypeAdapter extends GsonPathTypeAdapter<IndirectlyAnnotatedSubType> {
 
     public IndirectlyAnnotatedSubType_GsonTypeAdapter(Gson gson) {

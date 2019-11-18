@@ -1,43 +1,26 @@
 package gsonpath.adapter.standard
 
-import com.squareup.javapoet.ClassName
 import gsonpath.AutoGsonAdapter
 import gsonpath.adapter.AdapterFactory
-import gsonpath.adapter.AdapterMetadata
-import gsonpath.adapter.util.ElementAndAnnotation
-import gsonpath.compiler.generateClassName
+import gsonpath.adapter.AdapterGenerationResult
+import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
 import gsonpath.dependencies.Dependencies
+import gsonpath.util.Logger
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
-object StandardAdapterFactory : AdapterFactory<AutoGsonAdapter>() {
-    override fun getHandledElement(
-            element: TypeElement,
-            elementClassName: ClassName,
-            adapterClassName: ClassName): AdapterMetadata {
+object StandardAdapterFactory : AdapterFactory {
 
-        val elementClassNames = if (element.kind.isInterface) {
-            listOf(
-                    ClassName.get(elementClassName.packageName(), generateClassName(elementClassName, "GsonPathModel")),
-                    elementClassName
-            )
-        } else {
-            listOf(elementClassName)
-        }
-
-        return AdapterMetadata(element, elementClassNames, adapterClassName)
-    }
-
-    override fun getAnnotationClass() = AutoGsonAdapter::class.java
-
-    override fun getSupportedElementKinds() = listOf(ElementKind.CLASS, ElementKind.INTERFACE)
-
-    override fun generate(
+    override fun generateGsonAdapters(
             env: RoundEnvironment,
-            dependencies: Dependencies,
-            elementAndAnnotation: ElementAndAnnotation<AutoGsonAdapter>) {
+            logger: Logger,
+            annotations: Set<TypeElement>,
+            dependencies: Dependencies): List<AdapterGenerationResult> {
 
-        dependencies.standardGsonAdapterGenerator.handle(elementAndAnnotation.element, elementAndAnnotation.annotation)
+        return getAnnotatedModelElements<AutoGsonAdapter>(env, annotations, listOf(ElementKind.CLASS, ElementKind.INTERFACE))
+                .onEach { logger.printMessage("Generating TypeAdapter (${it.element})") }
+                .map { dependencies.standardGsonAdapterGenerator.handle(it.element, it.annotation) }
     }
+
 }

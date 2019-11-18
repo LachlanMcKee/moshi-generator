@@ -5,10 +5,8 @@ import gsonpath.adapter.standard.adapter.StandardGsonAdapterGenerator
 import gsonpath.adapter.standard.factory.TypeAdapterFactoryGenerator
 import gsonpath.adapter.enums.EnumGsonAdapterGenerator
 import gsonpath.util.FileWriter
-import gsonpath.util.Logger
 
 data class Dependencies(
-        val logger: Logger,
         val standardGsonAdapterGenerator: StandardGsonAdapterGenerator,
         val fileWriter: FileWriter,
         val typeAdapterFactoryGenerator: TypeAdapterFactoryGenerator,

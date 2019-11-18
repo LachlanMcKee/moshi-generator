@@ -5,12 +5,12 @@ import static gsonpath.GsonUtil.*;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 import java.io.IOException;
 import java.lang.Override;
 
-@GeneratedAdapter(adapterElementClassNames = {"generator.enums.TestEnum"})
+@GsonPathGenerated
 public final class TestEnum_GsonTypeAdapter extends GsonPathTypeAdapter<TestEnum> {
     public TestEnum_GsonTypeAdapter(Gson gson) {
         super(gson);

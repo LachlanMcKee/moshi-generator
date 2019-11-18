@@ -6,14 +6,13 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
 object AdapterFactoryUtil {
-    fun <T : Annotation> getAnnotatedModelElements(
-            annotationClass: Class<T>,
+    inline fun <reified T : Annotation> getAnnotatedModelElements(
             env: RoundEnvironment,
             annotations: Set<TypeElement>,
-            supportedElementKinds: List<ElementKind>): Set<ElementAndAnnotation<T>> {
+            supportedElementKinds: List<ElementKind> = listOf(ElementKind.CLASS)): Set<ElementAndAnnotation<T>> {
 
-        val supportedAnnotations = getSupportedAnnotations(annotations, annotationClass)
-        val customAnnotations = getCustomAnnotations(annotations, annotationClass)
+        val supportedAnnotations = getSupportedAnnotations(annotations, T::class.java)
+        val customAnnotations = getCustomAnnotations(annotations, T::class.java)
 
         // Avoid going any further if no supported annotations are found.
         if (supportedAnnotations.isEmpty() && customAnnotations.isEmpty()) {
@@ -21,11 +20,11 @@ object AdapterFactoryUtil {
         }
 
         return env
-                .getElementsAnnotatedWith(annotationClass)
+                .getElementsAnnotatedWith(T::class.java)
                 .asSequence()
                 .filter { supportedElementKinds.contains(it.kind) }
                 .map {
-                    ElementAndAnnotation(it as TypeElement, it.getAnnotation(annotationClass))
+                    ElementAndAnnotation(it as TypeElement, it.getAnnotation(T::class.java))
                 }
                 .filter {
                     !customAnnotations.contains(it.element)
@@ -36,7 +35,7 @@ object AdapterFactoryUtil {
                                     .getElementsAnnotatedWith(customAnnotation)
                                     .filter { supportedElementKinds.contains(it.kind) }
                                     .map {
-                                        ElementAndAnnotation(it as TypeElement, customAnnotation.getAnnotation(annotationClass))
+                                        ElementAndAnnotation(it as TypeElement, customAnnotation.getAnnotation(T::class.java))
                                     }
                         }
                 )

@@ -3,14 +3,14 @@ package generator.standard.substitution.valid;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.JsonReaderHelper;
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
-@GeneratedAdapter(adapterElementClassNames = {"generator.standard.substitution.valid.TestSubstitutionImpl2"})
+@GsonPathGenerated
 public final class TestSubstitutionImpl2_GsonTypeAdapter extends GsonPathTypeAdapter<TestSubstitutionImpl2> {
     public TestSubstitutionImpl2_GsonTypeAdapter(Gson gson) {
         super(gson);

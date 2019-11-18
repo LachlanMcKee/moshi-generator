@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken
 import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeSpec
-import gsonpath.adapter.AdapterMetadata
+import gsonpath.adapter.AdapterGenerationResult
 import gsonpath.adapter.Constants.GSON
 import gsonpath.adapter.Constants.NULL
 import gsonpath.adapter.util.writeFile
@@ -17,7 +17,7 @@ import javax.lang.model.element.TypeElement
 
 class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
 
-    fun generate(factoryElement: TypeElement, generatedGsonAdapters: List<AdapterMetadata>) {
+    fun generate(factoryElement: TypeElement, generatedGsonAdapters: List<AdapterGenerationResult>) {
         val packageLocalHandleResults = TypeAdapterFactoryHandlersFactory
                 .createResults(factoryElement, generatedGsonAdapters)
 
@@ -33,7 +33,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
      */
     private fun createGsonTypeFactoryImpl(
             factoryElement: TypeElement,
-            packageLocalAdapterGenerationResults: Map<String, List<AdapterMetadata>>) {
+            packageLocalAdapterGenerationResults: Map<String, List<AdapterGenerationResult>>) {
 
         val factoryClassName = ClassName.get(factoryElement)
 
@@ -44,7 +44,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
     }
 
     private fun TypeSpec.Builder.gsonTypeFactoryImplContent(
-            packageLocalAdapterGenerationResults: Map<String, List<AdapterMetadata>>): TypeSpec.Builder {
+            packageLocalAdapterGenerationResults: Map<String, List<AdapterGenerationResult>>): TypeSpec.Builder {
 
         field(PACKAGE_PRIVATE_LOADERS, ArrayTypeName.of(TypeAdapterFactory::class.java)) {
             addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -91,7 +91,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
 
     private fun createPackageLocalTypeAdapterLoaders(
             packageName: String,
-            packageLocalGsonAdapters: List<AdapterMetadata>) {
+            packageLocalGsonAdapters: List<AdapterGenerationResult>) {
 
         TypeSpecExt.finalClassBuilder(ClassName.get(packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME))
                 .addSuperinterface(TypeAdapterFactory::class.java)
@@ -103,7 +103,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
     // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);
     //
     private fun TypeSpec.Builder.packagePrivateTypeAdapterLoaderContent(
-            packageLocalGsonAdapters: List<AdapterMetadata>): TypeSpec.Builder {
+            packageLocalGsonAdapters: List<AdapterGenerationResult>): TypeSpec.Builder {
 
         overrideMethod("create") {
             returns(TypeAdapter::class.java)
@@ -113,17 +113,17 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
                 createVariable(Class::class.java, RAW_TYPE, "type.getRawType()")
 
                 for ((currentAdapterIndex, result) in packageLocalGsonAdapters.withIndex()) {
-                    val condition = result.elementClassNames
+                    val condition = result.adapterGenericTypeClassNames
                             .joinToString(separator = " || ") { "rawType.equals(\$T.class)" }
 
                     if (currentAdapterIndex == 0) {
-                        ifWithoutClose(condition, *(result.elementClassNames.toTypedArray())) {
-                            `return`("new \$T($GSON)", result.typeAdapterClassName)
+                        ifWithoutClose(condition, *result.adapterGenericTypeClassNames) {
+                            `return`("new \$T($GSON)", result.adapterClassName)
                         }
                     } else {
                         newLine() // New line for easier readability.
-                        elseIf(condition, *(result.elementClassNames.toTypedArray())) {
-                            `return`("new \$T($GSON)", result.typeAdapterClassName)
+                        elseIf(condition, *result.adapterGenericTypeClassNames) {
+                            `return`("new \$T($GSON)", result.adapterClassName)
                         }
                     }
                 }

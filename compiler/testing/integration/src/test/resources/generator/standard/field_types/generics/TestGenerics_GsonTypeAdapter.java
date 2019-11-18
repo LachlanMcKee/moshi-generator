@@ -3,7 +3,7 @@ package generator.standard.field_types.generics;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gsonpath.GeneratedAdapter;
+import gsonpath.GsonPathGenerated;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.JsonReaderHelper;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.List;
 
-@GeneratedAdapter(adapterElementClassNames = {"generator.standard.field_types.generics.TestGenerics"})
+@GsonPathGenerated
 public final class TestGenerics_GsonTypeAdapter extends GsonPathTypeAdapter<TestGenerics> {
     public TestGenerics_GsonTypeAdapter(Gson gson) {
         super(gson);

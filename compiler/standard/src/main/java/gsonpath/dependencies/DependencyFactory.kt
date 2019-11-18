@@ -26,7 +26,6 @@ import javax.annotation.processing.ProcessingEnvironment
 object DependencyFactory {
 
     fun create(processingEnv: ProcessingEnvironment): Dependencies {
-        val logger = Logger(processingEnv)
         val fileWriter = FileWriter(processingEnv)
         val defaultValueDetector = DefaultValueDetectorImpl(processingEnv)
 
@@ -39,7 +38,7 @@ object DependencyFactory {
         val gsonObjectTreeFactory = GsonObjectTreeFactory(gsonObjectFactory)
 
         val subTypeMetadataFactory = SubTypeMetadataFactoryImpl(typeHandler)
-        val extensions = loadExtensions(logger)
+        val extensions = loadExtensions(processingEnv)
         val extensionsHandler = ExtensionsHandler(processingEnv, extensions)
         val readFunctions = ReadFunctions(extensionsHandler)
         val writeFunctions = WriteFunctions(extensionsHandler)
@@ -58,7 +57,6 @@ object DependencyFactory {
 
         // Handle the standard type adapters.
         return Dependencies(
-                logger = logger,
                 standardGsonAdapterGenerator = StandardGsonAdapterGenerator(
                         adapterModelMetadataFactory,
                         fileWriter,
@@ -76,8 +74,8 @@ object DependencyFactory {
         )
     }
 
-    private fun loadExtensions(logger: Logger): List<GsonPathExtension> {
-        return ExtensionsLoader.loadExtensions(logger)
+    private fun loadExtensions(processingEnv: ProcessingEnvironment): List<GsonPathExtension> {
+        return ExtensionsLoader.loadExtensions(Logger(processingEnv))
                 .plus(arrayOf(
                         EmptyToNullExtension(),
                         FlattenJsonExtension(),

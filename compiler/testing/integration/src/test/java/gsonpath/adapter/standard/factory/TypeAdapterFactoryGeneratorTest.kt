@@ -4,8 +4,7 @@ import com.google.common.truth.Truth.assertAbout
 import com.google.testing.compile.JavaFileObjects
 import com.google.testing.compile.JavaSourceSubjectFactory
 import com.google.testing.compile.JavaSourcesSubjectFactory
-import gsonpath.GsonPathAdapterProcessor
-import gsonpath.GsonPathFactoryProcessor
+import gsonpath.GsonProcessor
 import gsonpath.generator.GeneratorTester.assertGeneratedContent
 import gsonpath.generator.TestCriteria
 import org.junit.Test
@@ -33,7 +32,7 @@ class TypeAdapterFactoryGeneratorTest {
     fun givenNoTypeAdaptersAndNoTypeAdapterFactory_whenProcessorRuns_expectNoErrors() {
         assertAbout(JavaSourceSubjectFactory.javaSource())
                 .that(JavaFileObjects.forResource("generator/factory/NonGsonPathFile.java"))
-                .processedWith(GsonPathAdapterProcessor())
+                .processedWith(GsonProcessor())
                 .compilesWithoutError()
     }
 
@@ -73,7 +72,7 @@ class TypeAdapterFactoryGeneratorTest {
                 .that(listOf(JavaFileObjects.forResource("generator/factory/TestLoaderSource.java"))
                         .plus(typeAdapterFactoryFileName.map { JavaFileObjects.forResource("generator/factory/$it") })
                 )
-                .processedWith(GsonPathFactoryProcessor())
+                .processedWith(GsonProcessor())
                 .failsToCompile()
                 .withErrorContaining(errorMessage)
     }
