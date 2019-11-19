@@ -71,10 +71,10 @@ open class GsonProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): Set<String> {
-        val additonalAnnotations: Set<String> = processingEnv.options["gsonpath.additionalAnnotations"]
+        val options = processingEnv.options["gsonpath.additionalAnnotations"]
+        val additonalAnnotations: Set<String> = options
                 ?.split(",")
-                ?.toSet()
-                ?: emptySet()
+                ?.toSet() ?: throw IllegalStateException("No additonal annotations were found! $options")
 
         return additonalAnnotations.plus(setOf(
                 AutoGsonAdapterFactory::class.java.canonicalName,
