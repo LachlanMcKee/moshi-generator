@@ -1,6 +1,13 @@
 Change Log
 ===========
 
+Version 3.7.2 *(2019-11-28)*
+----------------------------
+
+* Improvement: Made incremental annotation processing opt in. By default it will no longer be incremental
+     * This is to avoid any unexpected build failures.
+     * Refer to the README to learn how to make the processor incremental.
+
 Version 3.7.1 *(2019-11-20)*
 ----------------------------
 
