@@ -122,6 +122,34 @@ return new GsonBuilder()
                 .create();
 ```
 
+#### Incremental annotation processing
+
+You must update your build.gradle (for each module) to opt into incremental annotation processing.
+
+When enabled, all custom annotations (annotations which are either themselves annotated with either: `@AutoGsonAdapter`, `@GsonSubType`, `@AutoGsonAdapterFactory`) must be registered in the build.gradle (comma separated), otherwise they will be silently ignored.
+
+Examples of this configuration are as follows: 
+
+```groovy
+// Standard annotation processor
+javaCompileOptions {
+   annotationProcessorOptions {
+      arguments = [
+         'gsonpath.incremental': 'true',
+         'gsonpath.additionalAnnotations': 'com.example.CustomAutoGsonAdapter,com.example.CustomGsonSubType'
+      ]
+   }
+}
+
+// Kotlin annotation processor (kapt)
+kapt {
+   arguments {
+      arg("gsonpath.incremental", "true")
+      arg("gsonpath.additionalAnnotations", "com.example.CustomAutoGsonAdapter,com.example.CustomGsonSubType")
+   }
+}
+```
+
 ## Proguard
 To use proguard within your project, you must add the generated type adapter factory. Using the example above, this would be:
 
@@ -133,8 +161,8 @@ To use proguard within your project, you must add the generated type adapter fac
 This library is available on Maven, you can add it to your project using the following gradle dependencies:
 
 ```gradle
-compile 'net.lachlanmckee:gsonpath:3.7.1'
-apt 'net.lachlanmckee:gsonpath-compiler:3.7.1'
+compile 'net.lachlanmckee:gsonpath:3.7.2'
+apt 'net.lachlanmckee:gsonpath-compiler:3.7.2'
 
-compile 'net.lachlanmckee:gsonpath-kt:3.7.1' // an optional Kotlin library 
+compile 'net.lachlanmckee:gsonpath-kt:3.7.2' // an optional Kotlin library 
 ```
