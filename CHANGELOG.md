@@ -1,6 +1,16 @@
 Change Log
 ===========
 
+Version 3.8.0 *(2020-01-29)*
+----------------------------
+
+* Improvement: `@AutoGsonAdaptorFactory` can now define default values [#244](../../issues/244).
+     * To support this certain fields within `@AutoGsonAdapter` were made arrays. This is a potentially breaking change.
+* Improvement: Updated to Java 8 [#246](../../issues/246).
+     * In future certain Java 8 features such as lambas will be used going forward.
+* Improvement: Changed the `GsonResult#Failure` `exception` to be `JsonParseException` rather than `Exception` [#248](../../issues/248).
+     * This reflects the actual exception that can be thrown.   
+
 Version 3.7.2 *(2019-11-28)*
 ----------------------------
 
