@@ -3,12 +3,15 @@ package gsonpath.adapter.subType
 import com.google.gson.Gson
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
+import gsonpath.GsonPathListener
 import gsonpath.GsonPathTypeAdapter
 import gsonpath.GsonSubtype
 import gsonpath.LazyFactoryMetadata
 import gsonpath.adapter.AdapterFactory
 import gsonpath.adapter.AdapterGenerationResult
 import gsonpath.adapter.Constants
+import gsonpath.adapter.Constants.GSON
+import gsonpath.adapter.Constants.LISTENER
 import gsonpath.adapter.common.GsonSubTypeFactory
 import gsonpath.adapter.common.GsonSubTypeResult
 import gsonpath.adapter.util.AdapterFactoryUtil.getAnnotatedModelElements
@@ -73,11 +76,11 @@ object SubTypeAdapterFactory : AdapterFactory {
         superclass(ParameterizedTypeName.get(ClassName.get(GsonPathTypeAdapter::class.java), typeName))
         addAnnotation(Constants.GENERATED_ANNOTATION)
 
-        // Add the constructor which takes a gson instance for future use.
         constructor {
             addModifiers(Modifier.PUBLIC)
-            addParameter(Gson::class.java, "gson")
-            addStatement("super(gson)")
+            addParameter(Gson::class.java, GSON)
+            addParameter(GsonPathListener::class.java, LISTENER)
+            addStatement("super($GSON, $LISTENER)")
         }
 
         addMethod(result.readMethodSpecs)

@@ -11,9 +11,11 @@ import static gsonpath.GsonUtil.isValidValue;
 
 public abstract class GsonPathTypeAdapter<T> extends TypeAdapter<T> {
     protected final Gson gson;
+    protected final GsonPathListener listener;
 
-    public GsonPathTypeAdapter(Gson gson) {
+    public GsonPathTypeAdapter(Gson gson, GsonPathListener listener) {
         this.gson = gson;
+        this.listener = listener;
     }
 
     @Override

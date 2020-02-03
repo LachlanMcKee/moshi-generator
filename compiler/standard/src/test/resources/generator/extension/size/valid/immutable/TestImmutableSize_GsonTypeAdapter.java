@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import gsonpath.GsonPathGenerated;
+import gsonpath.GsonPathListener;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.GsonUtil;
 import gsonpath.JsonReaderHelper;
@@ -13,8 +14,8 @@ import java.lang.String;
 
 @GsonPathGenerated
 public final class TestImmutableSize_GsonTypeAdapter extends GsonPathTypeAdapter<TestImmutableSize> {
-    public TestImmutableSize_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestImmutableSize_GsonTypeAdapter(Gson gson, GsonPathListener listener) {
+        super(gson, listener);
     }
 
     @Override

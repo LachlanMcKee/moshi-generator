@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import gsonpath.GsonPathGenerated;
+import gsonpath.GsonPathListener;
 import gsonpath.GsonPathTypeAdapter;
 import java.io.IOException;
 import java.lang.Override;
@@ -13,8 +14,8 @@ import java.lang.String;
 
 @GsonPathGenerated
 public final class TestEnumWithoutDefault_GsonTypeAdapter extends GsonPathTypeAdapter<TestEnumWithoutDefault> {
-    public TestEnumWithoutDefault_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestEnumWithoutDefault_GsonTypeAdapter(Gson gson, GsonPathListener listener) {
+        super(gson, listener);
     }
 
     @Override
