@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import gsonpath.GsonPathGenerated;
-import gsonpath.GsonPathListener;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.GsonUtil;
 import gsonpath.JsonReaderHelper;
@@ -15,8 +14,8 @@ import java.lang.Override;
 @GsonPathGenerated
 public final class TestValidateAllExceptNullable_GsonTypeAdapter extends GsonPathTypeAdapter<TestValidateAllExceptNullable> {
 
-    public TestValidateAllExceptNullable_GsonTypeAdapter(Gson gson, GsonPathListener listener) {
-        super(gson, listener);
+    public TestValidateAllExceptNullable_GsonTypeAdapter(Gson gson) {
+        super(gson);
     }
 
     @Override

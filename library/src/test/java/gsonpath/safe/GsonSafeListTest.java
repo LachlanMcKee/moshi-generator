@@ -2,32 +2,20 @@ package gsonpath.safe;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import gsonpath.GsonPathListener;
 import gsonpath.GsonPathTypeAdapterFactory;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 public class GsonSafeListTest {
-    @Captor
-    ArgumentCaptor<Exception> exceptionArgumentCaptor;
-
     @Test
     public void testUsingGsonSafeArrayList() {
-        MockitoAnnotations.initMocks(this);
-
-        GsonPathListener listener = mock(GsonPathListener.class);
         Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(new GsonPathTypeAdapterFactory(listener))
+                .registerTypeAdapterFactory(new GsonPathTypeAdapterFactory())
                 .create();
 
         InputStream resourceAsStream = ClassLoader
@@ -42,14 +30,5 @@ public class GsonSafeListTest {
         assertEquals(2, typesList.size());
         assertEquals(new Integer(1), typesList.get(0));
         assertEquals(new Integer(4), typesList.get(1));
-
-        verify(listener, times(2)).onListElementIgnored(exceptionArgumentCaptor.capture());
-        Exception exception1 = exceptionArgumentCaptor.getAllValues().get(0);
-        assertEquals(JsonSyntaxException.class, exception1.getClass());
-        assertEquals("java.lang.NumberFormatException: For input string: \"a\"", exception1.getMessage());
-
-        Exception exception2 = exceptionArgumentCaptor.getAllValues().get(1);
-        assertEquals(JsonSyntaxException.class, exception2.getClass());
-        assertEquals("java.lang.NumberFormatException: For input string: \"b\"", exception2.getMessage());
     }
 }

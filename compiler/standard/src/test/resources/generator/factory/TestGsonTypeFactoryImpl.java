@@ -4,17 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
-import gsonpath.GsonPathListener;
+
 import java.lang.Override;
 
 public final class TestGsonTypeFactoryImpl implements TestGsonTypeFactory {
     private final TypeAdapterFactory[] mPackagePrivateLoaders;
 
-    public TestGsonTypeFactoryImpl(GsonPathListener listener) {
+    public GsonTypeAdapterLoader() {
         mPackagePrivateLoaders = new TypeAdapterFactory[3];
-        mPackagePrivateLoaders[0] = new generator.factory.PackagePrivateTypeAdapterLoader(listener);
-        mPackagePrivateLoaders[1] = new generator.factory.source2.PackagePrivateTypeAdapterLoader(listener);
-        mPackagePrivateLoaders[2] = new generator.factory.source3.PackagePrivateTypeAdapterLoader(listener);
+        mPackagePrivateLoaders[0] = new generator.factory.PackagePrivateTypeAdapterLoader();
+        mPackagePrivateLoaders[1] = new generator.factory.source2.PackagePrivateTypeAdapterLoader();
+        mPackagePrivateLoaders[2] = new generator.factory.source3.PackagePrivateTypeAdapterLoader();
     }
 
     @Override

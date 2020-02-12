@@ -8,8 +8,6 @@ import gsonpath.*
 import gsonpath.adapter.AdapterGenerationResult
 import gsonpath.adapter.AdapterMethodBuilder
 import gsonpath.adapter.Constants
-import gsonpath.adapter.Constants.GSON
-import gsonpath.adapter.Constants.LISTENER
 import gsonpath.adapter.standard.adapter.properties.PropertyFetcher
 import gsonpath.adapter.util.writeFile
 import gsonpath.compiler.generateClassName
@@ -52,11 +50,13 @@ class EnumGsonAdapterGenerator(
         superclass(ParameterizedTypeName.get(ClassName.get(GsonPathTypeAdapter::class.java), properties.enumTypeName))
         addAnnotation(Constants.GENERATED_ANNOTATION)
 
+        // Add the constructor which takes a gson instance for future use.
         constructor {
             addModifiers(Modifier.PUBLIC)
-            addParameter(Gson::class.java, GSON)
-            addParameter(GsonPathListener::class.java, LISTENER)
-            addStatement("super($GSON, $LISTENER)")
+            addParameter(Gson::class.java, "gson")
+            code {
+                addStatement("super(gson)")
+            }
         }
 
         addMethod(createReadMethod(properties))
@@ -76,9 +76,6 @@ class EnumGsonAdapterGenerator(
                     }
                     default(addBreak = false) {
                         if (properties.defaultValue != null) {
-                            `if`("listener != null") {
-                                addStatement("listener.onDefaultEnum(\$T.class, enumValue)", properties.enumTypeName)
-                            }
                             `return`("\$T", properties.defaultValue.enumValueTypeName)
                         } else {
                             addEscapedStatement("""throw new gsonpath.JsonUnexpectedEnumValueException(enumValue, "$enumTypeName")""")

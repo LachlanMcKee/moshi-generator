@@ -10,11 +10,8 @@ import gsonpath.safe.GsonSafeListTypeAdapterFactory;
  * Adds serialization/deserialization handling for GsonPath specific types to Gson.
  */
 public final class GsonPathTypeAdapterFactory implements TypeAdapterFactory {
-    private final GsonSafeListTypeAdapterFactory safeListFactory;
-
-    public GsonPathTypeAdapterFactory(GsonPathListener listener) {
-        safeListFactory = new GsonSafeListTypeAdapterFactory(listener);
-    }
+    private final GsonSafeListTypeAdapterFactory safeListFactory =
+            new GsonSafeListTypeAdapterFactory();
 
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
