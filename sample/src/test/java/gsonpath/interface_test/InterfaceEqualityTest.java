@@ -2,7 +2,8 @@ package gsonpath.interface_test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import gsonpath.TestGsonTypeFactoryImpl;
+import gsonpath.GsonPath;
+import gsonpath.TestGsonTypeFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -53,7 +54,7 @@ public class InterfaceEqualityTest {
 
     private Gson buildGson() {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(new TestGsonTypeFactoryImpl(null));
+        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
         return builder.create();
     }
 

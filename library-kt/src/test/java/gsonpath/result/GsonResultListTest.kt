@@ -14,7 +14,7 @@ class GsonResultListTest {
     @Test
     fun testUsingGsonSafeArrayList() {
         val gson = GsonBuilder()
-                .registerTypeAdapterFactory(GsonPathTypeAdapterFactoryKt(null))
+                .registerTypeAdapterFactory(GsonPathTypeAdapterFactoryKt())
                 .create()
 
         val resourceAsStream = ClassLoader

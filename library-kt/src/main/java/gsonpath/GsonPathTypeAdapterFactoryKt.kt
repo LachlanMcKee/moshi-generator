@@ -11,11 +11,11 @@ import gsonpath.result.GsonResultListTypeAdapterFactory
  *
  * This version of the class proxies to GsonPathTypeAdapterFactory, so it can be used as the sole factory.
  */
-class GsonPathTypeAdapterFactoryKt(listener: GsonPathListener?) : TypeAdapterFactory {
+class GsonPathTypeAdapterFactoryKt : TypeAdapterFactory {
     override fun <T> create(gson: Gson, type: TypeToken<T>): TypeAdapter<T>? {
         return gsonPathFactory.create(gson, type) ?: gsonResultListFactory.create(gson, type)
     }
 
-    private val gsonPathFactory by lazy { GsonPathTypeAdapterFactory(listener) }
+    private val gsonPathFactory by lazy { GsonPathTypeAdapterFactory() }
     private val gsonResultListFactory by lazy { GsonResultListTypeAdapterFactory() }
 }

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import gsonpath.GsonPathGenerated;
-import gsonpath.GsonPathListener;
 import gsonpath.GsonPathTypeAdapter;
 import gsonpath.JsonReaderHelper;
 import java.io.IOException;
@@ -13,8 +12,8 @@ import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestRootNesting_GsonTypeAdapter extends GsonPathTypeAdapter<TestRootNesting> {
-    public TestRootNesting_GsonTypeAdapter(Gson gson, GsonPathListener listener) {
-        super(gson, listener);
+    public TestRootNesting_GsonTypeAdapter(Gson gson) {
+        super(gson);
     }
 
     @Override
