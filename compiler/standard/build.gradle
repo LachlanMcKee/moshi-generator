@@ -26,7 +26,7 @@ dependencies {
 
     compile "com.squareup:javapoet:$javapoet_version"
     compile "com.google.auto:auto-common:0.6"
-    compile "com.google.code.gson:gson:$gson_version"
+    compile "com.squareup.moshi:moshi:$moshi_version"
 
     testCompile "com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0"
     testCompile "com.google.truth:truth:0.34"

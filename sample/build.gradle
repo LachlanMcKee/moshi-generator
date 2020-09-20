@@ -30,7 +30,7 @@ kapt {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "com.google.code.gson:gson:$gson_version"
+    compile "com.squareup.moshi:moshi:$moshi_version"
 
     compile project(":sample-base")
     kapt project(":compiler:standard")
