@@ -29,20 +29,20 @@ public final class IndirectlyAnnotatedSubType_GsonTypeAdapter extends GsonPathTy
         if (subTypeElement0_jsonElement == null || subTypeElement0_jsonElement.isJsonNull()) {
             throw new com.google.gson.JsonParseException("cannot deserialize generator.gson_sub_type.indirectly_annotated.IndirectlyAnnotatedSubType because the subtype field 'type' is either null or does not exist.");
         } else {
-            subTypeElement0 = gson.getAdapter(boolean.class).fromJsonTree(subTypeElement0_jsonElement);
+            subTypeElement0 = moshi.getAdapter(boolean.class).fromJsonTree(subTypeElement0_jsonElement);
         }
 
         Class<? extends IndirectlyAnnotatedSubType> delegateClass = IndirectlyAnnotatedSubType.getSubType1(subTypeElement0);
         if (delegateClass == null) {
             return null;
         }
-        IndirectlyAnnotatedSubType result = gson.getAdapter(delegateClass).fromJsonTree(jsonElement);
+        IndirectlyAnnotatedSubType result = moshi.getAdapter(delegateClass).fromJsonTree(jsonElement);
         return result;
     }
 
     @Override
     public void writeImpl(JsonWriter out, IndirectlyAnnotatedSubType value) throws IOException {
-        TypeAdapter delegateAdapter = gson.getAdapter(value.getClass());
+        TypeAdapter delegateAdapter = moshi.getAdapter(value.getClass());
         delegateAdapter.write(out, value);
     }
 }

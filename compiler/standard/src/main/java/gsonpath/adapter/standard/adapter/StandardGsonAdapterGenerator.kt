@@ -1,9 +1,9 @@
 package gsonpath.adapter.standard.adapter
 
-import com.google.gson.Gson
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
+import com.squareup.moshi.Moshi
 import gsonpath.LazyFactoryMetadata
 import gsonpath.ProcessingException
 import gsonpath.adapter.AdapterGenerationResult
@@ -48,8 +48,8 @@ class StandardGsonAdapterGenerator(
         // Add the constructor which takes a gson instance for future use.
         constructor {
             addModifiers(Modifier.PUBLIC)
-            addParameter(Gson::class.java, "gson")
-            addStatement("super(gson)")
+            addParameter(Moshi::class.java, "moshi")
+            addStatement("super(moshi)")
         }
 
         readFunctions.handleRead(this, metadata.readParams)

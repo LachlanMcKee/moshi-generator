@@ -25,7 +25,7 @@ public final class TestInheritance_GsonTypeAdapter extends GsonPathTypeAdapter<T
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "Json1":
-                    Integer value_Json1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_Json1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_Json1 != null) {
                         result.value1 = value_Json1;
                     }
@@ -46,7 +46,7 @@ public final class TestInheritance_GsonTypeAdapter extends GsonPathTypeAdapter<T
         out.beginObject();
         int obj0 = value.value1;
         out.name("Json1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

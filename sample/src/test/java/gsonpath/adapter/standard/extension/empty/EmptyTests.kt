@@ -11,25 +11,25 @@ object EmptyTests {
     class StringTests {
         @Test
         fun givenBlankPassedToNonNullModel_whenJsonParsed_thenExpectException() {
-            TestUtil.expectException(EmptyModel.NonNull.StringModel::class.java, "{value:\"\"}",
+            TestUtil.expectException(EmptyModel.NonNull.StringModel::class.java, "{\"value\":\"\"}",
                 "JSON element 'value' cannot be blank")
         }
 
         @Test
         fun givenBlankPassedToNullableModel_whenJsonParsed_thenExpectNull() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.StringModel::class.java, "{value:\"\"}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.StringModel::class.java, "{\"value\":\"\"}")
             Assert.assertEquals(null, model.value)
         }
 
         @Test
         fun givenValuePassedToNonNullModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.StringModel::class.java, "{value:\"a\"}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.StringModel::class.java, "{\"value\":\"a\"}")
             Assert.assertEquals("a", model.value)
         }
 
         @Test
         fun givenValuePassedToNullableModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.StringModel::class.java, "{value:\"a\"}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.StringModel::class.java, "{\"value\":\"a\"}")
             Assert.assertEquals("a", model.value)
         }
     }
@@ -37,26 +37,26 @@ object EmptyTests {
     class MapTests {
         @Test
         fun givenBlankPassedToNonNullModel_whenJsonParsed_thenExpectException() {
-            TestUtil.expectException(EmptyModel.NonNull.MapModel::class.java, "{value: {}}",
+            TestUtil.expectException(EmptyModel.NonNull.MapModel::class.java, "{\"value\": {}}",
                 "JSON element 'value' cannot be blank")
         }
 
         @Test
         fun givenBlankPassedToNullableModel_whenJsonParsed_thenExpectNull() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.MapModel::class.java, "{value: {}}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.MapModel::class.java, "{\"value\": {}}")
             Assert.assertEquals(null, model.value)
         }
 
         @Test
         fun givenValuePassedToNonNullModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.NonNull.MapModel::class.java, "{value: {\"a\": \"a\"}}")
+            val model = TestUtil.executeFromJson(EmptyModel.NonNull.MapModel::class.java, "{\"value\": {\"a\": \"a\"}}")
             Assert.assertEquals(1, model.value.size)
             Assert.assertEquals("a", model.value["a"])
         }
 
         @Test
         fun givenValuePassedToNullableModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.MapModel::class.java, "{value: {\"a\": \"a\"}}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.MapModel::class.java, "{\"value\": {\"a\": \"a\"}}")
             Assert.assertEquals(1, model.value.size)
             Assert.assertEquals("a", model.value["a"])
         }
@@ -65,26 +65,26 @@ object EmptyTests {
     class CollectionTests {
         @Test
         fun givenBlankPassedToNonNullModel_whenJsonParsed_thenExpectException() {
-            TestUtil.expectException(EmptyModel.NonNull.CollectionModel::class.java, "{value: []}",
+            TestUtil.expectException(EmptyModel.NonNull.CollectionModel::class.java, "{\"value\": []}",
                 "JSON element 'value' cannot be blank")
         }
 
         @Test
         fun givenBlankPassedToNullableModel_whenJsonParsed_thenExpectNull() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.CollectionModel::class.java, "{value: []}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.CollectionModel::class.java, "{\"value\": []}")
             Assert.assertEquals(null, model.value)
         }
 
         @Test
         fun givenValuePassedToNonNullModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.NonNull.CollectionModel::class.java, "{value: [\"a\"]}")
+            val model = TestUtil.executeFromJson(EmptyModel.NonNull.CollectionModel::class.java, "{\"value\": [\"a\"]}")
             Assert.assertEquals(1, model.value.size)
             Assert.assertEquals("a", model.value.iterator().next())
         }
 
         @Test
         fun givenValuePassedToNullableModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.CollectionModel::class.java, "{value: [\"a\"]}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.CollectionModel::class.java, "{\"value\": [\"a\"]}")
             Assert.assertEquals(1, model.value.size)
             Assert.assertEquals("a", model.value.iterator().next())
         }
@@ -93,26 +93,26 @@ object EmptyTests {
     class ArrayTests {
         @Test
         fun givenBlankPassedToNonNullModel_whenJsonParsed_thenExpectException() {
-            TestUtil.expectException(EmptyModel.NonNull.ArrayModel::class.java, "{value: []}",
+            TestUtil.expectException(EmptyModel.NonNull.ArrayModel::class.java, "{\"value\": []}",
                 "JSON element 'value' cannot be blank")
         }
 
         @Test
         fun givenBlankPassedToNullableModel_whenJsonParsed_thenExpectNull() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.ArrayModel::class.java, "{value: []}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.ArrayModel::class.java, "{\"value\": []}")
             Assert.assertArrayEquals(null, model.value)
         }
 
         @Test
         fun givenValuePassedToNonNullModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.NonNull.ArrayModel::class.java, "{value: [\"a\"]}")
+            val model = TestUtil.executeFromJson(EmptyModel.NonNull.ArrayModel::class.java, "{\"value\": [\"a\"]}")
             Assert.assertEquals(1, model.value.size)
             Assert.assertEquals("a", model.value[0])
         }
 
         @Test
         fun givenValuePassedToNullableModel_whenJsonParsed_thenExpectValue() {
-            val model = TestUtil.executeFromJson(EmptyModel.Nullable.ArrayModel::class.java, "{value: [\"a\"]}")
+            val model = TestUtil.executeFromJson(EmptyModel.Nullable.ArrayModel::class.java, "{\"value\": [\"a\"]}")
             Assert.assertEquals(1, model.value.size)
             Assert.assertEquals("a", model.value[0])
         }

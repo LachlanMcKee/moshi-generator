@@ -10,7 +10,7 @@ class LazyFactoryMetadata(
     private val elementAndAnnotation: ElementAndAnnotation<AutoGsonAdapterFactory>
         get() {
             return _elementAndAnnotation ?: throw ProcessingException("An interface annotated with" +
-                    " @AutoGsonAdapterFactory (that directly extends com.google.gson.TypeAdapterFactory) must exist " +
+                    " @AutoGsonAdapterFactory (that directly extends JsonAdapter.Factory) must exist " +
                     "before the annotation processor can succeed. " +
                     "See the AutoGsonAdapterFactory annotation for further details.")
         }

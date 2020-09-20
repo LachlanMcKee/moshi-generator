@@ -8,13 +8,13 @@ class InvalidTests {
 
     @Test
     fun testInvalidElementsRemoved() {
-        assertValues("{value:[{'text': null}, {'text': 'a'}, {'text': null}, {'text': 'c'}, {'text': null}]}",
+        assertValues("{\"value\":[{\"text\": null}, {\"text\": \"a\"}, {\"text\": null}, {\"text\": \"c\"}, {\"text\": null}]}",
                 InvalidModel.Data("a"), InvalidModel.Data("c"))
     }
 
     @Test
     fun testValuesEmptyWhenAllInvalid() {
-        assertValues("{value:[{'text': null}, {'text': null}, {'text': null}]}")
+        assertValues("{\"value\":[{\"text\": null}, {\"text\": null}, {\"text\": null}]}")
     }
 
     private fun assertValues(jsonText: String, vararg expected: InvalidModel.Data) {

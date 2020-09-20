@@ -1,41 +1,41 @@
 package gsonpath.internal;
 
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 
 import java.io.IOException;
 
 import static gsonpath.internal.GsonUtil.isValidValue;
 
-public abstract class GsonPathTypeAdapter<T> extends TypeAdapter<T> {
-    protected final Gson gson;
+public abstract class GsonPathTypeAdapter<T> extends JsonAdapter<T> {
+    protected final Moshi moshi;
 
-    public GsonPathTypeAdapter(Gson gson) {
-        this.gson = gson;
+    public GsonPathTypeAdapter(Moshi moshi) {
+        this.moshi = moshi;
     }
 
     @Override
-    public final T read(JsonReader in) throws IOException {
+    public final T fromJson(JsonReader reader) throws IOException {
         // Ensure the object is not null.
-        if (!isValidValue(in)) {
+        if (!isValidValue(reader)) {
             return null;
         }
-        return readImpl(in);
+        return readImpl(reader);
     }
 
     @Override
-    public final void write(JsonWriter out, T value) throws IOException {
+    public final void toJson(JsonWriter writer, T value) throws IOException {
         if (value == null) {
-            out.nullValue();
+            writer.nullValue();
             return;
         }
 
-        writeImpl(out, value);
+        writeImpl(writer, value);
     }
 
-    public abstract T readImpl(JsonReader in) throws IOException;
+    public abstract T readImpl(JsonReader reader) throws IOException;
 
-    public abstract void writeImpl(JsonWriter out, T value) throws IOException;
+    public abstract void writeImpl(JsonWriter writer, T value) throws IOException;
 }

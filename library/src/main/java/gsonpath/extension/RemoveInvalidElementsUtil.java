@@ -1,11 +1,10 @@
 package gsonpath.extension;
 
-import com.google.gson.*;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonReader;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.Moshi;
 import gsonpath.audit.AuditLog;
 import gsonpath.audit.AuditLog.RemovedElement;
-import gsonpath.audit.AuditJsonReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,38 +14,39 @@ import static gsonpath.internal.GsonUtil.isValidValue;
 
 public class RemoveInvalidElementsUtil {
 
-    public static <T> void removeInvalidElementsList(TypeAdapter<T> adapter, JsonReader in, List<T> outputList) {
-        AuditLog auditLog = AuditJsonReader.getAuditLogFromReader(in);
-
-        JsonArray jsonArray = Streams.parse(in).getAsJsonArray();
-        for (JsonElement jsonElement : jsonArray) {
+    public static <T> void removeInvalidElementsList(JsonAdapter<T> adapter, JsonReader reader, List<T> outputList) throws IOException {
+        // TODO:
+//        AuditLog auditLog = AuditJsonReader.getAuditLogFromReader(reader);
+//
+        List<Object> jsonArray = (List<Object>) reader.readJsonValue();
+        for (Object jsonElement : jsonArray) {
             try {
-                outputList.add(adapter.fromJsonTree(jsonElement));
-            } catch (JsonParseException e) {
-                if (auditLog != null) {
-                    auditLog.addRemovedElement(new RemovedElement(in.getPath(), e, jsonElement));
-                }
+                outputList.add(adapter.fromJsonValue(jsonElement));
+            } catch (Exception e) {
+//                if (auditLog != null) {
+//                    auditLog.addRemovedElement(new RemovedElement(reader.getPath(), e, jsonElement));
+//                }
             }
         }
     }
 
-    public static <T> List<T> removeInvalidElementsList(Class<T> clazz, Gson gson, JsonReader in) throws IOException {
-        if (!isValidValue(in)) {
+    public static <T> List<T> removeInvalidElementsList(Class<T> clazz, Moshi moshi, JsonReader reader) throws IOException {
+        if (!isValidValue(reader)) {
             return null;
         }
-        TypeAdapter<T> adapter = gson.getAdapter(clazz);
+        JsonAdapter<T> adapter = moshi.adapter(clazz);
         List<T> elements = new ArrayList<>();
-        removeInvalidElementsList(adapter, in, elements);
+        removeInvalidElementsList(adapter, reader, elements);
         return elements;
     }
 
     public static <T> T[] removeInvalidElementsArray(
             Class<T> clazz,
-            Gson gson,
-            JsonReader in,
+            Moshi moshi,
+            JsonReader reader,
             CreateArrayFunction<T> createArrayFunction) throws IOException {
 
-        List<T> adjustedList = removeInvalidElementsList(clazz, gson, in);
+        List<T> adjustedList = removeInvalidElementsList(clazz, moshi, reader);
         if (adjustedList == null) {
             return null;
         }

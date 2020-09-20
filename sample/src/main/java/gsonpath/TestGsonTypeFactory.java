@@ -1,7 +1,7 @@
 package gsonpath;
 
-import com.google.gson.TypeAdapterFactory;
+import com.squareup.moshi.JsonAdapter;
 
 @SampleAdapterFactory
-public interface TestGsonTypeFactory extends TypeAdapterFactory {
+public interface TestGsonTypeFactory extends JsonAdapter.Factory {
 }

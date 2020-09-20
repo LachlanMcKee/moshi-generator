@@ -25,7 +25,7 @@ public final class TestNestedClass_Nested_GsonTypeAdapter extends GsonPathTypeAd
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "value1":
-                    Integer value_value1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_value1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -46,7 +46,7 @@ public final class TestNestedClass_Nested_GsonTypeAdapter extends GsonPathTypeAd
         out.beginObject();
         int obj0 = value.value1;
         out.name("value1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

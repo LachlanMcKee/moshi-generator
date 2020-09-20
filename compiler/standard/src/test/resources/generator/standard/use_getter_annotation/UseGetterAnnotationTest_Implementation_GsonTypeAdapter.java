@@ -33,7 +33,7 @@ public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extend
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "name":
-                                String value_common_name_safe = gson.getAdapter(String.class).read(in);
+                                String value_common_name_safe = moshi.getAdapter(String.class).read(in);
                                 if (value_common_name_safe != null) {
                                     value_common_name = value_common_name_safe;
                                     mandatoryFieldsCheckList[0] = true;
@@ -55,7 +55,7 @@ public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extend
                     while (jsonReaderHelper.handleObject(2, 1)) {
                         switch (in.nextName()) {
                             case "intTest":
-                                value_specific_intTest = gson.getAdapter(Integer.class).read(in);
+                                value_specific_intTest = moshi.getAdapter(Integer.class).read(in);
                                 break;
 
                             default:
@@ -107,7 +107,7 @@ public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extend
         String obj0 = value.getName();
         if (obj0 != null) {
             out.name("name");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         // End common
@@ -118,7 +118,7 @@ public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extend
         out.beginObject();
         int obj1 = value.getIntTest();
         out.name("intTest");
-        gson.getAdapter(Integer.class).write(out, obj1);
+        moshi.getAdapter(Integer.class).write(out, obj1);
 
         // End specific
         out.endObject();

@@ -1,6 +1,6 @@
 package gsonpath;
 
-import com.google.gson.TypeAdapterFactory;
+import com.squareup.moshi.JsonAdapter;
 import gsonpath.annotation.AutoGsonAdapter;
 import gsonpath.annotation.AutoGsonAdapterFactory;
 
@@ -16,9 +16,9 @@ public class GsonPath {
     }
 
     /**
-     * Creates an instance of an {@link TypeAdapterFactory} implementation class that implements the input interface.
+     * Creates an instance of an {@link JsonAdapter.Factory} implementation class that implements the input interface.
      * <p>
-     * This factory is used to map the auto generated {@link com.google.gson.TypeAdapter} classes created using the
+     * This factory is used to map the auto generated {@link JsonAdapter} classes created using the
      * {@link AutoGsonAdapter} annotation.
      * <p>
      * Only a single use of reflection is used within the constructor, so it isn't critical to hold onto this reference
@@ -26,12 +26,12 @@ public class GsonPath {
      *
      * @param clazz the type adatper class to use to find the concrete implementation. Ensure that the interface is
      *              annotated with {@link AutoGsonAdapterFactory}
-     * @return a new instance of the {@link TypeAdapterFactory} class
+     * @return a new instance of the {@link JsonAdapter.Factory} class
      */
-    public static TypeAdapterFactory createTypeAdapterFactory(Class<? extends TypeAdapterFactory> clazz) {
+    public static JsonAdapter.Factory createTypeAdapterFactory(Class<? extends JsonAdapter.Factory> clazz) {
         String factoryClassName = clazz.getCanonicalName() + FACTORY_IMPLEMENTATION_SUFFIX;
         try {
-            return (TypeAdapterFactory) Class.forName(factoryClassName).newInstance();
+            return (JsonAdapter.Factory) Class.forName(factoryClassName).newInstance();
         } catch (Exception e) {
             throw new IllegalStateException("Unable to instantiate generated TypeAdapterFactory '" + factoryClassName + "'", e);
         }

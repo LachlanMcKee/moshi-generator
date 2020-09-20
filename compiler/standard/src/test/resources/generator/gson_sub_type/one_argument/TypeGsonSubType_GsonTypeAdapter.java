@@ -30,20 +30,20 @@ public final class TypeGsonSubType_GsonTypeAdapter extends GsonPathTypeAdapter<T
         if (subTypeElement0_jsonElement == null || subTypeElement0_jsonElement.isJsonNull()) {
             subTypeElement0 = null;
         } else {
-            subTypeElement0 = gson.getAdapter(String.class).fromJsonTree(subTypeElement0_jsonElement);
+            subTypeElement0 = moshi.getAdapter(String.class).fromJsonTree(subTypeElement0_jsonElement);
         }
 
         Class<? extends TypeGsonSubType> delegateClass = TypeGsonSubType.getSubType1(subTypeElement0);
         if (delegateClass == null) {
             return null;
         }
-        TypeGsonSubType result = gson.getAdapter(delegateClass).fromJsonTree(jsonElement);
+        TypeGsonSubType result = moshi.getAdapter(delegateClass).fromJsonTree(jsonElement);
         return result;
     }
 
     @Override
     public void writeImpl(JsonWriter out, TypeGsonSubType value) throws IOException {
-        TypeAdapter delegateAdapter = gson.getAdapter(value.getClass());
+        TypeAdapter delegateAdapter = moshi.getAdapter(value.getClass());
         delegateAdapter.write(out, value);
     }
 }

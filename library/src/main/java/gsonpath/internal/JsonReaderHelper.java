@@ -1,6 +1,6 @@
 package gsonpath.internal;
 
-import com.google.gson.stream.JsonReader;
+import com.squareup.moshi.JsonReader;
 
 import java.io.IOException;
 

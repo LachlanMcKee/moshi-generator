@@ -29,21 +29,21 @@ public final class GenericsTest_GsonTypeAdapter extends GsonPathTypeAdapter<Gene
         while (jsonReaderHelper.handleObject(0, 3)) {
             switch (in.nextName()) {
                 case "value1":
-                    String value_value1 = gson.getAdapter(String.class).read(in);
+                    String value_value1 = moshi.getAdapter(String.class).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
                     break;
 
                 case "value2":
-                    Map<String, Integer> value_value2 = gson.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).read(in);
+                    Map<String, Integer> value_value2 = moshi.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).read(in);
                     if (value_value2 != null) {
                         result.value2 = value_value2;
                     }
                     break;
 
                 case "value3":
-                    Double value_value3 = gson.getAdapter(Double.class).read(in);
+                    Double value_value3 = moshi.getAdapter(Double.class).read(in);
                     if (value_value3 != null) {
                         result.value3 = value_value3;
                     }
@@ -65,19 +65,19 @@ public final class GenericsTest_GsonTypeAdapter extends GsonPathTypeAdapter<Gene
         String obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         Map<String, Integer> obj1 = value.value2;
         if (obj1 != null) {
             out.name("value2");
-            gson.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).write(out, obj1);
+            moshi.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).write(out, obj1);
         }
 
         Double obj2 = value.value3;
         if (obj2 != null) {
             out.name("value3");
-            GsonUtil.writeWithGenericAdapter(gson, obj2.getClass(), out, obj2);
+            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
         }
 
         // End

@@ -38,7 +38,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
         while (jsonReaderHelper.handleObject(0, 8)) {
             switch (in.nextName()) {
                 case "intExample":
-                    Integer value_intExample_safe = gson.getAdapter(Integer.class).read(in);
+                    Integer value_intExample_safe = moshi.getAdapter(Integer.class).read(in);
                     if (value_intExample_safe != null) {
                         value_intExample = value_intExample_safe;
                         mandatoryFieldsCheckList[0] = true;
@@ -49,7 +49,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
                     break;
 
                 case "longExample":
-                    Long value_longExample_safe = gson.getAdapter(Long.class).read(in);
+                    Long value_longExample_safe = moshi.getAdapter(Long.class).read(in);
                     if (value_longExample_safe != null) {
                         value_longExample = value_longExample_safe;
                         mandatoryFieldsCheckList[1] = true;
@@ -60,7 +60,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
                     break;
 
                 case "doubleExample":
-                    Double value_doubleExample_safe = gson.getAdapter(Double.class).read(in);
+                    Double value_doubleExample_safe = moshi.getAdapter(Double.class).read(in);
                     if (value_doubleExample_safe != null) {
                         value_doubleExample = value_doubleExample_safe;
                         mandatoryFieldsCheckList[2] = true;
@@ -71,7 +71,7 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
                     break;
 
                 case "booleanExample":
-                    Boolean value_booleanExample_safe = gson.getAdapter(Boolean.class).read(in);
+                    Boolean value_booleanExample_safe = moshi.getAdapter(Boolean.class).read(in);
                     if (value_booleanExample_safe != null) {
                         value_booleanExample = value_booleanExample_safe;
                         mandatoryFieldsCheckList[3] = true;
@@ -82,19 +82,19 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
                     break;
 
                 case "intArrayExample":
-                    value_intArrayExample = gson.getAdapter(int[].class).read(in);
+                    value_intArrayExample = moshi.getAdapter(int[].class).read(in);
                     break;
 
                 case "longArrayExample":
-                    value_longArrayExample = gson.getAdapter(long[].class).read(in);
+                    value_longArrayExample = moshi.getAdapter(long[].class).read(in);
                     break;
 
                 case "doubleArrayExample":
-                    value_doubleArrayExample = gson.getAdapter(double[].class).read(in);
+                    value_doubleArrayExample = moshi.getAdapter(double[].class).read(in);
                     break;
 
                 case "booleanArrayExample":
-                    value_booleanArrayExample = gson.getAdapter(boolean[].class).read(in);
+                    value_booleanArrayExample = moshi.getAdapter(boolean[].class).read(in);
                     break;
 
                 default:
@@ -150,42 +150,42 @@ public final class TestUsingPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
         out.beginObject();
         int obj0 = value.getIntExample();
         out.name("intExample");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         long obj1 = value.getLongExample();
         out.name("longExample");
-        gson.getAdapter(Long.class).write(out, obj1);
+        moshi.getAdapter(Long.class).write(out, obj1);
 
         double obj2 = value.getDoubleExample();
         out.name("doubleExample");
-        gson.getAdapter(Double.class).write(out, obj2);
+        moshi.getAdapter(Double.class).write(out, obj2);
 
         boolean obj3 = value.getBooleanExample();
         out.name("booleanExample");
-        gson.getAdapter(Boolean.class).write(out, obj3);
+        moshi.getAdapter(Boolean.class).write(out, obj3);
 
         int[] obj4 = value.getIntArrayExample();
         if (obj4 != null) {
             out.name("intArrayExample");
-            GsonUtil.writeWithGenericAdapter(gson, obj4.getClass(), out, obj4);
+            GsonUtil.writeWithGenericAdapter(moshi, obj4.getClass(), out, obj4);
         }
 
         long[] obj5 = value.getLongArrayExample();
         if (obj5 != null) {
             out.name("longArrayExample");
-            GsonUtil.writeWithGenericAdapter(gson, obj5.getClass(), out, obj5);
+            GsonUtil.writeWithGenericAdapter(moshi, obj5.getClass(), out, obj5);
         }
 
         double[] obj6 = value.getDoubleArrayExample();
         if (obj6 != null) {
             out.name("doubleArrayExample");
-            GsonUtil.writeWithGenericAdapter(gson, obj6.getClass(), out, obj6);
+            GsonUtil.writeWithGenericAdapter(moshi, obj6.getClass(), out, obj6);
         }
 
         boolean[] obj7 = value.getBooleanArrayExample();
         if (obj7 != null) {
             out.name("booleanArrayExample");
-            GsonUtil.writeWithGenericAdapter(gson, obj7.getClass(), out, obj7);
+            GsonUtil.writeWithGenericAdapter(moshi, obj7.getClass(), out, obj7);
         }
 
         // End

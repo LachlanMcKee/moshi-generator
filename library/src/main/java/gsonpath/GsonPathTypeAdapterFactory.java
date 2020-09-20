@@ -1,20 +1,22 @@
 package gsonpath;
 
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import gsonpath.internal.GsonSafeListTypeAdapterFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
 /**
  * Adds serialization/deserialization handling for GsonPath specific types to Gson.
  */
-public final class GsonPathTypeAdapterFactory implements TypeAdapterFactory {
+public final class GsonPathTypeAdapterFactory implements JsonAdapter.Factory {
     private final GsonSafeListTypeAdapterFactory safeListFactory =
             new GsonSafeListTypeAdapterFactory();
 
     @Override
-    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
-        return safeListFactory.create(gson, typeToken);
+    public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+        return safeListFactory.create(type, annotations, moshi);
     }
 }

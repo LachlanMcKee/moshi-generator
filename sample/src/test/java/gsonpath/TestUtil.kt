@@ -1,28 +1,26 @@
 package gsonpath
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParseException
+import com.squareup.moshi.Moshi
 import org.junit.Assert
-import java.io.InputStreamReader
 
 object TestUtil {
 
-    fun createGson(): Gson = GsonBuilder()
-            .registerTypeAdapterFactory(GsonPathTypeAdapterFactory())
-            .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory::class.java))
-            .create()
+    fun createMoshi(): Moshi = Moshi.Builder()
+            .add(GsonPathTypeAdapterFactory())
+            .add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory::class.java))
+            .build()
 
-    fun <T> executeFromJson(clazz: Class<T>, jsonString: String): T = createGson()
-            .fromJson(jsonString, clazz)
+    fun <T> executeFromJson(clazz: Class<T>, jsonString: String): T = createMoshi()
+            .adapter(clazz)
+            .fromJson(jsonString)!!
 
     fun expectException(clazz: Class<*>, jsonString: String, message: String) {
-        val exception: JsonParseException? =
+        val exception: Exception? =
                 try {
                     executeFromJson(clazz, jsonString)
                     null
 
-                } catch (e: JsonParseException) {
+                } catch (e: Exception) {
                     e
                 }
 

@@ -1,13 +1,12 @@
 package gsonpath;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.squareup.moshi.Moshi;
 import gsonpath.generated.PersonModelGenerated;
 import gsonpath.vanilla.PeopleModelVanilla;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.StringReader;
+import java.io.IOException;
 
 public class PeopleModelTest {
 
@@ -41,16 +40,16 @@ public class PeopleModelTest {
     }
 
     // Create the gson objects once.
-    private Gson vanillaGson;
-    private Gson gsonPath;
+    private Moshi vanillaMoshi;
+    private Moshi generatedMoshi;
 
     @Test
-    public void test() {
-        vanillaGson = new GsonBuilder().create();
+    public void test() throws IOException {
+        vanillaMoshi = new Moshi.Builder().build();
 
-        GsonBuilder gsonPathBuilder = new GsonBuilder();
-        gsonPathBuilder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
-        gsonPath = gsonPathBuilder.create();
+        Moshi.Builder generatedMoshiBuilder = new Moshi.Builder();
+        generatedMoshiBuilder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+        generatedMoshi = generatedMoshiBuilder.build();
 
         // Benchmark regular gson.
         long vanillaAverage = 0;
@@ -67,9 +66,9 @@ public class PeopleModelTest {
         System.out.println("pathAverage: " + (pathAverage / testSize));
     }
 
-    private long testVanillaGson() {
+    private long testVanillaGson() throws IOException {
         long start = System.nanoTime();
-        PeopleModelVanilla vanillaModel = vanillaGson.fromJson(JSON_TEST_STRING, PeopleModelVanilla.class);
+        PeopleModelVanilla vanillaModel = vanillaMoshi.adapter(PeopleModelVanilla.class).fromJson(JSON_TEST_STRING);
 
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("vanillaModel. Time taken: " + duration);
@@ -80,9 +79,10 @@ public class PeopleModelTest {
         return duration;
     }
 
-    private long testGsonPath() {
+    private long testGsonPath() throws IOException {
         long start = System.nanoTime();
-        PersonModelGenerated personModelGenerated = gsonPath.fromJson(new StringReader(JSON_TEST_STRING), PersonModelGenerated.class);
+        PersonModelGenerated personModelGenerated = generatedMoshi.adapter(PersonModelGenerated.class)
+                .fromJson(JSON_TEST_STRING);
 
         long duration = ((System.nanoTime() - start) / 1000000);
         System.out.println("gsonPathModel. Time taken: " + duration);

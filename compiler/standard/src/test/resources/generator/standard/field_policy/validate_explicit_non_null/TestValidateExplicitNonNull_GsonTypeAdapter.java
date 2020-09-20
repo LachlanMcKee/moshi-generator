@@ -28,7 +28,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends GsonPathT
         while (jsonReaderHelper.handleObject(0, 4)) {
             switch (in.nextName()) {
                 case "mandatory1":
-                    Integer value_mandatory1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_mandatory1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_mandatory1 != null) {
                         result.mandatory1 = value_mandatory1;
                         mandatoryFieldsCheckList[0] = true;
@@ -39,7 +39,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends GsonPathT
                     break;
 
                 case "mandatory2":
-                    Integer value_mandatory2 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_mandatory2 = moshi.getAdapter(Integer.class).read(in);
                     if (value_mandatory2 != null) {
                         result.mandatory2 = value_mandatory2;
                         mandatoryFieldsCheckList[1] = true;
@@ -50,7 +50,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends GsonPathT
                     break;
 
                 case "mandatory3":
-                    Integer value_mandatory3 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_mandatory3 = moshi.getAdapter(Integer.class).read(in);
                     if (value_mandatory3 != null) {
                         result.mandatory3 = value_mandatory3;
                         mandatoryFieldsCheckList[2] = true;
@@ -61,7 +61,7 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends GsonPathT
                     break;
 
                 case "optional1":
-                    Integer value_optional1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_optional1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
@@ -109,23 +109,23 @@ public final class TestValidateExplicitNonNull_GsonTypeAdapter extends GsonPathT
         Integer obj0 = value.mandatory1;
         if (obj0 != null) {
             out.name("mandatory1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         Integer obj1 = value.mandatory2;
         if (obj1 != null) {
             out.name("mandatory2");
-            GsonUtil.writeWithGenericAdapter(gson, obj1.getClass(), out, obj1);
+            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
         }
 
         int obj2 = value.mandatory3;
         out.name("mandatory3");
-        gson.getAdapter(Integer.class).write(out, obj2);
+        moshi.getAdapter(Integer.class).write(out, obj2);
 
         Integer obj3 = value.optional1;
         if (obj3 != null) {
             out.name("optional1");
-            GsonUtil.writeWithGenericAdapter(gson, obj3.getClass(), out, obj3);
+            GsonUtil.writeWithGenericAdapter(moshi, obj3.getClass(), out, obj3);
         }
 
         // End

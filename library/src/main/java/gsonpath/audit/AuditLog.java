@@ -1,7 +1,5 @@
 package gsonpath.audit;
 
-import com.google.gson.JsonElement;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +53,9 @@ public final class AuditLog {
     public static final class RemovedElement {
         public final String path;
         public final Exception exception;
-        public final JsonElement jsonElement;
+        public final Object jsonElement;
 
-        public RemovedElement(String path, Exception exception, JsonElement jsonElement) {
+        public RemovedElement(String path, Exception exception, Object jsonElement) {
             this.path = path;
             this.exception = exception;
             this.jsonElement = jsonElement;

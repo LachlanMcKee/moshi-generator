@@ -32,56 +32,56 @@ public final class TestValidPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
         while (jsonReaderHelper.handleObject(0, 8)) {
             switch (in.nextName()) {
                 case "value1":
-                    Boolean value_value1 = gson.getAdapter(Boolean.class).read(in);
+                    Boolean value_value1 = moshi.getAdapter(Boolean.class).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
                     break;
 
                 case "value2":
-                    Integer value_value2 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_value2 = moshi.getAdapter(Integer.class).read(in);
                     if (value_value2 != null) {
                         result.value2 = value_value2;
                     }
                     break;
 
                 case "value3":
-                    Double value_value3 = gson.getAdapter(Double.class).read(in);
+                    Double value_value3 = moshi.getAdapter(Double.class).read(in);
                     if (value_value3 != null) {
                         result.value3 = value_value3;
                     }
                     break;
 
                 case "value4":
-                    Long value_value4 = gson.getAdapter(Long.class).read(in);
+                    Long value_value4 = moshi.getAdapter(Long.class).read(in);
                     if (value_value4 != null) {
                         result.value4 = value_value4;
                     }
                     break;
 
                 case "value5":
-                    Byte value_value5 = gson.getAdapter(Byte.class).read(in);
+                    Byte value_value5 = moshi.getAdapter(Byte.class).read(in);
                     if (value_value5 != null) {
                         result.value5 = value_value5;
                     }
                     break;
 
                 case "value6":
-                    Short value_value6 = gson.getAdapter(Short.class).read(in);
+                    Short value_value6 = moshi.getAdapter(Short.class).read(in);
                     if (value_value6 != null) {
                         result.value6 = value_value6;
                     }
                     break;
 
                 case "value7":
-                    Float value_value7 = gson.getAdapter(Float.class).read(in);
+                    Float value_value7 = moshi.getAdapter(Float.class).read(in);
                     if (value_value7 != null) {
                         result.value7 = value_value7;
                     }
                     break;
 
                 case "value8":
-                    Character value_value8 = gson.getAdapter(Character.class).read(in);
+                    Character value_value8 = moshi.getAdapter(Character.class).read(in);
                     if (value_value8 != null) {
                         result.value8 = value_value8;
                     }
@@ -102,35 +102,35 @@ public final class TestValidPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
         out.beginObject();
         boolean obj0 = value.value1;
         out.name("value1");
-        gson.getAdapter(Boolean.class).write(out, obj0);
+        moshi.getAdapter(Boolean.class).write(out, obj0);
 
         int obj1 = value.value2;
         out.name("value2");
-        gson.getAdapter(Integer.class).write(out, obj1);
+        moshi.getAdapter(Integer.class).write(out, obj1);
 
         double obj2 = value.value3;
         out.name("value3");
-        gson.getAdapter(Double.class).write(out, obj2);
+        moshi.getAdapter(Double.class).write(out, obj2);
 
         long obj3 = value.value4;
         out.name("value4");
-        gson.getAdapter(Long.class).write(out, obj3);
+        moshi.getAdapter(Long.class).write(out, obj3);
 
         byte obj4 = value.value5;
         out.name("value5");
-        gson.getAdapter(Byte.class).write(out, obj4);
+        moshi.getAdapter(Byte.class).write(out, obj4);
 
         short obj5 = value.value6;
         out.name("value6");
-        gson.getAdapter(Short.class).write(out, obj5);
+        moshi.getAdapter(Short.class).write(out, obj5);
 
         float obj6 = value.value7;
         out.name("value7");
-        gson.getAdapter(Float.class).write(out, obj6);
+        moshi.getAdapter(Float.class).write(out, obj6);
 
         char obj7 = value.value8;
         out.name("value8");
-        gson.getAdapter(Character.class).write(out, obj7);
+        moshi.getAdapter(Character.class).write(out, obj7);
 
         // End
         out.endObject();

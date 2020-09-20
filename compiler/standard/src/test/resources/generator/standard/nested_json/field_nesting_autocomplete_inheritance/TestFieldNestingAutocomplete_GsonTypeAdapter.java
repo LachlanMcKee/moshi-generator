@@ -28,7 +28,7 @@ public final class TestFieldNestingAutocomplete_GsonTypeAdapter extends GsonPath
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "value1":
-                                value_Json1_value1 = gson.getAdapter(Integer.class).read(in);
+                                value_Json1_value1 = moshi.getAdapter(Integer.class).read(in);
                                 break;
 
                             default:
@@ -59,7 +59,7 @@ public final class TestFieldNestingAutocomplete_GsonTypeAdapter extends GsonPath
         out.beginObject();
         int obj0 = value.getValue1();
         out.name("value1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End Json1
         out.endObject();

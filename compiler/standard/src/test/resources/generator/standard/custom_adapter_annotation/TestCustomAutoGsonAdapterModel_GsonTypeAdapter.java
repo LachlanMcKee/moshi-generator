@@ -31,7 +31,7 @@ public final class TestCustomAutoGsonAdapterModel_GsonTypeAdapter extends GsonPa
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "expectedValue":
-                                Integer value_path_expectedValue = gson.getAdapter(Integer.class).read(in);
+                                Integer value_path_expectedValue = moshi.getAdapter(Integer.class).read(in);
                                 if (value_path_expectedValue != null) {
                                     result.expectedValue = value_path_expectedValue;
                                     mandatoryFieldsCheckList[0] = true;
@@ -87,7 +87,7 @@ public final class TestCustomAutoGsonAdapterModel_GsonTypeAdapter extends GsonPa
         Integer obj0 = value.expectedValue;
         out.name("expectedValue");
         if (obj0 != null) {
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         } else {
             out.nullValue();
         }

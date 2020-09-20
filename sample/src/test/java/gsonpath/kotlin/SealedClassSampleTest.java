@@ -1,18 +1,18 @@
 package gsonpath.kotlin;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.squareup.moshi.Moshi;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
+import okio.Okio;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class SealedClassSampleTest {
     @Test
-    public void testWithAllValues() {
+    public void testWithAllValues() throws IOException {
         SealedClassArray model = runTest(SealedClassArray.class, "SealedClassSample.json");
 
         Type item1 = model.getItems()[0];
@@ -41,11 +41,11 @@ public class SealedClassSampleTest {
     }
 
     private void testWrite(SealedClassPojo pojo, String json) {
-        Assert.assertEquals(json, createGson().toJson(pojo));
+        Assert.assertEquals(json, createMoshi().adapter(SealedClassPojo.class).toJson(pojo));
     }
 
     @Test
-    public void testSinglePojo() {
+    public void testSinglePojo() throws IOException {
         SealedClassSubTypePojo model = runTest(SealedClassSubTypePojo.class, "SealedClassSample.json");
 
         Type item1 = model.getItem();
@@ -54,24 +54,23 @@ public class SealedClassSampleTest {
     }
 
     @Test
-    public void testAnnotatedSealedClass() {
+    public void testAnnotatedSealedClass() throws IOException {
         Type model = runTest(Type.class, "SealedClassSample_SingleType.json");
 
         Assert.assertEquals("Type3 Example", model.getName());
         Assert.assertEquals("123", ((Type.Type3) model).getStringTest());
     }
 
-    private <T> T runTest(Class<T> clazz, String fileName) {
+    private <T> T runTest(Class<T> clazz, String fileName) throws IOException {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream(fileName);
 
-        return createGson().fromJson(new InputStreamReader(resourceAsStream), clazz);
+        return createMoshi().adapter(clazz).fromJson(Okio.buffer(Okio.source(resourceAsStream)));
     }
 
-    private Gson createGson() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
-
-        return builder.create();
+    private Moshi createMoshi() {
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+        return builder.build();
     }
 }

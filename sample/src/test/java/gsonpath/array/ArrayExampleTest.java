@@ -1,20 +1,21 @@
 package gsonpath.array;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.squareup.moshi.Moshi;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class ArrayExampleTest {
     private static final String ARRAY_VALUE = "{\"test1\":[null,1],\"test2\":[null,null,{\"child\":10,\"child2\":20}],\"test3\":[null,null,null,{\"child\":[null,50]}],\"test4\":{\"child\":[null,100]}}";
 
     @Test
     public void testSerialize() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
-        Gson gson = builder.create();
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+        Moshi moshi = builder.build();
 
         ArrayExample model = new ArrayExample();
         model.plainArray = 1;
@@ -23,17 +24,17 @@ public class ArrayExampleTest {
         model.arrayWithNestedArray = 50;
         model.objectWithNestedArray = 100;
 
-        String test = gson.toJson(model);
+        String test = moshi.adapter(ArrayExample.class).toJson(model);
         Assert.assertEquals(ARRAY_VALUE, test);
     }
 
     @Test
-    public void testDeserialize() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
-        Gson gson = builder.create();
+    public void testDeserialize() throws IOException {
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+        Moshi moshi = builder.build();
 
-        ArrayExample vanillaModel = gson.fromJson(ARRAY_VALUE, ArrayExample.class);
+        ArrayExample vanillaModel = moshi.adapter(ArrayExample.class).fromJson(ARRAY_VALUE);
 
         Assert.assertEquals(1, vanillaModel.plainArray);
         Assert.assertEquals(10, vanillaModel.arrayWithNestedObject);

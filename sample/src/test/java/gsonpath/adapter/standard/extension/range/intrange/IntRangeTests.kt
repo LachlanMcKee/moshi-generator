@@ -22,25 +22,25 @@ object IntRangeTests {
 
         @Test
         fun givenMinValue_whenJsonParsed_thenFieldIsMinValue() {
-            val model = executeFromJson(modelClass, "{value:0}")
+            val model = executeFromJson(modelClass, "{\"value\":0}")
             assertValue(model, 0, 0L)
         }
 
         @Test
         fun givenMaxValue_whenJsonParsed_thenFieldIsMinValue() {
-            val model = executeFromJson(modelClass, "{value:5}")
+            val model = executeFromJson(modelClass, "{\"value\":5}")
             assertValue(model, 5, 5L)
         }
 
         @Test
         fun givenBelowMinValue_whenJsonParsed_thenThrowsException() {
-            TestUtil.expectException(modelClass, "{value:-1}",
+            TestUtil.expectException(modelClass, "{\"value\":-1}",
                 "Invalid 'from' range for JSON element 'value'. Expected: '>= 0', Found '-1'")
         }
 
         @Test
         fun givenAboveMaxValue_whenJsonParsed_thenThrowsException() {
-            TestUtil.expectException(modelClass, "{value:6}",
+            TestUtil.expectException(modelClass, "{\"value\":6}",
                 "Invalid 'to' range for JSON element 'value'. Expected: '<= 5', Found '6'")
         }
 

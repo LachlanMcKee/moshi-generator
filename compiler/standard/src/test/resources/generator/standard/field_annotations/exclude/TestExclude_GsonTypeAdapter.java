@@ -25,7 +25,7 @@ public final class TestExclude_GsonTypeAdapter extends GsonPathTypeAdapter<TestE
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "element1":
-                    Integer value_element1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_element1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_element1 != null) {
                         result.element1 = value_element1;
                     }
@@ -46,7 +46,7 @@ public final class TestExclude_GsonTypeAdapter extends GsonPathTypeAdapter<TestE
         out.beginObject();
         int obj0 = value.element1;
         out.name("element1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

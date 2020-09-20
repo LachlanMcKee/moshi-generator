@@ -28,7 +28,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAda
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "Json1":
-                                Integer value_Impl1_A_Json1 = gson.getAdapter(Integer.class).read(in);
+                                Integer value_Impl1_A_Json1 = moshi.getAdapter(Integer.class).read(in);
                                 if (value_Impl1_A_Json1 != null) {
                                     result.value1 = value_Impl1_A_Json1;
                                 }
@@ -46,7 +46,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAda
                     while (jsonReaderHelper.handleObject(2, 1)) {
                         switch (in.nextName()) {
                             case "Json1":
-                                Integer value_Impl1_B_Json1 = gson.getAdapter(Integer.class).read(in);
+                                Integer value_Impl1_B_Json1 = moshi.getAdapter(Integer.class).read(in);
                                 if (value_Impl1_B_Json1 != null) {
                                     result.value2 = value_Impl1_B_Json1;
                                 }
@@ -79,7 +79,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAda
         out.beginObject();
         int obj0 = value.value1;
         out.name("Json1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End Impl1_A
         out.endObject();
@@ -89,7 +89,7 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAda
         out.beginObject();
         int obj1 = value.value2;
         out.name("Json1");
-        gson.getAdapter(Integer.class).write(out, obj1);
+        moshi.getAdapter(Integer.class).write(out, obj1);
 
         // End Impl1_B
         out.endObject();

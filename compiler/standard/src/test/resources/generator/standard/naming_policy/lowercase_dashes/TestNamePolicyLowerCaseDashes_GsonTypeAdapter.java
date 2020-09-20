@@ -25,7 +25,7 @@ public final class TestNamePolicyLowerCaseDashes_GsonTypeAdapter extends GsonPat
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "test-value":
-                    Integer value_test_value = gson.getAdapter(Integer.class).read(in);
+                    Integer value_test_value = moshi.getAdapter(Integer.class).read(in);
                     if (value_test_value != null) {
                         result.testValue = value_test_value;
                     }
@@ -46,7 +46,7 @@ public final class TestNamePolicyLowerCaseDashes_GsonTypeAdapter extends GsonPat
         out.beginObject();
         int obj0 = value.testValue;
         out.name("test-value");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

@@ -26,21 +26,21 @@ public final class TestNoValidation_GsonTypeAdapter extends GsonPathTypeAdapter<
         while (jsonReaderHelper.handleObject(0, 3)) {
             switch (in.nextName()) {
                 case "optional1":
-                    Integer value_optional1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_optional1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
                     break;
 
                 case "optional2":
-                    Integer value_optional2 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_optional2 = moshi.getAdapter(Integer.class).read(in);
                     if (value_optional2 != null) {
                         result.optional2 = value_optional2;
                     }
                     break;
 
                 case "optional3":
-                    Integer value_optional3 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_optional3 = moshi.getAdapter(Integer.class).read(in);
                     if (value_optional3 != null) {
                         result.optional3 = value_optional3;
                     }
@@ -62,18 +62,18 @@ public final class TestNoValidation_GsonTypeAdapter extends GsonPathTypeAdapter<
         Integer obj0 = value.optional1;
         if (obj0 != null) {
             out.name("optional1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         Integer obj1 = value.optional2;
         if (obj1 != null) {
             out.name("optional2");
-            GsonUtil.writeWithGenericAdapter(gson, obj1.getClass(), out, obj1);
+            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
         }
 
         int obj2 = value.optional3;
         out.name("optional3");
-        gson.getAdapter(Integer.class).write(out, obj2);
+        moshi.getAdapter(Integer.class).write(out, obj2);
 
         // End
         out.endObject();

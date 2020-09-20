@@ -1,19 +1,19 @@
 package gsonpath
 
-import com.google.gson.Gson
-import com.google.gson.TypeAdapter
-import com.google.gson.TypeAdapterFactory
-import com.google.gson.reflect.TypeToken
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import gsonpath.internal.GsonResultListTypeAdapterFactory
+import java.lang.reflect.Type
 
 /**
  * Adds serialization/deserialization handling for GsonPath specific types to Gson.
  *
  * This version of the class proxies to GsonPathTypeAdapterFactory, so it can be used as the sole factory.
  */
-class GsonPathTypeAdapterFactoryKt : TypeAdapterFactory {
-    override fun <T> create(gson: Gson, type: TypeToken<T>): TypeAdapter<T>? {
-        return gsonPathFactory.create(gson, type) ?: gsonResultListFactory.create(gson, type)
+class GsonPathTypeAdapterFactoryKt : JsonAdapter.Factory {
+    override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
+        return gsonPathFactory.create(type, annotations, moshi)
+                ?: gsonResultListFactory.create(type, annotations, moshi)
     }
 
     private val gsonPathFactory by lazy { GsonPathTypeAdapterFactory() }

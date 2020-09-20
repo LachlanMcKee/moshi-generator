@@ -26,7 +26,7 @@ public final class TestMutableSize_GsonTypeAdapter extends GsonPathTypeAdapter<T
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "value1":
-                    String[] value_value1 = gson.getAdapter(String[].class).read(in);
+                    String[] value_value1 = moshi.getAdapter(String[].class).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -58,7 +58,7 @@ public final class TestMutableSize_GsonTypeAdapter extends GsonPathTypeAdapter<T
         String[] obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         // End

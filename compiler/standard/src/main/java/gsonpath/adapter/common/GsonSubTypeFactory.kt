@@ -1,12 +1,10 @@
 package gsonpath.adapter.common
 
-import com.google.gson.JsonElement
-import com.google.gson.TypeAdapter
-import com.google.gson.internal.Streams
 import com.squareup.javapoet.*
+import com.squareup.moshi.JsonAdapter
 import gsonpath.adapter.AdapterMethodBuilder
 import gsonpath.adapter.Constants
-import gsonpath.adapter.Constants.GSON
+import gsonpath.adapter.Constants.MOSHI
 import gsonpath.adapter.standard.extension.addException
 import gsonpath.util.*
 
@@ -35,10 +33,11 @@ object GsonSubTypeFactory {
             rawTypeName: TypeName) = AdapterMethodBuilder.createReadMethodBuilder(rawTypeName).applyAndBuild {
 
         code {
-            createVariable(JsonElement::class.java,
+            val mapWithObjectTypeName = ParameterizedTypeName.get(Map::class.java, Object::class.java, String::class.java)
+            createVariable(mapWithObjectTypeName,
                     JSON_ELEMENT,
-                    "\$T.parse(${Constants.IN})",
-                    Streams::class.java)
+                    "(\$T) reader.readJsonValue()",
+                    mapWithObjectTypeName)
 
             val fieldInfo = subTypeMetadata.gsonSubTypeFieldInfo.apply {
                 forEach {
@@ -57,7 +56,7 @@ object GsonSubTypeFactory {
                 `return`(Constants.NULL)
             }
 
-            createVariable(rawTypeName, RESULT, "$GSON.getAdapter($DELEGATE_CLASS).fromJsonTree($JSON_ELEMENT)")
+            createVariable(rawTypeName, RESULT, "$MOSHI.adapter($DELEGATE_CLASS).fromJsonValue($JSON_ELEMENT)")
 
             `return`(RESULT)
         }
@@ -65,13 +64,13 @@ object GsonSubTypeFactory {
 
     private fun CodeBlock.Builder.addVariable(fieldInfo: GsonSubTypeFieldInfo, rawTypeName: TypeName) {
         val jsonElementName = fieldInfo.variableName + "_jsonElement"
-        createVariable(JsonElement::class.java,
+        createVariable(Object::class.java,
                 jsonElementName,
-                "$JSON_ELEMENT.getAsJsonObject().get(\"${fieldInfo.jsonKey}\")")
+                "$JSON_ELEMENT.get(\"${fieldInfo.jsonKey}\")")
 
         addStatement("final \$T ${fieldInfo.variableName}", fieldInfo.parameterTypeName)
 
-        ifWithoutClose("$jsonElementName == ${Constants.NULL} || $jsonElementName.isJsonNull()") {
+        ifWithoutClose("$jsonElementName == ${Constants.NULL}") {
             if (fieldInfo.nullable) {
                 assign(fieldInfo.variableName, "null")
             } else {
@@ -87,7 +86,7 @@ object GsonSubTypeFactory {
                         "\$T.class"
 
             assign(fieldInfo.variableName,
-                    "${Constants.GET_ADAPTER}($adapterName).fromJsonTree($jsonElementName)",
+                    "$MOSHI.adapter($adapterName).fromJsonValue($jsonElementName)",
                     fieldInfo.parameterTypeName)
         }
     }
@@ -99,8 +98,8 @@ object GsonSubTypeFactory {
             rawTypeName: TypeName) = AdapterMethodBuilder.createWriteMethodBuilder(rawTypeName).applyAndBuild {
 
         code {
-            createVariable(TypeAdapter::class.java, DELEGATE_ADAPTER, "$GSON.getAdapter(${Constants.VALUE}.getClass())")
-            addStatement("$DELEGATE_ADAPTER.write(${Constants.OUT}, ${Constants.VALUE})")
+            createVariable(JsonAdapter::class.java, DELEGATE_ADAPTER, "$MOSHI.adapter(${Constants.VALUE}.getClass())")
+            addStatement("$DELEGATE_ADAPTER.toJson(${Constants.WRITER}, ${Constants.VALUE})")
         }
     }
 

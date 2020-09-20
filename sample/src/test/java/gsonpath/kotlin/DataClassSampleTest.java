@@ -1,21 +1,21 @@
 package gsonpath.kotlin;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.squareup.moshi.Moshi;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
 import gsonpath.exception.JsonFieldNoKeyException;
+import okio.Okio;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import static org.junit.Assert.fail;
 
 public class DataClassSampleTest {
     @Test
-    public void testWithAllValues() {
+    public void testWithAllValues() throws IOException {
         DataClassSample model = runTest("DataClassJson_all_values.json");
 
         Assert.assertEquals("test", model.getValue1());
@@ -35,14 +35,14 @@ public class DataClassSampleTest {
         }
     }
 
-    private DataClassSample runTest(String fileName) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+    private DataClassSample runTest(String fileName) throws IOException {
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream(fileName);
 
-        Gson gson = builder.create();
-        return gson.fromJson(new InputStreamReader(resourceAsStream), DataClassSample.class);
+        Moshi moshi = builder.build();
+        return moshi.adapter(DataClassSample.class).fromJson(Okio.buffer(Okio.source(resourceAsStream)));
     }
 }

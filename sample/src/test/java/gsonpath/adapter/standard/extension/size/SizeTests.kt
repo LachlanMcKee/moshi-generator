@@ -7,7 +7,6 @@ import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.lang.IllegalArgumentException
 import java.util.*
 
 @RunWith(Enclosed::class)
@@ -25,11 +24,11 @@ object SizeTests {
         fun givenLengthWithinRange_whenJsonParsed_thenValueIsDeserialized() {
             when (modelClass) {
                 SizeModel.MinAndMax.StringModel::class.java -> {
-                    val model = executeFromJson(modelClass, "{value: \"12\"}")
+                    val model = executeFromJson(modelClass, "{\"value\": \"12\"}")
                     Assert.assertEquals("12", model.value)
                 }
                 else -> {
-                    val model = executeFromJson(modelClass, "{value: [1, 2]}")
+                    val model = executeFromJson(modelClass, "{\"value\": [1, 2]}")
                     assertValue(model, arrayOf(1, 2))
                 }
             }
@@ -39,8 +38,8 @@ object SizeTests {
         fun givenSizeTooSmall_whenJsonParsed_thenThrowsException() {
             val jsonString =
                 when (modelClass) {
-                    SizeModel.MinAndMax.StringModel::class.java -> "{value: \"\"}"
-                    else -> "{value: []}"
+                    SizeModel.MinAndMax.StringModel::class.java -> "{\"value\": \"\"}"
+                    else -> "{\"value\": []}"
                 }
 
             TestUtil.expectException(modelClass, jsonString,
@@ -51,8 +50,8 @@ object SizeTests {
         fun givenSizeTooLarge_whenJsonParsed_thenThrowsException() {
             val jsonString =
                 when (modelClass) {
-                    SizeModel.MinAndMax.StringModel::class.java -> "{value: \"1234\"}"
-                    else -> "{value: [1, 2, 3, 4]}"
+                    SizeModel.MinAndMax.StringModel::class.java -> "{\"value\": \"1234\"}"
+                    else -> "{\"value\": [1, 2, 3, 4]}"
                 }
 
             TestUtil.expectException(modelClass, jsonString,
@@ -85,11 +84,11 @@ object SizeTests {
         fun givenSizeEqualsMultiple_whenJsonParsed_thenValueIsDeserialized() {
             when (modelClass) {
                 SizeModel.Multiple.StringModel::class.java -> {
-                    val model = executeFromJson(modelClass, "{value: \"12\"}")
+                    val model = executeFromJson(modelClass, "{\"value\": \"12\"}")
                     Assert.assertEquals("12", model.value)
                 }
                 else -> {
-                    val model = executeFromJson(modelClass, "{value: [1, 2]}")
+                    val model = executeFromJson(modelClass, "{\"value\": [1, 2]}")
                     assertValue(model, arrayOf(1, 2))
                 }
             }
@@ -99,11 +98,11 @@ object SizeTests {
         fun givenSizeIsAMultiple_whenJsonParsed_thenValueIsDeserialized() {
             when (modelClass) {
                 SizeModel.Multiple.StringModel::class.java -> {
-                    val model = executeFromJson(modelClass, "{value: \"1234\"}")
+                    val model = executeFromJson(modelClass, "{\"value\": \"1234\"}")
                     Assert.assertEquals("1234", model.value)
                 }
                 else -> {
-                    val model = executeFromJson(modelClass, "{value: [1, 2, 3, 4]}")
+                    val model = executeFromJson(modelClass, "{\"value\": [1, 2, 3, 4]}")
                     assertValue(model, arrayOf(1, 2, 3, 4))
                 }
             }
@@ -113,8 +112,8 @@ object SizeTests {
         fun givenSizeIsNotAMultiple_whenJsonParsed_thenThrowsException() {
             val jsonString =
                 when (modelClass) {
-                    SizeModel.Multiple.StringModel::class.java -> "{value: \"123\"}"
-                    else -> "{value: [1, 2, 3]}"
+                    SizeModel.Multiple.StringModel::class.java -> "{\"value\": \"123\"}"
+                    else -> "{\"value\": [1, 2, 3]}"
                 }
 
             TestUtil.expectException(modelClass, jsonString,
@@ -147,11 +146,11 @@ object SizeTests {
         fun givenSizeIsExact_whenJsonParsed_thenValueIsDeserialized() {
             when (modelClass) {
                 SizeModel.ExactSize.StringModel::class.java -> {
-                    val model = executeFromJson(modelClass, "{value: \"1\"}")
+                    val model = executeFromJson(modelClass, "{\"value\": \"1\"}")
                     Assert.assertEquals("1", model.value)
                 }
                 else -> {
-                    val model = executeFromJson(modelClass, "{value: [1]}")
+                    val model = executeFromJson(modelClass, "{\"value\": [1]}")
                     assertValue(model, arrayOf(1))
                 }
             }
@@ -161,8 +160,8 @@ object SizeTests {
         fun givenSizeDoesNotMatch_whenJsonParsed_thenThrowsException() {
             val jsonString =
                 when (modelClass) {
-                    SizeModel.ExactSize.StringModel::class.java -> "{value: \"12\"}"
-                    else -> "{value: [1, 2]}"
+                    SizeModel.ExactSize.StringModel::class.java -> "{\"value\": \"12\"}"
+                    else -> "{\"value\": [1, 2]}"
                 }
 
             TestUtil.expectException(modelClass, jsonString,

@@ -1,21 +1,23 @@
 package generator.factory.source3;
 
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 import java.lang.Class;
 import java.lang.Override;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
-public final class PackagePrivateTypeAdapterLoader implements TypeAdapterFactory {
+public final class PackagePrivateTypeAdapterLoader implements JsonAdapter.Factory {
     @Override
-    public TypeAdapter create(Gson gson, TypeToken type) {
-        Class rawType = type.getRawType();
+    public JsonAdapter create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+        Class rawType = Types.getRawType(type);
         if (rawType.equals(TestLoaderSource.class)) {
-            return new TestLoaderSource_GsonTypeAdapter(gson);
+            return new TestLoaderSource_GsonTypeAdapter(moshi);
 
         } else if (rawType.equals(TestLoaderSource.Inner.class)) {
-            return new TestLoaderSource_Inner_GsonTypeAdapter(gson);
+            return new TestLoaderSource_Inner_GsonTypeAdapter(moshi);
         }
 
         return null;

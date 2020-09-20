@@ -47,5 +47,5 @@ fun getAnnotationValueObject(annotationMirror: AnnotationMirror, propertyName: S
  * @param exceptionText the text to add to the exception.
  */
 fun CodeBlock.Builder.addException(exceptionText: String): CodeBlock.Builder {
-    return this.addStatement("""throw new com.google.gson.JsonParseException("$exceptionText")""")
+    return this.addStatement("""throw new com.squareup.moshi.JsonDataException("$exceptionText")""")
 }

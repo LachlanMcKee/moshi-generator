@@ -31,15 +31,15 @@ public final class GenericsTest_GsonTypeAdapter extends GsonPathTypeAdapter<Gene
         while (jsonReaderHelper.handleObject(0, 3)) {
             switch (in.nextName()) {
                 case "value1":
-                    value_value1 = gson.getAdapter(String.class).read(in);
+                    value_value1 = moshi.getAdapter(String.class).read(in);
                     break;
 
                 case "value2":
-                    value_value2 = gson.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).read(in);
+                    value_value2 = moshi.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).read(in);
                     break;
 
                 case "value3":
-                    value_value3 = gson.getAdapter(Double.class).read(in);
+                    value_value3 = moshi.getAdapter(Double.class).read(in);
                     break;
 
                 default:
@@ -61,19 +61,19 @@ public final class GenericsTest_GsonTypeAdapter extends GsonPathTypeAdapter<Gene
         String obj0 = value.getValue1();
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         Map<String, Integer> obj1 = value.getValue2();
         if (obj1 != null) {
             out.name("value2");
-            gson.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).write(out, obj1);
+            moshi.getAdapter(new com.google.gson.reflect.TypeToken<Map<String, Integer>>(){}).write(out, obj1);
         }
 
         Double obj2 = value.getValue3();
         if (obj2 != null) {
             out.name("value3");
-            GsonUtil.writeWithGenericAdapter(gson, obj2.getClass(), out, obj2);
+            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
         }
 
         // End

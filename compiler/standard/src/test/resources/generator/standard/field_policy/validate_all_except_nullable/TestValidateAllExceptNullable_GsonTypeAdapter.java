@@ -28,7 +28,7 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends GsonPat
         while (jsonReaderHelper.handleObject(0, 3)) {
             switch (in.nextName()) {
                 case "mandatory1":
-                    Integer value_mandatory1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_mandatory1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_mandatory1 != null) {
                         result.mandatory1 = value_mandatory1;
                         mandatoryFieldsCheckList[0] = true;
@@ -38,7 +38,7 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends GsonPat
                     break;
 
                 case "mandatory2":
-                    Integer value_mandatory2 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_mandatory2 = moshi.getAdapter(Integer.class).read(in);
                     if (value_mandatory2 != null) {
                         result.mandatory2 = value_mandatory2;
                         mandatoryFieldsCheckList[1] = true;
@@ -48,7 +48,7 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends GsonPat
                     break;
 
                 case "optional1":
-                    Integer value_optional1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_optional1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
@@ -92,19 +92,19 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends GsonPat
         Integer obj0 = value.mandatory1;
         if (obj0 != null) {
             out.name("mandatory1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         Integer obj1 = value.mandatory2;
         if (obj1 != null) {
             out.name("mandatory2");
-            GsonUtil.writeWithGenericAdapter(gson, obj1.getClass(), out, obj1);
+            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
         }
 
         Integer obj2 = value.optional1;
         if (obj2 != null) {
             out.name("optional1");
-            GsonUtil.writeWithGenericAdapter(gson, obj2.getClass(), out, obj2);
+            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
         }
 
         // End

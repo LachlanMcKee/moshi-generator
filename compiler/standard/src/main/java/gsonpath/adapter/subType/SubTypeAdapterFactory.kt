@@ -1,8 +1,8 @@
 package gsonpath.adapter.subType
 
-import com.google.gson.Gson
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.moshi.Moshi
 import gsonpath.LazyFactoryMetadata
 import gsonpath.adapter.AdapterFactory
 import gsonpath.adapter.AdapterGenerationResult
@@ -76,8 +76,8 @@ object SubTypeAdapterFactory : AdapterFactory {
         // Add the constructor which takes a gson instance for future use.
         constructor {
             addModifiers(Modifier.PUBLIC)
-            addParameter(Gson::class.java, "gson")
-            addStatement("super(gson)")
+            addParameter(Moshi::class.java, "moshi")
+            addStatement("super(moshi)")
         }
 
         addMethod(result.readMethodSpecs)

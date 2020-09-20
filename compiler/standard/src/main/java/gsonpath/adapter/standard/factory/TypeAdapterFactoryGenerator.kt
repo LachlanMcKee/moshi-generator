@@ -1,17 +1,15 @@
 package gsonpath.adapter.standard.factory
 
-import com.google.gson.Gson
-import com.google.gson.TypeAdapter
-import com.google.gson.TypeAdapterFactory
-import com.google.gson.reflect.TypeToken
-import com.squareup.javapoet.ArrayTypeName
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import gsonpath.adapter.AdapterGenerationResult
-import gsonpath.adapter.Constants.GSON
+import gsonpath.adapter.Constants.MOSHI
 import gsonpath.adapter.Constants.NULL
 import gsonpath.adapter.util.writeFile
 import gsonpath.util.*
+import java.lang.reflect.Type
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
@@ -46,7 +44,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
     private fun TypeSpec.Builder.gsonTypeFactoryImplContent(
             packageLocalAdapterGenerationResults: Map<String, List<AdapterGenerationResult>>): TypeSpec.Builder {
 
-        field(PACKAGE_PRIVATE_LOADERS, ArrayTypeName.of(TypeAdapterFactory::class.java)) {
+        field(PACKAGE_PRIVATE_LOADERS, ArrayTypeName.of(JsonAdapter.Factory::class.java)) {
             addModifiers(Modifier.PRIVATE, Modifier.FINAL)
         }
 
@@ -55,7 +53,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
             code {
                 assignNew(PACKAGE_PRIVATE_LOADERS,
                         "\$T[${packageLocalAdapterGenerationResults.size}]",
-                        TypeAdapterFactory::class.java)
+                        JsonAdapter.Factory::class.java)
 
                 // Add the package local type adapter loaders to the hash map.
                 for ((index, packageName) in packageLocalAdapterGenerationResults.keys.withIndex()) {
@@ -69,13 +67,14 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
         // <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type);
         //
         overrideMethod("create") {
-            returns(TypeAdapter::class.java)
-            addParameter(Gson::class.java, GSON)
-            addParameter(TypeToken::class.java, "type")
+            returns(JsonAdapter::class.java)
+            addParameter(Type::class.java, "type")
+            addParameter(ParameterizedTypeName.get(ClassName.get(Set::class.java), WildcardTypeName.subtypeOf(Annotation::class.java)), "annotations")
+            addParameter(Moshi::class.java, MOSHI)
 
             code {
                 `for`("int i = 0; i < $PACKAGE_PRIVATE_LOADERS.length; i++") {
-                    createVariable(TypeAdapter::class.java, TYPE_ADAPTER, "$PACKAGE_PRIVATE_LOADERS[i].create($GSON, type)")
+                    createVariable(JsonAdapter::class.java, TYPE_ADAPTER, "$PACKAGE_PRIVATE_LOADERS[i].create(type, annotations, $MOSHI)")
                     newLine()
 
                     `if`("$TYPE_ADAPTER != $NULL") {
@@ -94,7 +93,7 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
             packageLocalGsonAdapters: List<AdapterGenerationResult>) {
 
         TypeSpecExt.finalClassBuilder(ClassName.get(packageName, PACKAGE_PRIVATE_TYPE_ADAPTER_LOADER_CLASS_NAME))
-                .addSuperinterface(TypeAdapterFactory::class.java)
+                .addSuperinterface(JsonAdapter.Factory::class.java)
                 .packagePrivateTypeAdapterLoaderContent(packageLocalGsonAdapters)
                 .writeFile(fileWriter, packageName)
     }
@@ -106,11 +105,12 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
             packageLocalGsonAdapters: List<AdapterGenerationResult>): TypeSpec.Builder {
 
         overrideMethod("create") {
-            returns(TypeAdapter::class.java)
-            addParameter(Gson::class.java, GSON)
-            addParameter(TypeToken::class.java, "type")
+            returns(JsonAdapter::class.java)
+            addParameter(Type::class.java, "type")
+            addParameter(ParameterizedTypeName.get(ClassName.get(Set::class.java), WildcardTypeName.subtypeOf(Annotation::class.java)), "annotations")
+            addParameter(Moshi::class.java, MOSHI)
             code {
-                createVariable(Class::class.java, RAW_TYPE, "type.getRawType()")
+                createVariable(Class::class.java, RAW_TYPE, "\$T.getRawType(type)", Types::class.java)
 
                 for ((currentAdapterIndex, result) in packageLocalGsonAdapters.withIndex()) {
                     val condition = result.adapterGenericTypeClassNames
@@ -118,12 +118,12 @@ class TypeAdapterFactoryGenerator(private val fileWriter: FileWriter) {
 
                     if (currentAdapterIndex == 0) {
                         ifWithoutClose(condition, *result.adapterGenericTypeClassNames) {
-                            `return`("new \$T($GSON)", result.adapterClassName)
+                            `return`("new \$T($MOSHI)", result.adapterClassName)
                         }
                     } else {
                         newLine() // New line for easier readability.
                         elseIf(condition, *result.adapterGenericTypeClassNames) {
-                            `return`("new \$T($GSON)", result.adapterClassName)
+                            `return`("new \$T($MOSHI)", result.adapterClassName)
                         }
                     }
                 }

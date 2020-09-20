@@ -26,7 +26,7 @@ public final class TestGenerics_GsonTypeAdapter extends GsonPathTypeAdapter<Test
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "value1":
-                    List<String> value_value1 = gson.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).read(in);
+                    List<String> value_value1 = moshi.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).read(in);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -48,7 +48,7 @@ public final class TestGenerics_GsonTypeAdapter extends GsonPathTypeAdapter<Test
         List<String> obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            gson.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj0);
+            moshi.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj0);
         }
 
         // End

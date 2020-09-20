@@ -25,7 +25,7 @@ public final class TestNamePolicyIdentity_GsonTypeAdapter extends GsonPathTypeAd
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "testValue":
-                    Integer value_testValue = gson.getAdapter(Integer.class).read(in);
+                    Integer value_testValue = moshi.getAdapter(Integer.class).read(in);
                     if (value_testValue != null) {
                         result.testValue = value_testValue;
                     }
@@ -46,7 +46,7 @@ public final class TestNamePolicyIdentity_GsonTypeAdapter extends GsonPathTypeAd
         out.beginObject();
         int obj0 = value.testValue;
         out.name("testValue");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

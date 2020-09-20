@@ -28,7 +28,7 @@ public final class TestMultipleDelimiters_GsonTypeAdapter extends GsonPathTypeAd
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "Nest1":
-                                Integer value_Json1_Nest1 = gson.getAdapter(Integer.class).read(in);
+                                Integer value_Json1_Nest1 = moshi.getAdapter(Integer.class).read(in);
                                 if (value_Json1_Nest1 != null) {
                                     result.value1 = value_Json1_Nest1;
                                 }
@@ -43,7 +43,7 @@ public final class TestMultipleDelimiters_GsonTypeAdapter extends GsonPathTypeAd
                     break;
 
                 case "Json2.Nest1":
-                    Integer value_Json2_Nest1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_Json2_Nest1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_Json2_Nest1 != null) {
                         result.value2 = value_Json2_Nest1;
                     }
@@ -68,13 +68,13 @@ public final class TestMultipleDelimiters_GsonTypeAdapter extends GsonPathTypeAd
         out.beginObject();
         int obj0 = value.value1;
         out.name("Nest1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End Json1
         out.endObject();
         int obj1 = value.value2;
         out.name("Json2.Nest1");
-        gson.getAdapter(Integer.class).write(out, obj1);
+        moshi.getAdapter(Integer.class).write(out, obj1);
 
         // End
         out.endObject();

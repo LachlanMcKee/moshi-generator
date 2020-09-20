@@ -6,9 +6,9 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import gsonpath.ProcessingException
 import gsonpath.adapter.AdapterMethodBuilder
-import gsonpath.adapter.Constants.GET_ADAPTER
-import gsonpath.adapter.Constants.IN
+import gsonpath.adapter.Constants.MOSHI
 import gsonpath.adapter.Constants.NULL
+import gsonpath.adapter.Constants.READER
 import gsonpath.adapter.standard.extension.ExtensionsHandler
 import gsonpath.adapter.standard.model.GsonArray
 import gsonpath.adapter.standard.model.GsonField
@@ -20,7 +20,7 @@ import gsonpath.model.FieldType
 import gsonpath.util.*
 
 /**
- * public T read(JsonReader in) throws IOException {
+ * public T fromJson(JsonReader reader) throws IOException {
  */
 class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
@@ -57,7 +57,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
         }
 
         val readerHelperClassName = ClassName.get(JsonReaderHelper::class.java)
-        createVariableNew("\$T", JSON_READER_HELPER, "\$T($IN, ${params.objectIndexes.size}, ${params.arrayIndexes.size})",
+        createVariableNew("\$T", JSON_READER_HELPER, "\$T($READER, ${params.objectIndexes.size}, ${params.arrayIndexes.size})",
                 readerHelperClassName,
                 readerHelperClassName)
 
@@ -90,7 +90,7 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
         }
 
         return `while`("$JSON_READER_HELPER.handleObject($objectIndex, $jsonMappingSize)") {
-            switch("$IN.nextName()") {
+            switch("$READER.nextName()") {
                 jsonMapping.entries()
                         .forEach { entry ->
                             addReadCodeForModel(
@@ -215,17 +215,19 @@ class ReadFunctions(private val extensionsHandler: ExtensionsHandler) {
 
         } else {
             val fieldTypeName = gsonField.fieldInfo.fieldType.typeName.box()
-            val adapterName =
-                    if (fieldTypeName is ParameterizedTypeName)
-                        "new com.google.gson.reflect.TypeToken<\$T>(){}" // This is a generic type
-                    else
-                        "\$T.class"
-
             if (checkIfResultIsNull) {
-                createVariable(fieldTypeName, variableName, "$GET_ADAPTER($adapterName).read($IN)", fieldTypeName)
+                if (fieldTypeName is ParameterizedTypeName) {
+                    createVariable(fieldTypeName, variableName, "$MOSHI.<\$T>adapter(com.squareup.moshi.Types.newParameterizedType(${fieldTypeName.rawType}.class, ${fieldTypeName.typeArguments.joinToString(", ") { "$it.class" }})).fromJson($READER)", fieldTypeName)
+                } else {
+                    createVariable(fieldTypeName, variableName, "$MOSHI.adapter(\$T.class).fromJson($READER)", fieldTypeName)
+                }
 
             } else {
-                assign(variableName, "$GET_ADAPTER($adapterName).read($IN)", fieldTypeName)
+                if (fieldTypeName is ParameterizedTypeName) {
+                    assign(variableName, "$MOSHI.<\$T>adapter(com.squareup.moshi.Types.newParameterizedType(${fieldTypeName.rawType}.class, ${fieldTypeName.typeArguments.joinToString(", ") { "$it.class" }})).fromJson($READER)", fieldTypeName)
+                } else {
+                    assign(variableName, "$MOSHI.adapter(\$T.class).fromJson($READER)", fieldTypeName)
+                }
             }
         }
 

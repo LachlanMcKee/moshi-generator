@@ -35,7 +35,7 @@ public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdap
                                 while (jsonReaderHelper.handleObject(2, 1)) {
                                     switch (in.nextName()) {
                                         case "value1":
-                                            value_parent_child_value1 = gson.getAdapter(String.class).read(in);
+                                            value_parent_child_value1 = moshi.getAdapter(String.class).read(in);
                                             break;
 
                                         default:
@@ -55,11 +55,11 @@ public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdap
                     break;
 
                 case "isBooleanTest1":
-                    value_isBooleanTest1 = gson.getAdapter(Boolean.class).read(in);
+                    value_isBooleanTest1 = moshi.getAdapter(Boolean.class).read(in);
                     break;
 
                 case "isBooleanTest2":
-                    value_isBooleanTest2 = gson.getAdapter(Boolean.class).read(in);
+                    value_isBooleanTest2 = moshi.getAdapter(Boolean.class).read(in);
                     break;
 
                 default:
@@ -89,7 +89,7 @@ public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdap
         String obj0 = value.getValue1();
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         // End parentchild
@@ -98,12 +98,12 @@ public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdap
         out.endObject();
         boolean obj1 = value.isBooleanTest1();
         out.name("isBooleanTest1");
-        gson.getAdapter(Boolean.class).write(out, obj1);
+        moshi.getAdapter(Boolean.class).write(out, obj1);
 
         Boolean obj2 = value.isBooleanTest2();
         if (obj2 != null) {
             out.name("isBooleanTest2");
-            GsonUtil.writeWithGenericAdapter(gson, obj2.getClass(), out, obj2);
+            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
         }
 
         // End

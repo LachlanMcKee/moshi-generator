@@ -1,26 +1,26 @@
 package gsonpath.generated;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.squareup.moshi.Moshi;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
+import okio.Okio;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class StoreModelTest {
     @Test
-    public void test() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+    public void test() throws IOException {
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream("BookJson.json");
 
-        Gson gson = builder.create();
-        StoreModel model = gson.fromJson(new InputStreamReader(resourceAsStream), StoreModel.class);
+        Moshi gson = builder.build();
+        StoreModel model = gson.adapter(StoreModel.class).fromJson(Okio.buffer(Okio.source(resourceAsStream)));
 
         Assert.assertEquals("red", model.bikeColour);
         Assert.assertEquals(4, model.bookList.size());

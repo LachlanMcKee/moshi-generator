@@ -1,9 +1,9 @@
 package gsonpath.adapter.enums
 
-import com.google.gson.Gson
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.moshi.Moshi
 import gsonpath.LazyFactoryMetadata
 import gsonpath.ProcessingException
 import gsonpath.adapter.AdapterGenerationResult
@@ -12,7 +12,6 @@ import gsonpath.adapter.Constants
 import gsonpath.adapter.standard.adapter.properties.PropertyFetcher
 import gsonpath.adapter.util.writeFile
 import gsonpath.annotation.EnumGsonAdapter
-import gsonpath.audit.AuditJsonReader
 import gsonpath.audit.AuditLog
 import gsonpath.compiler.generateClassName
 import gsonpath.internal.GsonPathTypeAdapter
@@ -61,9 +60,9 @@ class EnumGsonAdapterGenerator(
         // Add the constructor which takes a gson instance for future use.
         constructor {
             addModifiers(Modifier.PUBLIC)
-            addParameter(Gson::class.java, "gson")
+            addParameter(Moshi::class.java, "moshi")
             code {
-                addStatement("super(gson)")
+                addStatement("super(moshi)")
             }
         }
 
@@ -75,7 +74,7 @@ class EnumGsonAdapterGenerator(
         val enumTypeName = properties.enumTypeName
         return AdapterMethodBuilder.createReadMethodBuilder(properties.enumTypeName).applyAndBuild {
             code {
-                createVariable(String::class.java, "enumValue", "in.nextString()")
+                createVariable(String::class.java, "enumValue", "reader.nextString()")
                 switch("enumValue") {
                     properties.fields.forEach { (enumValueTypeName, label) ->
                         case("\"$label\"", addBreak = false) {
@@ -84,12 +83,13 @@ class EnumGsonAdapterGenerator(
                     }
                     default(addBreak = false) {
                         if (properties.defaultValue != null) {
-                            createVariable(AuditLog::class.java, "auditLog", "\$T.getAuditLogFromReader(in)", AuditJsonReader::class.java)
-                            `if`("auditLog != null") {
-                                addStatement(
-                                        "auditLog.addUnexpectedEnumValue(new \$T(\"${properties.enumTypeName}\", in.getPath(), enumValue))",
-                                        AuditLog.UnexpectedEnumValue::class.java)
-                            }
+                            // TODO
+//                            createVariable(AuditLog::class.java, "auditLog", "\$T.getAuditLogFromReader(reader)", AuditJsonReader::class.java)
+//                            `if`("auditLog != null") {
+//                                addStatement(
+//                                        "auditLog.addUnexpectedEnumValue(new \$T(\"${properties.enumTypeName}\", reader.getPath(), enumValue))",
+//                                        AuditLog.UnexpectedEnumValue::class.java)
+//                            }
                             `return`("\$T", properties.defaultValue.enumValueTypeName)
                         } else {
                             addEscapedStatement("""throw new gsonpath.exception.JsonUnexpectedEnumValueException(enumValue, "$enumTypeName")""")
@@ -106,7 +106,7 @@ class EnumGsonAdapterGenerator(
                 switch("value") {
                     properties.fields.forEach { (enumValueTypeName, label) ->
                         case(enumValueTypeName.simpleName()) {
-                            addStatement("out.value(\"$label\")")
+                            addStatement("writer.value(\"$label\")")
                         }
                     }
                 }

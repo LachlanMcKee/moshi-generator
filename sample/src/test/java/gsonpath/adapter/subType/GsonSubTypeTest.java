@@ -1,27 +1,27 @@
 package gsonpath.adapter.subType;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.squareup.moshi.Moshi;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
+import okio.Okio;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class GsonSubTypeTest {
 
     @Test
-    public void testValidGsonSubTypeUsingList() {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))
-                .create();
+    public void testValidGsonSubTypeUsingList() throws IOException {
+        Moshi moshi = new Moshi.Builder()
+                .add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))
+                .build();
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream("Polymorphism_valid.json");
 
-        TypesList typesList = gson.fromJson(new InputStreamReader(resourceAsStream), TypesList.class);
+        TypesList typesList = moshi.adapter(TypesList.class).fromJson(Okio.buffer(Okio.source(resourceAsStream)));
         Type[] types = typesList.getItems();
         Assert.assertEquals(6, types.length);
 
@@ -72,15 +72,15 @@ public class GsonSubTypeTest {
     }
 
     @Test
-    public void testValidGsonSubTypeUsingPojo() {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))
-                .create();
+    public void testValidGsonSubTypeUsingPojo() throws IOException {
+        Moshi moshi = new Moshi.Builder()
+                .add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class))
+                .build();
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream("Polymorphism_valid.json");
 
-        TypesPojo typesList = gson.fromJson(new InputStreamReader(resourceAsStream), TypesPojo.class);
+        TypesPojo typesList = moshi.adapter(TypesPojo.class).fromJson(Okio.buffer(Okio.source(resourceAsStream)));
 
         validateValue1(typesList.getItem0());
         validateValue2(typesList.getItem1());

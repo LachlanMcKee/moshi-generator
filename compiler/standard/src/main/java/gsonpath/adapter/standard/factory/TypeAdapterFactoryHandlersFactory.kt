@@ -1,13 +1,13 @@
 package gsonpath.adapter.standard.factory
 
-import com.google.gson.TypeAdapterFactory
 import com.squareup.javapoet.TypeName
+import com.squareup.moshi.JsonAdapter
 import gsonpath.ProcessingException
 import gsonpath.adapter.AdapterGenerationResult
 import javax.lang.model.element.TypeElement
 
 object TypeAdapterFactoryHandlersFactory {
-    private val typeAdapterFactoryTypeName = TypeName.get(TypeAdapterFactory::class.java)
+    private val typeAdapterFactoryTypeName = TypeName.get(JsonAdapter.Factory::class.java)
 
     fun createResults(
             factoryElement: TypeElement,
@@ -17,11 +17,11 @@ object TypeAdapterFactoryHandlersFactory {
             return emptyMap()
         }
 
-        // Ensure that the factory element only extends TypeAdapterFactory
+        // Ensure that the factory element only extends JsonAdapter.Factory
         val factoryInterfaces = factoryElement.interfaces
         if (factoryInterfaces.size != 1 || TypeName.get(factoryInterfaces[0]) != typeAdapterFactoryTypeName) {
             throw ProcessingException("Interfaces annotated with @AutoGsonAdapterFactory must extend " +
-                    "com.google.gson.TypeAdapterFactory and no other interfaces.", factoryElement)
+                    "com.squareup.moshi.JsonAdapter.Factory and no other interfaces.", factoryElement)
         }
 
         return generatedGsonAdapters.fold(emptyMap()) { map, generatedGsonAdapter ->

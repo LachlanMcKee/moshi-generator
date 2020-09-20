@@ -25,7 +25,7 @@ public final class TestNamePolicyUpperCamelCaseSpaces_GsonTypeAdapter extends Gs
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "Test Value":
-                    Integer value_Test_Value = gson.getAdapter(Integer.class).read(in);
+                    Integer value_Test_Value = moshi.getAdapter(Integer.class).read(in);
                     if (value_Test_Value != null) {
                         result.testValue = value_Test_Value;
                     }
@@ -47,7 +47,7 @@ public final class TestNamePolicyUpperCamelCaseSpaces_GsonTypeAdapter extends Gs
         out.beginObject();
         int obj0 = value.testValue;
         out.name("Test Value");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End
         out.endObject();

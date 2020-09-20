@@ -30,11 +30,11 @@ public final class TestUsingInheritance_GsonTypeAdapter extends GsonPathTypeAdap
         while (jsonReaderHelper.handleObject(0, 3)) {
             switch (in.nextName()) {
                 case "value3":
-                    value_value3 = gson.getAdapter(Integer.class).read(in);
+                    value_value3 = moshi.getAdapter(Integer.class).read(in);
                     break;
 
                 case "value1":
-                    Integer value_value1_safe = gson.getAdapter(Integer.class).read(in);
+                    Integer value_value1_safe = moshi.getAdapter(Integer.class).read(in);
                     if (value_value1_safe != null) {
                         value_value1 = value_value1_safe;
                         mandatoryFieldsCheckList[0] = true;
@@ -48,7 +48,7 @@ public final class TestUsingInheritance_GsonTypeAdapter extends GsonPathTypeAdap
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "Nest2":
-                                value_Json1_Nest2 = gson.getAdapter(Integer.class).read(in);
+                                value_Json1_Nest2 = moshi.getAdapter(Integer.class).read(in);
                                 break;
 
                             default:
@@ -96,13 +96,13 @@ public final class TestUsingInheritance_GsonTypeAdapter extends GsonPathTypeAdap
         Integer obj0 = value.getValue3();
         if (obj0 != null) {
             out.name("value3");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         Integer obj1 = value.getValue1();
         if (obj1 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj1.getClass(), out, obj1);
+            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
         }
 
 
@@ -112,7 +112,7 @@ public final class TestUsingInheritance_GsonTypeAdapter extends GsonPathTypeAdap
         Integer obj2 = value.getValue2();
         if (obj2 != null) {
             out.name("Nest2");
-            GsonUtil.writeWithGenericAdapter(gson, obj2.getClass(), out, obj2);
+            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
         }
 
         // End Json1

@@ -1,9 +1,8 @@
 package gsonpath.internal;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,26 +15,26 @@ import java.util.List;
  *
  * @param <E> the object type to serialize/deserialize.
  */
-public final class CollectionTypeAdapter<E> extends TypeAdapter<Collection<E>> {
-    private final TypeAdapter<E> componentTypeAdapter;
+public final class CollectionTypeAdapter<E> extends JsonAdapter<Collection<E>> {
+    private final JsonAdapter<E> componentTypeAdapter;
     private final boolean filterNulls;
 
-    public CollectionTypeAdapter(TypeAdapter<E> componentTypeAdapter, boolean filterNulls) {
+    public CollectionTypeAdapter(JsonAdapter<E> componentTypeAdapter, boolean filterNulls) {
         this.componentTypeAdapter = componentTypeAdapter;
         this.filterNulls = filterNulls;
     }
 
     @Override
-    public Collection<E> read(JsonReader in) throws IOException {
-        if (in.peek() == JsonToken.NULL) {
-            in.nextNull();
+    public Collection<E> fromJson(JsonReader reader) throws IOException {
+        if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull();
             return null;
         }
 
         List<E> list = new ArrayList<>();
-        in.beginArray();
-        while (in.hasNext()) {
-            E instance = componentTypeAdapter.read(in);
+        reader.beginArray();
+        while (reader.hasNext()) {
+            E instance = componentTypeAdapter.fromJson(reader);
 
             if (filterNulls && instance == null) {
                 continue;
@@ -43,22 +42,21 @@ public final class CollectionTypeAdapter<E> extends TypeAdapter<Collection<E>> {
 
             list.add(instance);
         }
-        in.endArray();
+        reader.endArray();
         return list;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void write(JsonWriter out, Collection<E> list) throws IOException {
+    public void toJson(JsonWriter writer, Collection<E> list) throws IOException {
         if (list == null) {
-            out.nullValue();
+            writer.nullValue();
             return;
         }
 
-        out.beginArray();
+        writer.beginArray();
         for (E element : list) {
-            componentTypeAdapter.write(out, element);
+            componentTypeAdapter.toJson(writer, element);
         }
-        out.endArray();
+        writer.endArray();
     }
 }

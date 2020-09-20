@@ -1,32 +1,30 @@
 package gsonpath.mandatory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
+import com.squareup.moshi.Moshi;
 import gsonpath.GsonPath;
 import gsonpath.TestGsonTypeFactory;
 import gsonpath.exception.JsonFieldNoKeyException;
+import okio.Okio;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class MandatoryFieldTest {
     @Test
     public void test() {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(GsonPath.createTypeAdapterFactory(TestGsonTypeFactory.class));
 
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         InputStream resourceAsStream = classLoader.getResourceAsStream("MandatoryTestJson.json");
 
-        Gson gson = builder.create();
+        Moshi moshi = builder.build();
 
         try {
-            gson.fromJson(new InputStreamReader(resourceAsStream), MandatorySampleModel.class);
+            moshi.adapter(MandatorySampleModel.class).fromJson(Okio.buffer(Okio.source(resourceAsStream)));
 
-        } catch (JsonParseException e) {
+        } catch (Exception e) {
             // Since the mandatory value is not found, we are expecting an exception.
             Assert.assertEquals(e.getClass(), JsonFieldNoKeyException.class);
             return;

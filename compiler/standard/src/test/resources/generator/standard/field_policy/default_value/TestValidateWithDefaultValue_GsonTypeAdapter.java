@@ -26,7 +26,7 @@ public final class TestValidateWithDefaultValue_GsonTypeAdapter extends GsonPath
         while (jsonReaderHelper.handleObject(0, 1)) {
             switch (in.nextName()) {
                 case "mandatoryWithDefault":
-                    Integer value_mandatoryWithDefault = gson.getAdapter(Integer.class).read(in);
+                    Integer value_mandatoryWithDefault = moshi.getAdapter(Integer.class).read(in);
                     if (value_mandatoryWithDefault != null) {
                         result.mandatoryWithDefault = value_mandatoryWithDefault;
                     }
@@ -48,7 +48,7 @@ public final class TestValidateWithDefaultValue_GsonTypeAdapter extends GsonPath
         Integer obj0 = value.mandatoryWithDefault;
         if (obj0 != null) {
             out.name("mandatoryWithDefault");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         // End

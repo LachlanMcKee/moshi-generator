@@ -30,7 +30,7 @@ public final class TestImmutableRemoveInvalidElements_GsonTypeAdapter extends Gs
             switch (in.nextName()) {
                 case "value1":
                     // Extension (Read) - 'RemoveInvalidElements' Annotation
-                    value_value1 = RemoveInvalidElementsUtil.removeInvalidElementsArray(String.class, gson, in, new RemoveInvalidElementsUtil.CreateArrayFunction<String>() {
+                    value_value1 = RemoveInvalidElementsUtil.removeInvalidElementsArray(String.class, moshi, in, new RemoveInvalidElementsUtil.CreateArrayFunction<String>() {
                         @Override
                         public String[] createArray() {
                             return new String[0];
@@ -41,7 +41,7 @@ public final class TestImmutableRemoveInvalidElements_GsonTypeAdapter extends Gs
 
                 case "value2":
                     // Extension (Read) - 'RemoveInvalidElements' Annotation
-                    value_value2 = RemoveInvalidElementsUtil.removeInvalidElementsList(String.class, gson, in);
+                    value_value2 = RemoveInvalidElementsUtil.removeInvalidElementsList(String.class, moshi, in);
 
                     break;
 
@@ -64,13 +64,13 @@ public final class TestImmutableRemoveInvalidElements_GsonTypeAdapter extends Gs
         String[] obj0 = value.getValue1();
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         List<String> obj1 = value.getValue2();
         if (obj1 != null) {
             out.name("value2");
-            gson.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj1);
+            moshi.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj1);
         }
 
         // End

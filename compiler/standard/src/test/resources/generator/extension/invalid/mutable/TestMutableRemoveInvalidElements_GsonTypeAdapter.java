@@ -29,7 +29,7 @@ public final class TestMutableRemoveInvalidElements_GsonTypeAdapter extends Gson
             switch (in.nextName()) {
                 case "value1":
                     // Extension (Read) - 'RemoveInvalidElements' Annotation
-                    String[] value_value1 = RemoveInvalidElementsUtil.removeInvalidElementsArray(String.class, gson, in, new RemoveInvalidElementsUtil.CreateArrayFunction<String>() {
+                    String[] value_value1 = RemoveInvalidElementsUtil.removeInvalidElementsArray(String.class, moshi, in, new RemoveInvalidElementsUtil.CreateArrayFunction<String>() {
                         @Override
                         public String[] createArray() {
                             return new String[0];
@@ -43,7 +43,7 @@ public final class TestMutableRemoveInvalidElements_GsonTypeAdapter extends Gson
 
                 case "value2":
                     // Extension (Read) - 'RemoveInvalidElements' Annotation
-                    List<String> value_value2 = RemoveInvalidElementsUtil.removeInvalidElementsList(String.class, gson, in);
+                    List<String> value_value2 = RemoveInvalidElementsUtil.removeInvalidElementsList(String.class, moshi, in);
 
                     if (value_value2 != null) {
                         result.value2 = value_value2;
@@ -66,13 +66,13 @@ public final class TestMutableRemoveInvalidElements_GsonTypeAdapter extends Gson
         String[] obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         List<String> obj1 = value.value2;
         if (obj1 != null) {
             out.name("value2");
-            gson.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj1);
+            moshi.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj1);
         }
 
         // End

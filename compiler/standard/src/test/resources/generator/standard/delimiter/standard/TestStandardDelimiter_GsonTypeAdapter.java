@@ -28,7 +28,7 @@ public final class TestStandardDelimiter_GsonTypeAdapter extends GsonPathTypeAda
                     while (jsonReaderHelper.handleObject(1, 1)) {
                         switch (in.nextName()) {
                             case "Nest1":
-                                Integer value_Json1_Nest1 = gson.getAdapter(Integer.class).read(in);
+                                Integer value_Json1_Nest1 = moshi.getAdapter(Integer.class).read(in);
                                 if (value_Json1_Nest1 != null) {
                                     result.value1 = value_Json1_Nest1;
                                 }
@@ -61,7 +61,7 @@ public final class TestStandardDelimiter_GsonTypeAdapter extends GsonPathTypeAda
         out.beginObject();
         int obj0 = value.value1;
         out.name("Nest1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
         // End Json1
         out.endObject();

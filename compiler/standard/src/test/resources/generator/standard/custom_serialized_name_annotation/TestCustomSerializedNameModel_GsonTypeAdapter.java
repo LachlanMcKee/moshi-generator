@@ -29,14 +29,14 @@ public final class TestCustomSerializedNameModel_GsonTypeAdapter extends GsonPat
                     while (jsonReaderHelper.handleObject(1, 5)) {
                         switch (in.nextName()) {
                             case "value1":
-                                String value_nest_value1 = gson.getAdapter(String.class).read(in);
+                                String value_nest_value1 = moshi.getAdapter(String.class).read(in);
                                 if (value_nest_value1 != null) {
                                     result.value1 = value_nest_value1;
                                 }
                                 break;
 
                             case "value2":
-                                String value_nest_value2 = gson.getAdapter(String.class).read(in);
+                                String value_nest_value2 = moshi.getAdapter(String.class).read(in);
                                 if (value_nest_value2 != null) {
                                     result.valueX = value_nest_value2;
                                 }
@@ -46,14 +46,14 @@ public final class TestCustomSerializedNameModel_GsonTypeAdapter extends GsonPat
                                 while (jsonReaderHelper.handleObject(2, 2)) {
                                     switch (in.nextName()) {
                                         case "value3":
-                                            String value_nest_second_value3 = gson.getAdapter(String.class).read(in);
+                                            String value_nest_second_value3 = moshi.getAdapter(String.class).read(in);
                                             if (value_nest_second_value3 != null) {
                                                 result.value3 = value_nest_second_value3;
                                             }
                                             break;
 
                                         case "value3b":
-                                            String value_nest_second_value3b = gson.getAdapter(String.class).read(in);
+                                            String value_nest_second_value3b = moshi.getAdapter(String.class).read(in);
                                             if (value_nest_second_value3b != null) {
                                                 result.value3b = value_nest_second_value3b;
                                             }
@@ -68,14 +68,14 @@ public final class TestCustomSerializedNameModel_GsonTypeAdapter extends GsonPat
                                 break;
 
                             case "value1b":
-                                String value_nest_value1b = gson.getAdapter(String.class).read(in);
+                                String value_nest_value1b = moshi.getAdapter(String.class).read(in);
                                 if (value_nest_value1b != null) {
                                     result.value1b = value_nest_value1b;
                                 }
                                 break;
 
                             case "value2b":
-                                String value_nest_value2b = gson.getAdapter(String.class).read(in);
+                                String value_nest_value2b = moshi.getAdapter(String.class).read(in);
                                 if (value_nest_value2b != null) {
                                     result.valueXb = value_nest_value2b;
                                 }
@@ -109,13 +109,13 @@ public final class TestCustomSerializedNameModel_GsonTypeAdapter extends GsonPat
         String obj0 = value.value1;
         if (obj0 != null) {
             out.name("value1");
-            GsonUtil.writeWithGenericAdapter(gson, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
         }
 
         String obj1 = value.valueX;
         if (obj1 != null) {
             out.name("value2");
-            GsonUtil.writeWithGenericAdapter(gson, obj1.getClass(), out, obj1);
+            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
         }
 
 
@@ -125,13 +125,13 @@ public final class TestCustomSerializedNameModel_GsonTypeAdapter extends GsonPat
         String obj2 = value.value3;
         if (obj2 != null) {
             out.name("value3");
-            GsonUtil.writeWithGenericAdapter(gson, obj2.getClass(), out, obj2);
+            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
         }
 
         String obj3 = value.value3b;
         if (obj3 != null) {
             out.name("value3b");
-            GsonUtil.writeWithGenericAdapter(gson, obj3.getClass(), out, obj3);
+            GsonUtil.writeWithGenericAdapter(moshi, obj3.getClass(), out, obj3);
         }
 
         // End nestsecond
@@ -139,13 +139,13 @@ public final class TestCustomSerializedNameModel_GsonTypeAdapter extends GsonPat
         String obj4 = value.value1b;
         if (obj4 != null) {
             out.name("value1b");
-            GsonUtil.writeWithGenericAdapter(gson, obj4.getClass(), out, obj4);
+            GsonUtil.writeWithGenericAdapter(moshi, obj4.getClass(), out, obj4);
         }
 
         String obj5 = value.valueXb;
         if (obj5 != null) {
             out.name("value2b");
-            GsonUtil.writeWithGenericAdapter(gson, obj5.getClass(), out, obj5);
+            GsonUtil.writeWithGenericAdapter(moshi, obj5.getClass(), out, obj5);
         }
 
         // End nest

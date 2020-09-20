@@ -25,7 +25,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
         while (jsonReaderHelper.handleObject(0, 2)) {
             switch (in.nextName()) {
                 case "Json1":
-                    Integer value_Json1 = gson.getAdapter(Integer.class).read(in);
+                    Integer value_Json1 = moshi.getAdapter(Integer.class).read(in);
                     if (value_Json1 != null) {
                         result.value1 = value_Json1;
                     }
@@ -35,7 +35,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
                     while (jsonReaderHelper.handleObject(1, 2)) {
                         switch (in.nextName()) {
                             case "Nest1":
-                                Integer value_Json2_Nest1 = gson.getAdapter(Integer.class).read(in);
+                                Integer value_Json2_Nest1 = moshi.getAdapter(Integer.class).read(in);
                                 if (value_Json2_Nest1 != null) {
                                     result.value2 = value_Json2_Nest1;
                                 }
@@ -45,14 +45,14 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
                                 while (jsonReaderHelper.handleObject(2, 2)) {
                                     switch (in.nextName()) {
                                         case "EndPoint1":
-                                            Integer value_Json2_Nest2_EndPoint1 = gson.getAdapter(Integer.class).read(in);
+                                            Integer value_Json2_Nest2_EndPoint1 = moshi.getAdapter(Integer.class).read(in);
                                             if (value_Json2_Nest2_EndPoint1 != null) {
                                                 result.value3 = value_Json2_Nest2_EndPoint1;
                                             }
                                             break;
 
                                         case "EndPoint2":
-                                            Integer value_Json2_Nest2_EndPoint2 = gson.getAdapter(Integer.class).read(in);
+                                            Integer value_Json2_Nest2_EndPoint2 = moshi.getAdapter(Integer.class).read(in);
                                             if (value_Json2_Nest2_EndPoint2 != null) {
                                                 result.value4 = value_Json2_Nest2_EndPoint2;
                                             }
@@ -89,7 +89,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
         out.beginObject();
         int obj0 = value.value1;
         out.name("Json1");
-        gson.getAdapter(Integer.class).write(out, obj0);
+        moshi.getAdapter(Integer.class).write(out, obj0);
 
 
         // Begin Json2
@@ -97,7 +97,7 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
         out.beginObject();
         int obj1 = value.value2;
         out.name("Nest1");
-        gson.getAdapter(Integer.class).write(out, obj1);
+        moshi.getAdapter(Integer.class).write(out, obj1);
 
 
         // Begin Json2Nest2
@@ -105,11 +105,11 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
         out.beginObject();
         int obj2 = value.value3;
         out.name("EndPoint1");
-        gson.getAdapter(Integer.class).write(out, obj2);
+        moshi.getAdapter(Integer.class).write(out, obj2);
 
         int obj3 = value.value4;
         out.name("EndPoint2");
-        gson.getAdapter(Integer.class).write(out, obj3);
+        moshi.getAdapter(Integer.class).write(out, obj3);
 
         // End Json2Nest2
         out.endObject();
