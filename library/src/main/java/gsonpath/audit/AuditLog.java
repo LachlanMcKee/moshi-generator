@@ -1,5 +1,7 @@
 package gsonpath.audit;
 
+import com.squareup.moshi.JsonReader;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,15 @@ public final class AuditLog {
     private List<UnexpectedEnumValue> unexpectedEnumValues;
 
     AuditLog() {
+    }
+
+    public static AuditLog fromReader(JsonReader reader) {
+        AuditLog auditLog = reader.tag(AuditLog.class);
+        if (auditLog == null) {
+            auditLog = new AuditLog();
+            reader.setTag(AuditLog.class, auditLog);
+        }
+        return auditLog;
     }
 
     /**

@@ -60,7 +60,7 @@ class FlattenJsonExtension : GsonPathExtension {
     }
 
     private companion object {
-        // TODO
+        // TODO: This needs to be an object or use https://github.com/square/moshi/issues/1232
         private val CLASS_NAME_JSON_ELEMENT: ClassName = ClassName.get(String::class.java)
     }
 }

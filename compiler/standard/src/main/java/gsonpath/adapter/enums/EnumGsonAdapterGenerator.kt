@@ -83,13 +83,12 @@ class EnumGsonAdapterGenerator(
                     }
                     default(addBreak = false) {
                         if (properties.defaultValue != null) {
-                            // TODO
-//                            createVariable(AuditLog::class.java, "auditLog", "\$T.getAuditLogFromReader(reader)", AuditJsonReader::class.java)
-//                            `if`("auditLog != null") {
-//                                addStatement(
-//                                        "auditLog.addUnexpectedEnumValue(new \$T(\"${properties.enumTypeName}\", reader.getPath(), enumValue))",
-//                                        AuditLog.UnexpectedEnumValue::class.java)
-//                            }
+                            createVariable(AuditLog::class.java, "auditLog", "\$T.fromReader(reader)", AuditLog::class.java)
+                            `if`("auditLog != null") {
+                                addStatement(
+                                        "auditLog.addUnexpectedEnumValue(new \$T(\"${properties.enumTypeName}\", reader.getPath(), enumValue))",
+                                        AuditLog.UnexpectedEnumValue::class.java)
+                            }
                             `return`("\$T", properties.defaultValue.enumValueTypeName)
                         } else {
                             addEscapedStatement("""throw new gsonpath.exception.JsonUnexpectedEnumValueException(enumValue, "$enumTypeName")""")

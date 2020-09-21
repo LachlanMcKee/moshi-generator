@@ -9,8 +9,8 @@ import gsonpath.adapter.AdapterMethodBuilder
 import gsonpath.adapter.Constants
 import gsonpath.adapter.Constants.MOSHI
 import gsonpath.adapter.Constants.NULL
-import gsonpath.adapter.Constants.WRITER
 import gsonpath.adapter.Constants.VALUE
+import gsonpath.adapter.Constants.WRITER
 import gsonpath.adapter.standard.extension.ExtensionsHandler
 import gsonpath.adapter.standard.model.GsonArray
 import gsonpath.adapter.standard.model.GsonField

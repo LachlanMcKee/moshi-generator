@@ -1,7 +1,5 @@
 package gsonpath
 
-import java.lang.Exception
-
 /**
  * Used to keep track of succesful and unsucessful deserializations.
  */

@@ -4,8 +4,6 @@ import com.squareup.moshi.*
 import gsonpath.GsonResult
 import gsonpath.GsonResultList
 import gsonpath.internal.GsonUtil.isValidValue
-import java.lang.Exception
-import java.lang.IllegalStateException
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 

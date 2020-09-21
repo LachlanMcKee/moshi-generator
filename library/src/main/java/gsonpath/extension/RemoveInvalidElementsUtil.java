@@ -15,17 +15,14 @@ import static gsonpath.internal.GsonUtil.isValidValue;
 public class RemoveInvalidElementsUtil {
 
     public static <T> void removeInvalidElementsList(JsonAdapter<T> adapter, JsonReader reader, List<T> outputList) throws IOException {
-        // TODO:
-//        AuditLog auditLog = AuditJsonReader.getAuditLogFromReader(reader);
-//
+        AuditLog auditLog = AuditLog.fromReader(reader);
+
         List<Object> jsonArray = (List<Object>) reader.readJsonValue();
         for (Object jsonElement : jsonArray) {
             try {
                 outputList.add(adapter.fromJsonValue(jsonElement));
             } catch (Exception e) {
-//                if (auditLog != null) {
-//                    auditLog.addRemovedElement(new RemovedElement(reader.getPath(), e, jsonElement));
-//                }
+                auditLog.addRemovedElement(new RemovedElement(reader.getPath(), e, jsonElement));
             }
         }
     }
