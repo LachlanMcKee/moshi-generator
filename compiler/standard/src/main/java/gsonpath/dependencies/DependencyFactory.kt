@@ -13,7 +13,6 @@ import gsonpath.adapter.standard.adapter.write.WriteFunctions
 import gsonpath.adapter.standard.extension.ExtensionsHandler
 import gsonpath.adapter.standard.extension.ExtensionsLoader
 import gsonpath.adapter.standard.extension.empty.EmptyToNullExtension
-import gsonpath.adapter.standard.extension.flatten.FlattenJsonExtension
 import gsonpath.adapter.standard.extension.invalid.RemoveInvalidElementsExtension
 import gsonpath.adapter.standard.extension.range.floatrange.FloatRangeExtension
 import gsonpath.adapter.standard.extension.range.intrange.IntRangeExtension
@@ -85,7 +84,6 @@ object DependencyFactory {
         return ExtensionsLoader.loadExtensions(Logger(processingEnv))
                 .plus(arrayOf(
                         EmptyToNullExtension(),
-                        FlattenJsonExtension(),
                         RemoveInvalidElementsExtension(),
                         FloatRangeExtension(),
                         IntRangeExtension(),
