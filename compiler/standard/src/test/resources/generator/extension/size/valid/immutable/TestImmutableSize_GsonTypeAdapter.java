@@ -1,45 +1,44 @@
 package generator.standard.size.valid.nullable;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Override;
 import java.lang.String;
 
 @GsonPathGenerated
 public final class TestImmutableSize_GsonTypeAdapter extends GsonPathTypeAdapter<TestImmutableSize> {
-    public TestImmutableSize_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestImmutableSize_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestImmutableSize readImpl(JsonReader in) throws IOException {
+    public TestImmutableSize readImpl(JsonReader reader) throws IOException {
         String[] value_value1 = null;
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "value1":
-                    value_value1 = moshi.getAdapter(String[].class).read(in);
+                    value_value1 = moshi.adapter(String[].class).fromJson(reader);
 
                     // Gsonpath Extensions
                     if (value_value1 != null) {
 
                         // Extension - 'Size' Annotation
                         if (value_value1.length < 0) {
-                            throw new com.google.gson.JsonParseException("Invalid array length for JSON element 'value1'. Expected minimum: '0', actual minimum: '" + value_value1.length + "'");
+                            throw new com.squareup.moshi.JsonDataException("Invalid array length for JSON element 'value1'. Expected minimum: '0', actual minimum: '" + value_value1.length + "'");
                         }
                         if (value_value1.length > 6) {
-                            throw new com.google.gson.JsonParseException("Invalid array length for JSON element 'value1'. Expected maximum: '6', actual maximum: '" + value_value1.length + "'");
+                            throw new com.squareup.moshi.JsonDataException("Invalid array length for JSON element 'value1'. Expected maximum: '6', actual maximum: '" + value_value1.length + "'");
                         }
                         if (value_value1.length % 2 != 0) {
-                            throw new com.google.gson.JsonParseException("Invalid array length for JSON element 'value1'. length of '" + value_value1.length + "' is not a multiple of 2");
+                            throw new com.squareup.moshi.JsonDataException("Invalid array length for JSON element 'value1'. length of '" + value_value1.length + "' is not a multiple of 2");
                         }
 
                     }
@@ -52,20 +51,20 @@ public final class TestImmutableSize_GsonTypeAdapter extends GsonPathTypeAdapter
             }
         }
         return new TestImmutableSize(
-                value_value1);
+            value_value1);
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestImmutableSize value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestImmutableSize value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         String[] obj0 = value.getValue1();
         if (obj0 != null) {
-            out.name("value1");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("value1");
+            GsonUtil.writeWithGenericAdapter(moshi, String[].class, writer, obj0);
         }
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

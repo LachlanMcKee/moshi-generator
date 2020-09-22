@@ -1,32 +1,30 @@
 package gsonpath.safe;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 import gsonpath.GsonPathTypeAdapterFactory;
 import gsonpath.GsonSafeList;
+import okio.Okio;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import static org.junit.Assert.assertEquals;
 
 public class GsonSafeListTest {
     @Test
-    public void testUsingGsonSafeArrayList() {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapterFactory(new GsonPathTypeAdapterFactory())
-                .create();
+    public void testUsingGsonSafeArrayList() throws IOException {
+        Moshi moshi = new Moshi.Builder()
+                .add(new GsonPathTypeAdapterFactory())
+                .build();
 
         InputStream resourceAsStream = ClassLoader
                 .getSystemClassLoader()
                 .getResourceAsStream("sample.json");
 
-        GsonSafeList<Integer> typesList = gson.fromJson(
-                new InputStreamReader(resourceAsStream),
-                new TypeToken<GsonSafeList<Integer>>() {
-                }.getType());
+        GsonSafeList<Integer> typesList = moshi.<GsonSafeList<Integer>>adapter(Types.newParameterizedType(GsonSafeList.class, Integer.class))
+                .fromJson(Okio.buffer(Okio.source(resourceAsStream)));
 
         assertEquals(2, typesList.size());
         assertEquals(new Integer(1), typesList.get(0));

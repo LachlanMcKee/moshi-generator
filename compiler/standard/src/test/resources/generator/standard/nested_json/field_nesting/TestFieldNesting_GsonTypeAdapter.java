@@ -1,31 +1,30 @@
 package generator.standard.nested_json.field_nesting;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<TestFieldNesting> {
-    public TestFieldNesting_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestFieldNesting_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestFieldNesting readImpl(JsonReader in) throws IOException {
+    public TestFieldNesting readImpl(JsonReader reader) throws IOException {
         TestFieldNesting result = new TestFieldNesting();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 3, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 3, 0);
 
         while (jsonReaderHelper.handleObject(0, 2)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "Json1":
-                    Integer value_Json1 = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_Json1 = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_Json1 != null) {
                         result.value1 = value_Json1;
                     }
@@ -33,9 +32,9 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
 
                 case "Json2":
                     while (jsonReaderHelper.handleObject(1, 2)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "Nest1":
-                                Integer value_Json2_Nest1 = moshi.getAdapter(Integer.class).read(in);
+                                Integer value_Json2_Nest1 = moshi.adapter(Integer.class).fromJson(reader);
                                 if (value_Json2_Nest1 != null) {
                                     result.value2 = value_Json2_Nest1;
                                 }
@@ -43,16 +42,16 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
 
                             case "Nest2":
                                 while (jsonReaderHelper.handleObject(2, 2)) {
-                                    switch (in.nextName()) {
+                                    switch (reader.nextName()) {
                                         case "EndPoint1":
-                                            Integer value_Json2_Nest2_EndPoint1 = moshi.getAdapter(Integer.class).read(in);
+                                            Integer value_Json2_Nest2_EndPoint1 = moshi.adapter(Integer.class).fromJson(reader);
                                             if (value_Json2_Nest2_EndPoint1 != null) {
                                                 result.value3 = value_Json2_Nest2_EndPoint1;
                                             }
                                             break;
 
                                         case "EndPoint2":
-                                            Integer value_Json2_Nest2_EndPoint2 = moshi.getAdapter(Integer.class).read(in);
+                                            Integer value_Json2_Nest2_EndPoint2 = moshi.adapter(Integer.class).fromJson(reader);
                                             if (value_Json2_Nest2_EndPoint2 != null) {
                                                 result.value4 = value_Json2_Nest2_EndPoint2;
                                             }
@@ -84,38 +83,38 @@ public final class TestFieldNesting_GsonTypeAdapter extends GsonPathTypeAdapter<
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestFieldNesting value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestFieldNesting value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         int obj0 = value.value1;
-        out.name("Json1");
-        moshi.getAdapter(Integer.class).write(out, obj0);
+        writer.name("Json1");
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
 
         // Begin Json2
-        out.name("Json2");
-        out.beginObject();
+        writer.name("Json2");
+        writer.beginObject();
         int obj1 = value.value2;
-        out.name("Nest1");
-        moshi.getAdapter(Integer.class).write(out, obj1);
+        writer.name("Nest1");
+        moshi.adapter(Integer.class).toJson(writer, obj1);
 
 
         // Begin Json2Nest2
-        out.name("Nest2");
-        out.beginObject();
+        writer.name("Nest2");
+        writer.beginObject();
         int obj2 = value.value3;
-        out.name("EndPoint1");
-        moshi.getAdapter(Integer.class).write(out, obj2);
+        writer.name("EndPoint1");
+        moshi.adapter(Integer.class).toJson(writer, obj2);
 
         int obj3 = value.value4;
-        out.name("EndPoint2");
-        moshi.getAdapter(Integer.class).write(out, obj3);
+        writer.name("EndPoint2");
+        moshi.adapter(Integer.class).toJson(writer, obj3);
 
         // End Json2Nest2
-        out.endObject();
+        writer.endObject();
         // End Json2
-        out.endObject();
-        // End
-        out.endObject();
+        writer.endObject();
+        // End 
+        writer.endObject();
     }
 }

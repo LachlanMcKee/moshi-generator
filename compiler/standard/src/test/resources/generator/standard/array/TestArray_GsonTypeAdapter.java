@@ -27,7 +27,7 @@ public final class TestArray_GsonTypeAdapter extends GsonPathTypeAdapter<TestArr
                     while (jsonReaderHelper.handleArray(0)) {
                         switch (jsonReaderHelper.getArrayIndex(0)) {
                             case 1:
-                                Integer value_test1_1_ = moshi.adapter(Integer.class).read(reader);
+                                Integer value_test1_1_ = moshi.adapter(Integer.class).fromJson(reader);
                                 if (value_test1_1_ != null) {
                                     result.plainArray = value_test1_1_;
                                 }
@@ -48,14 +48,14 @@ public final class TestArray_GsonTypeAdapter extends GsonPathTypeAdapter<TestArr
                                 while (jsonReaderHelper.handleObject(1, 2)) {
                                     switch (reader.nextName()) {
                                         case "child":
-                                            Integer value_test2_2__child = moshi.adapter(Integer.class).read(reader);
+                                            Integer value_test2_2__child = moshi.adapter(Integer.class).fromJson(reader);
                                             if (value_test2_2__child != null) {
                                                 result.arrayWithNestedObject = value_test2_2__child;
                                             }
                                             break;
 
                                         case "child2":
-                                            Integer value_test2_2__child2 = moshi.adapter(Integer.class).read(reader);
+                                            Integer value_test2_2__child2 = moshi.adapter(Integer.class).fromJson(reader);
                                             if (value_test2_2__child2 != null) {
                                                 result.arrayWithNestedObject2 = value_test2_2__child2;
                                             }
@@ -87,7 +87,7 @@ public final class TestArray_GsonTypeAdapter extends GsonPathTypeAdapter<TestArr
                                             while (jsonReaderHelper.handleArray(3)) {
                                                 switch (jsonReaderHelper.getArrayIndex(3)) {
                                                     case 1:
-                                                        Integer value_test3_3__child_1_ = moshi.adapter(Integer.class).read(reader);
+                                                        Integer value_test3_3__child_1_ = moshi.adapter(Integer.class).fromJson(reader);
                                                         if (value_test3_3__child_1_ != null) {
                                                             result.arrayWithNestedArray = value_test3_3__child_1_;
                                                         }
@@ -124,7 +124,7 @@ public final class TestArray_GsonTypeAdapter extends GsonPathTypeAdapter<TestArr
                                 while (jsonReaderHelper.handleArray(4)) {
                                     switch (jsonReaderHelper.getArrayIndex(4)) {
                                         case 1:
-                                            Integer value_test4_child_1_ = moshi.adapter(Integer.class).read(reader);
+                                            Integer value_test4_child_1_ = moshi.adapter(Integer.class).fromJson(reader);
                                             if (value_test4_child_1_ != null) {
                                                 result.objectWithNestedArray = value_test4_child_1_;
                                             }
@@ -161,87 +161,87 @@ public final class TestArray_GsonTypeAdapter extends GsonPathTypeAdapter<TestArr
         writer.beginObject();
 
         // Begin Array: '.test1'
-        out.name("test1");
-        out.beginArray();
+        writer.name("test1");
+        writer.beginArray();
 
-        out.nullValue(); // Set Value: 'test1[0]'
+        writer.nullValue(); // Set Value: 'test1[0]'
 
         // Set Value: 'test1[1]'
         int obj0 = value.plainArray;
-        moshi.adapter(Integer.class).write(writer, obj0);
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
         // End Array: 'test1'
-        out.endArray();
+        writer.endArray();
 
         // Begin Array: '.test2'
-        out.name("test2");
-        out.beginArray();
+        writer.name("test2");
+        writer.beginArray();
 
-        out.nullValue(); // Set Value: 'test2[0]'
-        out.nullValue(); // Set Value: 'test2[1]'
+        writer.nullValue(); // Set Value: 'test2[0]'
+        writer.nullValue(); // Set Value: 'test2[1]'
 
         // Begin Object: 'test2[2]'
         writer.beginObject();
         int obj1 = value.arrayWithNestedObject;
         writer.name("child");
-        moshi.adapter(Integer.class).write(writer, obj1);
+        moshi.adapter(Integer.class).toJson(writer, obj1);
 
         int obj2 = value.arrayWithNestedObject2;
         writer.name("child2");
-        moshi.adapter(Integer.class).write(writer, obj2);
+        moshi.adapter(Integer.class).toJson(writer, obj2);
 
         // End test2[2]
         writer.endObject();
         // End Array: 'test2'
-        out.endArray();
+        writer.endArray();
 
         // Begin Array: '.test3'
-        out.name("test3");
-        out.beginArray();
+        writer.name("test3");
+        writer.beginArray();
 
-        out.nullValue(); // Set Value: 'test3[0]'
-        out.nullValue(); // Set Value: 'test3[1]'
-        out.nullValue(); // Set Value: 'test3[2]'
+        writer.nullValue(); // Set Value: 'test3[0]'
+        writer.nullValue(); // Set Value: 'test3[1]'
+        writer.nullValue(); // Set Value: 'test3[2]'
 
         // Begin Object: 'test3[3]'
         writer.beginObject();
 
         // Begin Array: 'test3[3].child'
-        out.name("child");
-        out.beginArray();
+        writer.name("child");
+        writer.beginArray();
 
-        out.nullValue(); // Set Value: 'test3[3].child[0]'
+        writer.nullValue(); // Set Value: 'test3[3].child[0]'
 
         // Set Value: 'test3[3].child[1]'
         int obj3 = value.arrayWithNestedArray;
-        moshi.adapter(Integer.class).write(writer, obj3);
+        moshi.adapter(Integer.class).toJson(writer, obj3);
 
         // End Array: 'child'
-        out.endArray();
+        writer.endArray();
         // End test3[3]
         writer.endObject();
         // End Array: 'test3'
-        out.endArray();
+        writer.endArray();
 
         // Begin test4
         writer.name("test4");
         writer.beginObject();
 
         // Begin Array: 'test4.child'
-        out.name("child");
-        out.beginArray();
+        writer.name("child");
+        writer.beginArray();
 
-        out.nullValue(); // Set Value: 'test4.child[0]'
+        writer.nullValue(); // Set Value: 'test4.child[0]'
 
         // Set Value: 'test4.child[1]'
         int obj4 = value.objectWithNestedArray;
-        moshi.adapter(Integer.class).write(writer, obj4);
+        moshi.adapter(Integer.class).toJson(writer, obj4);
 
         // End Array: 'child'
-        out.endArray();
+        writer.endArray();
         // End test4
         writer.endObject();
-        // End
+        // End 
         writer.endObject();
     }
 }

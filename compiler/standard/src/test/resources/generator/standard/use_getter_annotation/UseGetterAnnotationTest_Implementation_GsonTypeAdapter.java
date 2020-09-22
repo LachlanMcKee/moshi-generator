@@ -1,13 +1,12 @@
 package generator.standard.use_getter_annotation;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
@@ -15,25 +14,24 @@ import java.lang.String;
 
 @GsonPathGenerated
 public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extends GsonPathTypeAdapter<UseGetterAnnotationTest.Implementation> {
-
-    public UseGetterAnnotationTest_Implementation_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public UseGetterAnnotationTest_Implementation_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public UseGetterAnnotationTest.Implementation readImpl(JsonReader in) throws IOException {
+    public UseGetterAnnotationTest.Implementation readImpl(JsonReader reader) throws IOException {
         String value_common_name = null;
         int value_specific_intTest = 0;
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 3, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 3, 0);
         boolean[] mandatoryFieldsCheckList = new boolean[1];
 
         while (jsonReaderHelper.handleObject(0, 2)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "common":
                     while (jsonReaderHelper.handleObject(1, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "name":
-                                String value_common_name_safe = moshi.getAdapter(String.class).read(in);
+                                String value_common_name_safe = moshi.adapter(String.class).fromJson(reader);
                                 if (value_common_name_safe != null) {
                                     value_common_name = value_common_name_safe;
                                     mandatoryFieldsCheckList[0] = true;
@@ -53,9 +51,9 @@ public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extend
 
                 case "specific":
                     while (jsonReaderHelper.handleObject(2, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "intTest":
-                                value_specific_intTest = moshi.getAdapter(Integer.class).read(in);
+                                value_specific_intTest = moshi.adapter(Integer.class).fromJson(reader);
                                 break;
 
                             default:
@@ -91,38 +89,38 @@ public final class UseGetterAnnotationTest_Implementation_GsonTypeAdapter extend
             }
         }
         return new UseGetterAnnotationTest.Implementation(
-                value_common_name,
-                value_specific_intTest);
+            value_common_name,
+            value_specific_intTest);
     }
 
     @Override
-    public void writeImpl(JsonWriter out, UseGetterAnnotationTest.Implementation value) throws
+    public void writeImpl(JsonWriter writer, UseGetterAnnotationTest.Implementation value) throws
             IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin common
-        out.name("common");
-        out.beginObject();
+        writer.name("common");
+        writer.beginObject();
         String obj0 = value.getName();
         if (obj0 != null) {
-            out.name("name");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("name");
+            GsonUtil.writeWithGenericAdapter(moshi, String.class, writer, obj0);
         }
 
         // End common
-        out.endObject();
+        writer.endObject();
 
         // Begin specific
-        out.name("specific");
-        out.beginObject();
+        writer.name("specific");
+        writer.beginObject();
         int obj1 = value.getIntTest();
-        out.name("intTest");
-        moshi.getAdapter(Integer.class).write(out, obj1);
+        writer.name("intTest");
+        moshi.adapter(Integer.class).toJson(writer, obj1);
 
         // End specific
-        out.endObject();
-        // End
-        out.endObject();
+        writer.endObject();
+        // End 
+        writer.endObject();
     }
 }

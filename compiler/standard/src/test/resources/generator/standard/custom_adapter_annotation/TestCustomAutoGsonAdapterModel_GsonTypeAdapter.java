@@ -1,37 +1,35 @@
 package generator.standard.custom_adapter_annotation;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestCustomAutoGsonAdapterModel_GsonTypeAdapter extends GsonPathTypeAdapter<TestCustomAutoGsonAdapterModel> {
-
-    public TestCustomAutoGsonAdapterModel_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestCustomAutoGsonAdapterModel_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestCustomAutoGsonAdapterModel readImpl(JsonReader in) throws IOException {
+    public TestCustomAutoGsonAdapterModel readImpl(JsonReader reader) throws IOException {
         TestCustomAutoGsonAdapterModel result = new TestCustomAutoGsonAdapterModel();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 2, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 2, 0);
         boolean[] mandatoryFieldsCheckList = new boolean[1];
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "path":
                     while (jsonReaderHelper.handleObject(1, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "expectedValue":
-                                Integer value_path_expectedValue = moshi.getAdapter(Integer.class).read(in);
+                                Integer value_path_expectedValue = moshi.adapter(Integer.class).fromJson(reader);
                                 if (value_path_expectedValue != null) {
                                     result.expectedValue = value_path_expectedValue;
                                     mandatoryFieldsCheckList[0] = true;
@@ -77,24 +75,25 @@ public final class TestCustomAutoGsonAdapterModel_GsonTypeAdapter extends GsonPa
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestCustomAutoGsonAdapterModel value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestCustomAutoGsonAdapterModel value) throws
+            IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin path
-        out.name("path");
-        out.beginObject();
+        writer.name("path");
+        writer.beginObject();
         Integer obj0 = value.expectedValue;
-        out.name("expectedValue");
+        writer.name("expectedValue");
         if (obj0 != null) {
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj0);
         } else {
-            out.nullValue();
+            writer.nullValue();
         }
 
         // End path
-        out.endObject();
+        writer.endObject();
         // End
-        out.endObject();
+        writer.endObject();
     }
 }

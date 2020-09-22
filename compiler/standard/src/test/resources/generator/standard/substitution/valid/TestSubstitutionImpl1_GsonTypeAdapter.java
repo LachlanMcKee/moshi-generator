@@ -1,34 +1,33 @@
 package generator.standard.substitution.valid;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAdapter<TestSubstitutionImpl1> {
-    public TestSubstitutionImpl1_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestSubstitutionImpl1_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestSubstitutionImpl1 readImpl(JsonReader in) throws IOException {
+    public TestSubstitutionImpl1 readImpl(JsonReader reader) throws IOException {
         TestSubstitutionImpl1 result = new TestSubstitutionImpl1();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 3, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 3, 0);
 
         while (jsonReaderHelper.handleObject(0, 2)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "Impl1_A":
                     while (jsonReaderHelper.handleObject(1, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "Json1":
-                                Integer value_Impl1_A_Json1 = moshi.getAdapter(Integer.class).read(in);
+                                Integer value_Impl1_A_Json1 = moshi.adapter(Integer.class).fromJson(reader);
                                 if (value_Impl1_A_Json1 != null) {
                                     result.value1 = value_Impl1_A_Json1;
                                 }
@@ -44,9 +43,9 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAda
 
                 case "Impl1_B":
                     while (jsonReaderHelper.handleObject(2, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "Json1":
-                                Integer value_Impl1_B_Json1 = moshi.getAdapter(Integer.class).read(in);
+                                Integer value_Impl1_B_Json1 = moshi.adapter(Integer.class).fromJson(reader);
                                 if (value_Impl1_B_Json1 != null) {
                                     result.value2 = value_Impl1_B_Json1;
                                 }
@@ -70,30 +69,30 @@ public final class TestSubstitutionImpl1_GsonTypeAdapter extends GsonPathTypeAda
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestSubstitutionImpl1 value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestSubstitutionImpl1 value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin Impl1_A
-        out.name("Impl1_A");
-        out.beginObject();
+        writer.name("Impl1_A");
+        writer.beginObject();
         int obj0 = value.value1;
-        out.name("Json1");
-        moshi.getAdapter(Integer.class).write(out, obj0);
+        writer.name("Json1");
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
         // End Impl1_A
-        out.endObject();
+        writer.endObject();
 
         // Begin Impl1_B
-        out.name("Impl1_B");
-        out.beginObject();
+        writer.name("Impl1_B");
+        writer.beginObject();
         int obj1 = value.value2;
-        out.name("Json1");
-        moshi.getAdapter(Integer.class).write(out, obj1);
+        writer.name("Json1");
+        moshi.adapter(Integer.class).toJson(writer, obj1);
 
         // End Impl1_B
-        out.endObject();
+        writer.endObject();
         // End
-        out.endObject();
+        writer.endObject();
     }
 }

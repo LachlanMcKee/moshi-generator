@@ -1,12 +1,11 @@
 package generator.standard.field_types.primitives.valid;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Boolean;
 import java.lang.Byte;
@@ -20,68 +19,68 @@ import java.lang.Short;
 
 @GsonPathGenerated
 public final class TestValidPrimitives_GsonTypeAdapter extends GsonPathTypeAdapter<TestValidPrimitives> {
-    public TestValidPrimitives_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestValidPrimitives_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestValidPrimitives readImpl(JsonReader in) throws IOException {
+    public TestValidPrimitives readImpl(JsonReader reader) throws IOException {
         TestValidPrimitives result = new TestValidPrimitives();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 8)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "value1":
-                    Boolean value_value1 = moshi.getAdapter(Boolean.class).read(in);
+                    Boolean value_value1 = moshi.adapter(Boolean.class).fromJson(reader);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
                     break;
 
                 case "value2":
-                    Integer value_value2 = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_value2 = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_value2 != null) {
                         result.value2 = value_value2;
                     }
                     break;
 
                 case "value3":
-                    Double value_value3 = moshi.getAdapter(Double.class).read(in);
+                    Double value_value3 = moshi.adapter(Double.class).fromJson(reader);
                     if (value_value3 != null) {
                         result.value3 = value_value3;
                     }
                     break;
 
                 case "value4":
-                    Long value_value4 = moshi.getAdapter(Long.class).read(in);
+                    Long value_value4 = moshi.adapter(Long.class).fromJson(reader);
                     if (value_value4 != null) {
                         result.value4 = value_value4;
                     }
                     break;
 
                 case "value5":
-                    Byte value_value5 = moshi.getAdapter(Byte.class).read(in);
+                    Byte value_value5 = moshi.adapter(Byte.class).fromJson(reader);
                     if (value_value5 != null) {
                         result.value5 = value_value5;
                     }
                     break;
 
                 case "value6":
-                    Short value_value6 = moshi.getAdapter(Short.class).read(in);
+                    Short value_value6 = moshi.adapter(Short.class).fromJson(reader);
                     if (value_value6 != null) {
                         result.value6 = value_value6;
                     }
                     break;
 
                 case "value7":
-                    Float value_value7 = moshi.getAdapter(Float.class).read(in);
+                    Float value_value7 = moshi.adapter(Float.class).fromJson(reader);
                     if (value_value7 != null) {
                         result.value7 = value_value7;
                     }
                     break;
 
                 case "value8":
-                    Character value_value8 = moshi.getAdapter(Character.class).read(in);
+                    Character value_value8 = moshi.adapter(Character.class).fromJson(reader);
                     if (value_value8 != null) {
                         result.value8 = value_value8;
                     }
@@ -97,42 +96,42 @@ public final class TestValidPrimitives_GsonTypeAdapter extends GsonPathTypeAdapt
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestValidPrimitives value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestValidPrimitives value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         boolean obj0 = value.value1;
-        out.name("value1");
-        moshi.getAdapter(Boolean.class).write(out, obj0);
+        writer.name("value1");
+        moshi.adapter(Boolean.class).toJson(writer, obj0);
 
         int obj1 = value.value2;
-        out.name("value2");
-        moshi.getAdapter(Integer.class).write(out, obj1);
+        writer.name("value2");
+        moshi.adapter(Integer.class).toJson(writer, obj1);
 
         double obj2 = value.value3;
-        out.name("value3");
-        moshi.getAdapter(Double.class).write(out, obj2);
+        writer.name("value3");
+        moshi.adapter(Double.class).toJson(writer, obj2);
 
         long obj3 = value.value4;
-        out.name("value4");
-        moshi.getAdapter(Long.class).write(out, obj3);
+        writer.name("value4");
+        moshi.adapter(Long.class).toJson(writer, obj3);
 
         byte obj4 = value.value5;
-        out.name("value5");
-        moshi.getAdapter(Byte.class).write(out, obj4);
+        writer.name("value5");
+        moshi.adapter(Byte.class).toJson(writer, obj4);
 
         short obj5 = value.value6;
-        out.name("value6");
-        moshi.getAdapter(Short.class).write(out, obj5);
+        writer.name("value6");
+        moshi.adapter(Short.class).toJson(writer, obj5);
 
         float obj6 = value.value7;
-        out.name("value7");
-        moshi.getAdapter(Float.class).write(out, obj6);
+        writer.name("value7");
+        moshi.adapter(Float.class).toJson(writer, obj6);
 
         char obj7 = value.value8;
-        out.name("value8");
-        moshi.getAdapter(Character.class).write(out, obj7);
+        writer.name("value8");
+        moshi.adapter(Character.class).toJson(writer, obj7);
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

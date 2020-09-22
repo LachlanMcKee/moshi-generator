@@ -1,12 +1,11 @@
 package generator.standard.field_types.generics;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Override;
 import java.lang.String;
@@ -14,19 +13,19 @@ import java.util.List;
 
 @GsonPathGenerated
 public final class TestGenerics_GsonTypeAdapter extends GsonPathTypeAdapter<TestGenerics> {
-    public TestGenerics_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestGenerics_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestGenerics readImpl(JsonReader in) throws IOException {
+    public TestGenerics readImpl(JsonReader reader) throws IOException {
         TestGenerics result = new TestGenerics();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "value1":
-                    List<String> value_value1 = moshi.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).read(in);
+                    List<String> value_value1 = moshi.<List<String>>adapter(com.squareup.moshi.Types.newParameterizedType(java.util.List.class, java.lang.String.class)).fromJson(reader);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -42,16 +41,16 @@ public final class TestGenerics_GsonTypeAdapter extends GsonPathTypeAdapter<Test
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestGenerics value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestGenerics value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         List<String> obj0 = value.value1;
         if (obj0 != null) {
-            out.name("value1");
-            moshi.getAdapter(new com.google.gson.reflect.TypeToken<List<String>>(){}).write(out, obj0);
+            writer.name("value1");
+            moshi.<List<String>>adapter(com.squareup.moshi.Types.newParameterizedType(java.util.List.class, java.lang.String.class)).toJson(writer, obj0);
         }
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

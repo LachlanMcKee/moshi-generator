@@ -68,7 +68,8 @@ object GsonSubTypeFactory {
                 jsonElementName,
                 "$JSON_ELEMENT.get(\"${fieldInfo.jsonKey}\")")
 
-        addStatement("final \$T ${fieldInfo.variableName}", fieldInfo.parameterTypeName)
+        val parameterTypeName = fieldInfo.parameterTypeName
+        addStatement("final \$T ${fieldInfo.variableName}", parameterTypeName)
 
         ifWithoutClose("$jsonElementName == ${Constants.NULL}") {
             if (fieldInfo.nullable) {
@@ -79,15 +80,13 @@ object GsonSubTypeFactory {
             }
         }
         `else` {
-            val adapterName =
-                    if (fieldInfo.parameterTypeName is ParameterizedTypeName)
-                        "new com.google.gson.reflect.TypeToken<\$T>(){}" // This is a generic type
-                    else
-                        "\$T.class"
-
-            assign(fieldInfo.variableName,
-                    "$MOSHI.adapter($adapterName).fromJsonValue($jsonElementName)",
-                    fieldInfo.parameterTypeName)
+            if (parameterTypeName is ParameterizedTypeName) {
+                assign(fieldInfo.variableName, "$MOSHI.<\$T>adapter(com.squareup.moshi.Types.newParameterizedType(${parameterTypeName.rawType}.class, ${parameterTypeName.typeArguments.joinToString(", ") { "$it.class" }})).fromJsonValue(${Constants.READER})", parameterTypeName)
+            } else {
+                assign(fieldInfo.variableName,
+                        "$MOSHI.adapter(\$T.class).fromJsonValue($jsonElementName)",
+                        parameterTypeName)
+            }
         }
     }
 

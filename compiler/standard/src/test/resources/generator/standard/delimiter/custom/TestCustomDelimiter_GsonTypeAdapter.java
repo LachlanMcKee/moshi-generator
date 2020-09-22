@@ -1,34 +1,33 @@
 package generator.standard.delimiter.custom;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestCustomDelimiter_GsonTypeAdapter extends GsonPathTypeAdapter<TestCustomDelimiter> {
-    public TestCustomDelimiter_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestCustomDelimiter_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestCustomDelimiter readImpl(JsonReader in) throws IOException {
+    public TestCustomDelimiter readImpl(JsonReader reader) throws IOException {
         TestCustomDelimiter result = new TestCustomDelimiter();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 2, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 2, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "Json1":
                     while (jsonReaderHelper.handleObject(1, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "Nest1":
-                                Integer value_Json1_Nest1 = moshi.getAdapter(Integer.class).read(in);
+                                Integer value_Json1_Nest1 = moshi.adapter(Integer.class).fromJson(reader);
                                 if (value_Json1_Nest1 != null) {
                                     result.value1 = value_Json1_Nest1;
                                 }
@@ -52,20 +51,20 @@ public final class TestCustomDelimiter_GsonTypeAdapter extends GsonPathTypeAdapt
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestCustomDelimiter value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestCustomDelimiter value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin Json1
-        out.name("Json1");
-        out.beginObject();
+        writer.name("Json1");
+        writer.beginObject();
         int obj0 = value.value1;
-        out.name("Nest1");
-        moshi.getAdapter(Integer.class).write(out, obj0);
+        writer.name("Nest1");
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
         // End Json1
-        out.endObject();
-        // End
-        out.endObject();
+        writer.endObject();
+        // End 
+        writer.endObject();
     }
 }

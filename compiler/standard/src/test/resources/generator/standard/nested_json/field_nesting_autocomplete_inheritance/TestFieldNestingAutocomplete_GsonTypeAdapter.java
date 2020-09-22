@@ -1,34 +1,33 @@
 package generator.standard.nested_json.field_nesting_autocomplete_inheritance;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestFieldNestingAutocomplete_GsonTypeAdapter extends GsonPathTypeAdapter<TestFieldNestingAutocomplete> {
-    public TestFieldNestingAutocomplete_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestFieldNestingAutocomplete_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestFieldNestingAutocomplete readImpl(JsonReader in) throws IOException {
+    public TestFieldNestingAutocomplete readImpl(JsonReader reader) throws IOException {
         int value_Json1_value1 = 0;
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 2, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 2, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "Json1":
                     while (jsonReaderHelper.handleObject(1, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "value1":
-                                value_Json1_value1 = moshi.getAdapter(Integer.class).read(in);
+                                value_Json1_value1 = moshi.adapter(Integer.class).fromJson(reader);
                                 break;
 
                             default:
@@ -46,24 +45,25 @@ public final class TestFieldNestingAutocomplete_GsonTypeAdapter extends GsonPath
             }
         }
         return new TestFieldNestingAutocomplete(
-                value_Json1_value1);
+            value_Json1_value1);
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestFieldNestingAutocomplete value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestFieldNestingAutocomplete value) throws
+            IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin Json1
-        out.name("Json1");
-        out.beginObject();
+        writer.name("Json1");
+        writer.beginObject();
         int obj0 = value.getValue1();
-        out.name("value1");
-        moshi.getAdapter(Integer.class).write(out, obj0);
+        writer.name("value1");
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
         // End Json1
-        out.endObject();
-        // End
-        out.endObject();
+        writer.endObject();
+        // End 
+        writer.endObject();
     }
 }

@@ -1,13 +1,12 @@
 package generator.standard.using_constructor.valid;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Boolean;
 import java.lang.Override;
@@ -15,27 +14,27 @@ import java.lang.String;
 
 @GsonPathGenerated
 public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdapter<ValidConstructorTest> {
-    public ValidConstructorTest_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public ValidConstructorTest_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public ValidConstructorTest readImpl(JsonReader in) throws IOException {
+    public ValidConstructorTest readImpl(JsonReader reader) throws IOException {
         String value_parent_child_value1 = null;
         boolean value_isBooleanTest1 = false;
         Boolean value_isBooleanTest2 = null;
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 3, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 3, 0);
 
         while (jsonReaderHelper.handleObject(0, 3)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "parent":
                     while (jsonReaderHelper.handleObject(1, 1)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "child":
                                 while (jsonReaderHelper.handleObject(2, 1)) {
-                                    switch (in.nextName()) {
+                                    switch (reader.nextName()) {
                                         case "value1":
-                                            value_parent_child_value1 = moshi.getAdapter(String.class).read(in);
+                                            value_parent_child_value1 = moshi.adapter(String.class).fromJson(reader);
                                             break;
 
                                         default:
@@ -55,11 +54,11 @@ public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdap
                     break;
 
                 case "isBooleanTest1":
-                    value_isBooleanTest1 = moshi.getAdapter(Boolean.class).read(in);
+                    value_isBooleanTest1 = moshi.adapter(Boolean.class).fromJson(reader);
                     break;
 
                 case "isBooleanTest2":
-                    value_isBooleanTest2 = moshi.getAdapter(Boolean.class).read(in);
+                    value_isBooleanTest2 = moshi.adapter(Boolean.class).fromJson(reader);
                     break;
 
                 default:
@@ -69,44 +68,44 @@ public final class ValidConstructorTest_GsonTypeAdapter extends GsonPathTypeAdap
             }
         }
         return new ValidConstructorTest(
-                value_parent_child_value1,
-                value_isBooleanTest1,
-                value_isBooleanTest2);
+            value_parent_child_value1,
+            value_isBooleanTest1,
+            value_isBooleanTest2);
     }
 
     @Override
-    public void writeImpl(JsonWriter out, ValidConstructorTest value) throws IOException {
+    public void writeImpl(JsonWriter writer, ValidConstructorTest value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin parent
-        out.name("parent");
-        out.beginObject();
+        writer.name("parent");
+        writer.beginObject();
 
         // Begin parentchild
-        out.name("child");
-        out.beginObject();
+        writer.name("child");
+        writer.beginObject();
         String obj0 = value.getValue1();
         if (obj0 != null) {
-            out.name("value1");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("value1");
+            GsonUtil.writeWithGenericAdapter(moshi, String.class, writer, obj0);
         }
 
         // End parentchild
-        out.endObject();
+        writer.endObject();
         // End parent
-        out.endObject();
+        writer.endObject();
         boolean obj1 = value.isBooleanTest1();
-        out.name("isBooleanTest1");
-        moshi.getAdapter(Boolean.class).write(out, obj1);
+        writer.name("isBooleanTest1");
+        moshi.adapter(Boolean.class).toJson(writer, obj1);
 
         Boolean obj2 = value.isBooleanTest2();
         if (obj2 != null) {
-            out.name("isBooleanTest2");
-            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
+            writer.name("isBooleanTest2");
+            GsonUtil.writeWithGenericAdapter(moshi, Boolean.class, writer, obj2);
         }
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

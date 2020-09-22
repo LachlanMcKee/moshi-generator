@@ -1,31 +1,30 @@
 package generator.standard.naming_policy.lowercase_underscores;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestNamePolicyLowerCaseUnderscores_GsonTypeAdapter extends GsonPathTypeAdapter<TestNamePolicyLowerCaseUnderscores> {
-    public TestNamePolicyLowerCaseUnderscores_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestNamePolicyLowerCaseUnderscores_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestNamePolicyLowerCaseUnderscores readImpl(JsonReader in) throws IOException {
+    public TestNamePolicyLowerCaseUnderscores readImpl(JsonReader reader) throws IOException {
         TestNamePolicyLowerCaseUnderscores result = new TestNamePolicyLowerCaseUnderscores();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "test_value":
-                    Integer value_test_value = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_test_value = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_test_value != null) {
                         result.testValue = value_test_value;
                     }
@@ -41,15 +40,15 @@ public final class TestNamePolicyLowerCaseUnderscores_GsonTypeAdapter extends Gs
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestNamePolicyLowerCaseUnderscores value) throws
+    public void writeImpl(JsonWriter writer, TestNamePolicyLowerCaseUnderscores value) throws
             IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         int obj0 = value.testValue;
-        out.name("test_value");
-        moshi.getAdapter(Integer.class).write(out, obj0);
+        writer.name("test_value");
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

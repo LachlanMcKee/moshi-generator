@@ -1,46 +1,45 @@
 package generator.standard.field_policy.no_validation;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestNoValidation_GsonTypeAdapter extends GsonPathTypeAdapter<TestNoValidation> {
-    public TestNoValidation_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestNoValidation_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestNoValidation readImpl(JsonReader in) throws IOException {
+    public TestNoValidation readImpl(JsonReader reader) throws IOException {
         TestNoValidation result = new TestNoValidation();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 3)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "optional1":
-                    Integer value_optional1 = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_optional1 = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_optional1 != null) {
                         result.optional1 = value_optional1;
                     }
                     break;
 
                 case "optional2":
-                    Integer value_optional2 = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_optional2 = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_optional2 != null) {
                         result.optional2 = value_optional2;
                     }
                     break;
 
                 case "optional3":
-                    Integer value_optional3 = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_optional3 = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_optional3 != null) {
                         result.optional3 = value_optional3;
                     }
@@ -56,26 +55,26 @@ public final class TestNoValidation_GsonTypeAdapter extends GsonPathTypeAdapter<
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestNoValidation value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestNoValidation value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         Integer obj0 = value.optional1;
         if (obj0 != null) {
-            out.name("optional1");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("optional1");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj0);
         }
 
         Integer obj1 = value.optional2;
         if (obj1 != null) {
-            out.name("optional2");
-            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
+            writer.name("optional2");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj1);
         }
 
         int obj2 = value.optional3;
-        out.name("optional3");
-        moshi.getAdapter(Integer.class).write(out, obj2);
+        writer.name("optional3");
+        moshi.adapter(Integer.class).toJson(writer, obj2);
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

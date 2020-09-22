@@ -1,43 +1,42 @@
 package generator.interf.valid;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestValidInterface_GsonTypeAdapter extends GsonPathTypeAdapter<TestValidInterface> {
-    public TestValidInterface_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestValidInterface_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestValidInterface readImpl(JsonReader in) throws IOException {
+    public TestValidInterface readImpl(JsonReader reader) throws IOException {
         Integer value_Json1_Nest1 = null;
         Integer value_value2 = null;
         Integer value_Json1_Nest3 = null;
         Integer value_result = null;
         Integer value_that = null;
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 2, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 2, 0);
 
         while (jsonReaderHelper.handleObject(0, 4)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "Json1":
                     while (jsonReaderHelper.handleObject(1, 2)) {
-                        switch (in.nextName()) {
+                        switch (reader.nextName()) {
                             case "Nest1":
-                                value_Json1_Nest1 = moshi.getAdapter(Integer.class).read(in);
+                                value_Json1_Nest1 = moshi.adapter(Integer.class).fromJson(reader);
                                 break;
 
                             case "Nest3":
-                                value_Json1_Nest3 = moshi.getAdapter(Integer.class).read(in);
+                                value_Json1_Nest3 = moshi.adapter(Integer.class).fromJson(reader);
                                 break;
 
                             default:
@@ -49,15 +48,15 @@ public final class TestValidInterface_GsonTypeAdapter extends GsonPathTypeAdapte
                     break;
 
                 case "value2":
-                    value_value2 = moshi.getAdapter(Integer.class).read(in);
+                    value_value2 = moshi.adapter(Integer.class).fromJson(reader);
                     break;
 
                 case "result":
-                    value_result = moshi.getAdapter(Integer.class).read(in);
+                    value_result = moshi.adapter(Integer.class).fromJson(reader);
                     break;
 
                 case "that":
-                    value_that = moshi.getAdapter(Integer.class).read(in);
+                    value_that = moshi.adapter(Integer.class).fromJson(reader);
                     break;
 
                 default:
@@ -75,46 +74,46 @@ public final class TestValidInterface_GsonTypeAdapter extends GsonPathTypeAdapte
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestValidInterface value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestValidInterface value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
 
         // Begin Json1
-        out.name("Json1");
-        out.beginObject();
+        writer.name("Json1");
+        writer.beginObject();
         Integer obj0 = value.getValue1();
         if (obj0 != null) {
-            out.name("Nest1");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("Nest1");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj0);
         }
 
         Integer obj1 = value.getValue3();
         if (obj1 != null) {
-            out.name("Nest3");
-            GsonUtil.writeWithGenericAdapter(moshi, obj1.getClass(), out, obj1);
+            writer.name("Nest3");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj1);
         }
 
         // End Json1
-        out.endObject();
+        writer.endObject();
         Integer obj2 = value.getValue2();
         if (obj2 != null) {
-            out.name("value2");
-            GsonUtil.writeWithGenericAdapter(moshi, obj2.getClass(), out, obj2);
+            writer.name("value2");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj2);
         }
 
         Integer obj3 = value.getResult();
         if (obj3 != null) {
-            out.name("result");
-            GsonUtil.writeWithGenericAdapter(moshi, obj3.getClass(), out, obj3);
+            writer.name("result");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj3);
         }
 
         Integer obj4 = value.getThat();
         if (obj4 != null) {
-            out.name("that");
-            GsonUtil.writeWithGenericAdapter(moshi, obj4.getClass(), out, obj4);
+            writer.name("that");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj4);
         }
 
         // End
-        out.endObject();
+        writer.endObject();
     }
 }

@@ -1,32 +1,31 @@
 package generator.standard.field_types.custom_field;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Override;
 import java.util.Currency;
 
 @GsonPathGenerated
 public final class TestCustomField_GsonTypeAdapter extends GsonPathTypeAdapter<TestCustomField> {
-    public TestCustomField_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestCustomField_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestCustomField readImpl(JsonReader in) throws IOException {
+    public TestCustomField readImpl(JsonReader reader) throws IOException {
         TestCustomField result = new TestCustomField();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "value1":
-                    Currency value_value1 = moshi.getAdapter(Currency.class).read(in);
+                    Currency value_value1 = moshi.adapter(Currency.class).fromJson(reader);
                     if (value_value1 != null) {
                         result.value1 = value_value1;
                     }
@@ -42,16 +41,16 @@ public final class TestCustomField_GsonTypeAdapter extends GsonPathTypeAdapter<T
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestCustomField value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestCustomField value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         Currency obj0 = value.value1;
         if (obj0 != null) {
-            out.name("value1");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("value1");
+            GsonUtil.writeWithGenericAdapter(moshi, Currency.class, writer, obj0);
         }
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

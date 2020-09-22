@@ -1,32 +1,31 @@
 package generator.interf.java8;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.GsonUtil;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestJava8Interface_GsonTypeAdapter extends GsonPathTypeAdapter<TestJava8Interface> {
-    public TestJava8Interface_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestJava8Interface_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestJava8Interface readImpl(JsonReader in) throws IOException {
+    public TestJava8Interface readImpl(JsonReader reader) throws IOException {
         Integer value_value1 = null;
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "value1":
-                    value_value1 = moshi.getAdapter(Integer.class).read(in);
+                    value_value1 = moshi.adapter(Integer.class).fromJson(reader);
                     break;
 
                 default:
@@ -36,20 +35,20 @@ public final class TestJava8Interface_GsonTypeAdapter extends GsonPathTypeAdapte
             }
         }
         return new TestJava8Interface_GsonPathModel(
-                value_value1);
+            value_value1);
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestJava8Interface value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestJava8Interface value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         Integer obj0 = value.getValue1();
         if (obj0 != null) {
-            out.name("value1");
-            GsonUtil.writeWithGenericAdapter(moshi, obj0.getClass(), out, obj0);
+            writer.name("value1");
+            GsonUtil.writeWithGenericAdapter(moshi, Integer.class, writer, obj0);
         }
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

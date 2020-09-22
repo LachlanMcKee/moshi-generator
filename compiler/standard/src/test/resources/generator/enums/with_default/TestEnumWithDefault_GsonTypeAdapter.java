@@ -2,60 +2,67 @@ package generator.enums.with_default;
 
 import static gsonpath.internal.GsonUtil.*;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
-import gsonpath.audit.AuditJsonReader;
 import gsonpath.audit.AuditLog;
 import gsonpath.internal.GsonPathTypeAdapter;
-
 import java.io.IOException;
 import java.lang.Override;
 import java.lang.String;
 
 @GsonPathGenerated
 public final class TestEnumWithDefault_GsonTypeAdapter extends GsonPathTypeAdapter<TestEnumWithDefault> {
-    public TestEnumWithDefault_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestEnumWithDefault_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestEnumWithDefault readImpl(JsonReader in) throws IOException {
-        String enumValue = in.nextString();
+    public TestEnumWithDefault readImpl(JsonReader reader) throws IOException {
+        String enumValue = reader.nextString();
         switch (enumValue) {
             case "value-abc":
                 return TestEnumWithDefault.VALUE_ABC;
+
             case "value-def":
                 return TestEnumWithDefault.VALUE_DEF;
+
             case "custom":
                 return TestEnumWithDefault.VALUE_GHI;
+
             case "value-1":
                 return TestEnumWithDefault.VALUE_1;
+
             default:
-                AuditLog auditLog = AuditJsonReader.getAuditLogFromReader(in);
+                AuditLog auditLog = AuditLog.fromReader(reader);
                 if (auditLog != null) {
-                    auditLog.addUnexpectedEnumValue(new AuditLog.UnexpectedEnumValue("generator.enums.with_default.TestEnumWithDefault", in.getPath(), enumValue));
+                    auditLog.addUnexpectedEnumValue(new AuditLog.UnexpectedEnumValue("generator.enums.with_default.TestEnumWithDefault", reader.getPath(), enumValue));
                 }
                 return TestEnumWithDefault.VALUE_ABC;
+
         }
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestEnumWithDefault value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestEnumWithDefault value) throws IOException {
         switch (value) {
             case VALUE_ABC:
-                out.value("value-abc");
+                writer.value("value-abc");
                 break;
+
             case VALUE_DEF:
-                out.value("value-def");
+                writer.value("value-def");
                 break;
+
             case VALUE_GHI:
-                out.value("custom");
+                writer.value("custom");
                 break;
+
             case VALUE_1:
-                out.value("value-1");
+                writer.value("value-1");
                 break;
+
         }
     }
 }

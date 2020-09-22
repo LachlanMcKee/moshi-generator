@@ -1,31 +1,30 @@
 package generator.standard.naming_policy.identity;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
 import gsonpath.annotation.GsonPathGenerated;
 import gsonpath.internal.GsonPathTypeAdapter;
 import gsonpath.internal.JsonReaderHelper;
-
 import java.io.IOException;
 import java.lang.Integer;
 import java.lang.Override;
 
 @GsonPathGenerated
 public final class TestNamePolicyIdentity_GsonTypeAdapter extends GsonPathTypeAdapter<TestNamePolicyIdentity> {
-    public TestNamePolicyIdentity_GsonTypeAdapter(Gson gson) {
-        super(gson);
+    public TestNamePolicyIdentity_GsonTypeAdapter(Moshi moshi) {
+        super(moshi);
     }
 
     @Override
-    public TestNamePolicyIdentity readImpl(JsonReader in) throws IOException {
+    public TestNamePolicyIdentity readImpl(JsonReader reader) throws IOException {
         TestNamePolicyIdentity result = new TestNamePolicyIdentity();
-        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(in, 1, 0);
+        JsonReaderHelper jsonReaderHelper = new JsonReaderHelper(reader, 1, 0);
 
         while (jsonReaderHelper.handleObject(0, 1)) {
-            switch (in.nextName()) {
+            switch (reader.nextName()) {
                 case "testValue":
-                    Integer value_testValue = moshi.getAdapter(Integer.class).read(in);
+                    Integer value_testValue = moshi.adapter(Integer.class).fromJson(reader);
                     if (value_testValue != null) {
                         result.testValue = value_testValue;
                     }
@@ -41,14 +40,14 @@ public final class TestNamePolicyIdentity_GsonTypeAdapter extends GsonPathTypeAd
     }
 
     @Override
-    public void writeImpl(JsonWriter out, TestNamePolicyIdentity value) throws IOException {
+    public void writeImpl(JsonWriter writer, TestNamePolicyIdentity value) throws IOException {
         // Begin
-        out.beginObject();
+        writer.beginObject();
         int obj0 = value.testValue;
-        out.name("testValue");
-        moshi.getAdapter(Integer.class).write(out, obj0);
+        writer.name("testValue");
+        moshi.adapter(Integer.class).toJson(writer, obj0);
 
-        // End
-        out.endObject();
+        // End 
+        writer.endObject();
     }
 }

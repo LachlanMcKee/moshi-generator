@@ -39,7 +39,7 @@ class TypeAdapterFactoryGeneratorTest {
     @Test
     fun givenTypeAdaptersAndNoTypeAdapterFactory_whenProcessorRuns_expectError() {
         assertTypeAdapterFactoryFailure(emptyList(), "Gson Path: An interface annotated with @AutoGsonAdapterFactory (that directly " +
-                "extends com.google.gson.TypeAdapterFactory) must exist before the annotation processor can succeed. " +
+                "extends JsonAdapter.Factory) must exist before the annotation processor can succeed. " +
                 "See the AutoGsonAdapterFactory annotation for further details.")
     }
 
@@ -52,13 +52,13 @@ class TypeAdapterFactoryGeneratorTest {
     @Test
     fun givenTypeAdaptersAndTypeAdapterNotExtendingTypeAdapterFactory_whenProcessorRuns_expectError() {
         assertTypeAdapterFactoryFailure(listOf("TestGsonTypeFactoryIncorrectInterfaces.java"),
-                "Gson Path: Interfaces annotated with @AutoGsonAdapterFactory must extend com.google.gson.TypeAdapterFactory and no other interfaces.")
+                "Gson Path: Interfaces annotated with @AutoGsonAdapterFactory must extend com.squareup.moshi.JsonAdapter.Factory and no other interfaces.")
     }
 
     @Test
     fun givenTypeAdaptersAndTypeAdapterNotExtendingAnyInterfaces_whenProcessorRuns_expectError() {
         assertTypeAdapterFactoryFailure(listOf("TestGsonTypeFactoryNoInterfaces.java"),
-                "Gson Path: Interfaces annotated with @AutoGsonAdapterFactory must extend com.google.gson.TypeAdapterFactory and no other interfaces.")
+                "Gson Path: Interfaces annotated with @AutoGsonAdapterFactory must extend com.squareup.moshi.JsonAdapter.Factory and no other interfaces.")
     }
 
     @Test
